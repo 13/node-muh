@@ -13,8 +13,6 @@
   <style type="text/css">
 	.socketstatus {
 		height: 4px !important;
-		border-radius: 0px !important;
-		padding: 0px !important;
 	}
   </style>
 </head>
@@ -22,7 +20,7 @@
   <div id="app">
     <div class="columns">
 		<div class="column is-full">
-			<p class="notification socketstatus" v-bind:class="stateToTag(socketState)"></p>
+			<p class="socketstatus notification is-marginless is-paddingless is-radiusless" v-bind:class="stateToTag(socketState)"></p>
 		</div>
 	</div>
 	<div class="columns is-mobile" v-for="host in hosts">
@@ -38,7 +36,6 @@
 "use strict"
 
 var socket = io(); //load socket.io-client and connect to the host that serves the page
-//var socketState = false;
 
 // Vue
 var app = new Vue({
