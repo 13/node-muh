@@ -4,86 +4,48 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">                                                                           
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Wake On Lan</title>
-  <!-- development version, includes helpful console warnings -->
-  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <!-- development version, includes helpful console warnings 
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+  <!-- production version, optimized for size and speed -->
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.8.2/css/bulma.min.css">
   <script defer src="https://use.fontawesome.com/releases/v5.13.0/js/all.js"></script>
-  <script src="https://momentjs.com/downloads/moment-with-locales.min.js"></script>
+  <style type="text/css">
+	.socketstatus {
+		height: 4px !important;
+		border-radius: 0px !important;
+		padding: 0px !important;
+	}
+  </style>
 </head>
 <body>
-<div id="wol"></div>
   <div id="app">
-	<!--<div v-for="data in json">{{data}}</div>
-    <div v-for="host in hosts">{{ host }}</div>-->
-	<!--<div class="list is-hoverable" v-if="json">
-      <a class="list-item" v-for="host in hosts"><span class="column is-four-fifths">{{ host.name }}</span> <span class="tag is-one-fifths">{{ host.state }}</span></a>
-	</div>-->
-	
-	<div class="columns" v-for="host in hosts">
-		<a href="#" id="wollink" v-on:click="warn(host.mac, $event)" v-bind:data-mac="host.mac">
-		<div class="column is-11">{{ host.name | short }}</div>
-		<div class="column has-text-right">
-			<span class="tag" v-bind:class="stateToTag(host.state)">{{ host.state | space }}</span>
+    <div class="columns">
+		<div class="column is-full">
+			<p class="notification socketstatus" v-bind:class="stateToTag(socketState)"></p>
 		</div>
-	  </a>
-	</div>	
-	
+	</div>
+	<div class="columns is-mobile" v-for="host in hosts">
+		<a href="#" class="column is-three-quarters" v-on:click="warn(host.mac, $event)">{{ host.name | short }}</a>
+		<a href="#" class="column has-text-right" v-on:click="warn(host.mac, $event); isHidden = !isHidden">
+			<span class="tag" v-bind:class="stateToTag(host.state)">{{ host.state | space }}</span>
+		</a>	
+	</div>
+	<h1 v-if="isHidden">Hide me on click event!</h1>
   </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script> <!-- include socket.io client side script -->
 <script>
 "use strict"
 
 var socket = io(); //load socket.io-client and connect to the host that serves the page
+//var socketState = false;
 
-/*window.addEventListener("load", function(){ //when page loads
-  var lightbox = document.getElementById("light");
-  lightbox.addEventListener("change", function() { //add event listener for when checkbox changes
-    socket.emit("light", Number(this.checked)); //send button status to server (as 1 or 0)
-  });
-});*/
-
-/*window.addEventListener("load", function(){ //when page loads
-  //var lightbox = document.getElementsByClassName("wollink");
-  var lightbox = document.getElementById("wollink");
-  console.log(lightbox);
-  lightbox.addEventListener("click", function(e) { 
-    console.log(e);
-    // loop parent nodes from the target to the delegation node
-    for (var target = e.target; target && target != this; target = target.parentNode) {
-        if (target.matches("wollink")) {
-            handler.call(target, e);
-            break;
-        }
-    }
-    //console.log(e.getAttribute("data-wol"));
-    //socket.emit("wolmac", lightbox.getAttribute("data-wol")); //send button status to server (as 1 or 0)
-  }, false);
-});*/
-
-/*socket.on('light', function (data) { //get button status from client
-  document.getElementById("light").checked = data; //change checkbox according to push button on Raspberry Pi
-  socket.emit("light", data); //send push button status to back to server
-});*/
-
-/*socket.on('wol', function (data) { //get button status from client
-  //document.getElementById("wol").innerText = data; //change 
-  //document.getElementById("wol").innerText = JSON.stringify(data); //change
-  //var wol = JSON.parse(data);
-  
-  var myJSON = JSON.parse(JSON.stringify(data));
-  for (x in myJSON){
-	for (y in myJSON[x]){
-	  document.getElementById("wol").innerText = myJSON[x][y].name; //change
-	}
-  }
-  //socket.emit("wol", data); //send push button status to back to server
-  
-});*/
-
-//
+// Vue
 var app = new Vue({
   el: '#app',
   data: {
+    socketState: false,
+    isHidden: false,
     json: null,
     hosts: []
     },
@@ -94,7 +56,7 @@ var app = new Vue({
   },
   filters: {
     space (value) {
-      return ""
+      return (value ? 'on' : 'off')
     },
     short (value) {
       return value.substr(0, value.indexOf('.'))
@@ -102,62 +64,41 @@ var app = new Vue({
   },
   methods: {
 	getRealtimeData() {
-		//socket.on('wol', function (data) { //get button status from client
-		//socket.on('wol', fetchedData => { //get button status from client
 		socket.on('wol', json => { //get button status from client
-			/*var myJSON = JSON.parse(JSON.stringify(data));
-			for (x in myJSON){
-				for (y in myJSON[x]){
-					document.getElementById("wol").innerText = myJSON[x][y].name; //change
-				}
-			}*/
 			this.json = json,
-			this.hosts = json.hosts
-			console.log("socket connect")
-		})
+			this.hosts = json.hosts;
+			this.socketState = true;
+			console.log("socket connect: " + this.socketState);
+		}),
+		socket.on('disconnect', socketState => {
+			this.socketState = false
+			console.log('socket disconnect: ' + socketState);
+		});
 	},
 	stateToTag(value){
-		var s
-		if (value){
-			s = 'is-success'
-		} else {
-			s = 'is-danger'
-		}
-		return s
+		return (value ? 'is-success' : 'is-danger')
 	},
 	warn: function (message, event) {
 		// now we have access to the native event
 		if (event) {
 			event.preventDefault()
-    		}
+    	}
 		console.log(message)
-                socket.emit("wakemac", message); //send push button status to back to server
+        socket.emit("wakemac", message); //send push button status to back to server
   	}
   },
   created () {
-    /*fetch('http://daten.buergernetz.bz.it/services/weather/district/2/bulletin?format=json&lang=de')
-      .then(response => response.json())
-      .then(json => {
-         this.json = json,
-         this.hosts = json.hosts
-      })*/
 	this.getRealtimeData()
   },
   /*computed: {
   }*/
 })
 
-socket.on('disconnect', function(){
-  console.log('socket disconnect');
-});
+/*socket.on('disconnect', function(){
+  this.socketState = false
+  console.log('socket disconnect: ' + socketState);
+});*/
 
-/*window.onload = function() {
-   console.log(document.getElementById('wollink'));
-   if(document.getElementById('wollink')){
-      alert('jo');
-      //Init for Vue
-   }
-}*/
 /* TODO */
 // 
 </script>
