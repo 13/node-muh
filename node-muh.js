@@ -26,16 +26,18 @@ io.on('connection', async (socket) => {
 
   socket.on('wakemac', (mac) => {
     console.log('Wake: ' + mac);
-    wakeonlan.wake(mac);
+    if (mac != null){ 
+      wakeonlan.wake(mac);
+    }
   });
 
   var servero = { 'hosts' : [
-			{ name:'google.com', port:'80', mac:'20:DE:20:DE:20:DE'},
+			{ name:'google.com', port:'80'},
 			{ name:'c3p1.muh', port:'22', mac:'40:8D:5C:1D:54:9B'},
 			{ name:'jabba.muh', port:'22', mac:'90:1B:0E:3E:F3:77'},
-			{ name:'p1.muh', port:'22', mac:'40:8D:5C:1D:54:9B'},
-			{ name:'p3.muh', port:'22', mac:'00:11:22:33:44:55'},
-			{ name:'p30.muh', port:'22', mac:'00:11:22:33:44:55'}
+			{ name:'p1.muh', port:'22'},
+			{ name:'p3.muh', port:'22'},
+			{ name:'p30.muh', port:'22'}
 		]}
   
   for (x in servero){
@@ -76,7 +78,7 @@ app.get('/ping', (req, res) => {
 });
 
 app.get('/wol', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html')
+  res.sendFile(__dirname + '/public/wol.html')
 });
 
 app.get('/wetter', (req, res) => {
