@@ -4,6 +4,8 @@ const io = require('socket.io')(server);
 const isReachable = require('is-reachable');
 const wakeonlan = require('wake_on_lan');
 
+const server_port = 8080;
+
 var connectCounter = 0;
 
 io.on('connection', async (socket) => { 
@@ -87,7 +89,7 @@ app.get('/wetter', (req, res) => {
   res.sendFile(__dirname + '/public/wetter.html')
 });
 
-server.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
+server.listen(server_port, function () {
+  console.log('Example app listening on port: ' + server_port);
 });
 
