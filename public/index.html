@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de-de" lang="de-de" >
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">                                                                           
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wake On Lan</title>
+  <!-- development version, includes helpful console warnings -->
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.8.2/css/bulma.min.css">
+  <script defer src="https://use.fontawesome.com/releases/v5.13.0/js/all.js"></script>
+  <script src="https://momentjs.com/downloads/moment-with-locales.min.js"></script>
+</head>
+<body>
+<div id="wol"></div>
+  <div id="app">
+	<!--<div v-for="data in json">{{data}}</div>
+    <div v-for="host in hosts">{{ host }}</div>-->
+	<!--<div class="list is-hoverable" v-if="json">
+      <a class="list-item" v-for="host in hosts"><span class="column is-four-fifths">{{ host.name }}</span> <span class="tag is-one-fifths">{{ host.state }}</span></a>
+	</div>-->
+	
+	<div class="columns" v-for="host in hosts">
+		<a href="#" id="wollink" v-on:click="warn(host.mac, $event)" v-bind:data-mac="host.mac">
+		<div class="column is-11">{{ host.name | short }}</div>
+		<div class="column has-text-right">
+			<span class="tag" v-bind:class="stateToTag(host.state)">{{ host.state | space }}</span>
+		</div>
+	  </a>
+	</div>	
+	
+  </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script> <!-- include socket.io client side script -->
+<script>
+"use strict"
+
+var socket = io(); //load socket.io-client and connect to the host that serves the page
+
+/*window.addEventListener("load", function(){ //when page loads
+  var lightbox = document.getElementById("light");
+  lightbox.addEventListener("change", function() { //add event listener for when checkbox changes
+    socket.emit("light", Number(this.checked)); //send button status to server (as 1 or 0)
+  });
+});*/
+
+/*window.addEventListener("load", function(){ //when page loads
+  //var lightbox = document.getElementsByClassName("wollink");
+  var lightbox = document.getElementById("wollink");
+  console.log(lightbox);
+  lightbox.addEventListener("click", function(e) { 
+    console.log(e);
+    // loop parent nodes from the target to the delegation node
+    for (var target = e.target; target && target != this; target = target.parentNode) {
+        if (target.matches("wollink")) {
+            handler.call(target, e);
+            break;
+        }
+    }
+    //console.log(e.getAttribute("data-wol"));
+    //socket.emit("wolmac", lightbox.getAttribute("data-wol")); //send button status to server (as 1 or 0)
+  }, false);
+});*/
+
+/*socket.on('light', function (data) { //get button status from client
+  document.getElementById("light").checked = data; //change checkbox according to push button on Raspberry Pi
+  socket.emit("light", data); //send push button status to back to server
+});*/
+
+/*socket.on('wol', function (data) { //get button status from client
+  //document.getElementById("wol").innerText = data; //change 
+  //document.getElementById("wol").innerText = JSON.stringify(data); //change
+  //var wol = JSON.parse(data);
+  
+  var myJSON = JSON.parse(JSON.stringify(data));
+  for (x in myJSON){
+	for (y in myJSON[x]){
+	  document.getElementById("wol").innerText = myJSON[x][y].name; //change
+	}
+  }
+  //socket.emit("wol", data); //send push button status to back to server
+  
+});*/
+
+//
+var app = new Vue({
+  el: '#app',
+  data: {
+    json: null,
+    hosts: []
+    },
+  mounted: function () {
+    this.$nextTick(function () {
+	// ...
+    })
+  },
+  filters: {
+    space (value) {
+      return ""
+    },
+    short (value) {
+      return value.substr(0, value.indexOf('.'))
+    }
+  },
+  methods: {
+	getRealtimeData() {
+		//socket.on('wol', function (data) { //get button status from client
+		//socket.on('wol', fetchedData => { //get button status from client
+		socket.on('wol', json => { //get button status from client
+			/*var myJSON = JSON.parse(JSON.stringify(data));
+			for (x in myJSON){
+				for (y in myJSON[x]){
+					document.getElementById("wol").innerText = myJSON[x][y].name; //change
+				}
+			}*/
+			this.json = json,
+			this.hosts = json.hosts
+			console.log("socket connect")
+		})
+	},
+	stateToTag(value){
+		var s
+		if (value){
+			s = 'is-success'
+		} else {
+			s = 'is-danger'
+		}
+		return s
+	},
+	warn: function (message, event) {
+		// now we have access to the native event
+		if (event) {
+			event.preventDefault()
+    		}
+		console.log(message)
+                socket.emit("wakemac", message); //send push button status to back to server
+  	}
+  },
+  created () {
+    /*fetch('http://daten.buergernetz.bz.it/services/weather/district/2/bulletin?format=json&lang=de')
+      .then(response => response.json())
+      .then(json => {
+         this.json = json,
+         this.hosts = json.hosts
+      })*/
+	this.getRealtimeData()
+  },
+  /*computed: {
+  }*/
+})
+
+socket.on('disconnect', function(){
+  console.log('socket disconnect');
+});
+
+/*window.onload = function() {
+   console.log(document.getElementById('wollink'));
+   if(document.getElementById('wollink')){
+      alert('jo');
+      //Init for Vue
+   }
+}*/
+/* TODO */
+// 
+</script>
+</html>
+</body>
+</html>
