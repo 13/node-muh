@@ -8,3 +8,4 @@ npm rebuild
 ## TODO
 * add notification on click
 * send mqtt message
+* rename WOL index

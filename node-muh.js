@@ -1,12 +1,17 @@
-const app = require('express')();
+const express = require('express');
+const app = express();
+
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
+
 const isReachable = require('is-reachable');
 const wakeonlan = require('wake_on_lan');
 
 const server_port = 8080;
 
 var connectCounter = 0;
+
+app.use(express.static(__dirname + '/public'));
 
 io.on('connection', async (socket) => { 
   console.log('starting connection ...');
