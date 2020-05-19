@@ -16,16 +16,16 @@ app.use(express.static(__dirname + '/public'));
 io.on('connection', async (socket) => { 
   console.log('starting connection ...');
   connectCounter++; 
-  console.log('user connected ' + connectCounter);
-  socket.on('connect', () => {
-	connectCounter++;  
+  console.log('users connected: ' + connectCounter);
+  /*socket.on('connect', () => {
+    connectCounter++;  
     console.log('user connected ' + connectCounter);
-  });
+  });*/
   socket.on('disconnect', () => {
     connectCounter--;
-    console.log('user disconnected ' + connectCounter);
+    console.log('user disconnected: ' + connectCounter);
     if (connectCounter < 1){
-      clearInterval(interval);
+      clearInterval(this.interval);
     }
   });
 
@@ -54,13 +54,6 @@ io.on('connection', async (socket) => {
   console.log('[WOL] JSON: ' + JSON.stringify(servero));
   socket.emit('wol',servero); // send
   
-  /*socket.on('wol', async (data) => { //get light switch status from client
-	for (x in servero){
-	  console.log('Starting ...');
-	  console.log('WOL: ' + servero[x]);
-    }
-  });*/
-
   var interval = setInterval(async() => {
 	console.log('[WOL] Sending JSON Interval ...');
   	for (x in servero){
