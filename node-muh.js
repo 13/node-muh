@@ -13,17 +13,20 @@ var connectCounter = 0;
 
 app.use(express.static(__dirname + '/public'));
 
+// new connection
 io.on('connection', async (socket) => { 
-  console.log('starting connection ...');
+  console.log('starting new connection ...');
   connectCounter++; 
   console.log('users connected: ' + connectCounter);
 
+  // disconnect user
   socket.on('disconnect', () => {
     connectCounter--;
     console.log('user disconnected: ' + connectCounter);
     clearAsyncInterval(interval);
   });
 
+  // receive mac and wol
   socket.on('wakemac', (mac) => {
     console.log('Wake: ' + mac);
     if (mac != null){ 
@@ -31,7 +34,8 @@ io.on('connection', async (socket) => {
     }
   });
 
-  var servero = { 'hosts' : [
+  // hosts
+  var hosts = { 'hosts' : [
 			{ name:'google.com', port:'80'},
 			{ name:'c3p1.muh', port:'22', mac:'40:8D:5C:1D:54:9B'},
 			{ name:'jabba.muh', port:'22', mac:'90:1B:0E:3E:F3:77'},
@@ -40,48 +44,39 @@ io.on('connection', async (socket) => {
 			{ name:'p30.muh', port:'22'}
 		]}
   
-  for (x in servero){
-	for (y in servero[x]){
-	  servero[x][y].state = await isReachable(servero[x][y].name + ':' + servero[x][y].port);
+  // hosts ping and send 
+  for (x in hosts){
+	for (y in hosts[x]){
+	  hosts[x][y].state = await isReachable(hosts[x][y].name + ':' + hosts[x][y].port);
 	}
   }
   console.log('[WOL] Sending JSON ...');
-  console.log('[WOL] JSON: ' + JSON.stringify(servero));
-  socket.emit('wol',servero); // send
+  console.log('[WOL] JSON: ' + JSON.stringify(hosts));
+  socket.emit('wol',hosts);
   
-  /*var interval = setInterval(async() => {
-	console.log('[WOL] Sending JSON Interval ...');
-  	for (x in servero){
-	  for (y in servero[x]){
-	    servero[x][y].state = await isReachable(servero[x][y].name + ':' + servero[x][y].port);
-	  }
-	}
-	console.log('[WOL] JSON: ' + JSON.stringify(servero));
-	socket.emit('wol',servero); // send
-  },5000);*/
-  
+  // hosts interval ping and send
   var interval = setAsyncInterval(async () => {
     console.log('start');
 	console.log('[WOL] Sending JSON Interval ...');
-  	for (x in servero){
-	  for (y in servero[x]){
-	    servero[x][y].state = await isReachable(servero[x][y].name + ':' + servero[x][y].port);
+  	for (x in hosts){
+	  for (y in hosts[x]){
+	    hosts[x][y].state = await isReachable(hosts[x][y].name + ':' + hosts[x][y].port);
 	  }
 	}	
     const promise = new Promise((resolve) => {
       setTimeout(resolve('all done'), 3000);
     });
     await promise;
-	console.log('[WOL] JSON: ' + JSON.stringify(servero));
-	socket.emit('wol',servero); // send	
+	console.log('[WOL] JSON: ' + JSON.stringify(hosts));
+	socket.emit('wol',hosts); // send	
     console.log('end');
   }, 3000);
   
   
 });
 
-app.get('/', function (req, res) {
-  res.send('Hello World!');
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/portal.html')
 });
 
 app.get('/ping', (req, res) => {
@@ -99,7 +94,6 @@ app.get('/wetter', (req, res) => {
 server.listen(server_port, function () {
   console.log('Listening on port: ' + server_port);
 });
-
 
 // async intervals
 
@@ -128,4 +122,3 @@ const clearAsyncInterval = (intervalIndex) => {
     asyncIntervals[intervalIndex] = false;
   }
 };
-
