@@ -41,7 +41,7 @@ wol.on('connection', async (socket) => {
   });
 
   // receive mac and wol
-  wol.on('wakemac', (mac) => {
+  socket.on('wakemac', (mac) => {
     console.log('Wake: ' + mac);
     if (mac != null){ 
       wakeonlan.wake(mac);
@@ -90,7 +90,9 @@ wol.on('connection', async (socket) => {
 
 // new connection
 io.on('connection', async (socket) => { 
-  console.log('starting new connection ...');
+  var socketId = socket.id;
+  var clientIp = socket.request.connection.remoteAddress;
+  console.log('New connection ' + clientIp);
 });
 
 app.get('/', (req, res) => {
