@@ -3,6 +3,8 @@ const app = express();
 
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
+const portal = io.of('/portal');
+const wol = io.of('/wol');
 
 const isReachable = require('is-reachable');
 const wakeonlan = require('wake_on_lan');
@@ -13,12 +15,24 @@ var connectCounter = 0;
 
 app.use(express.static(__dirname + '/public'));
 
-// new connection
-io.on('connection', async (socket) => { 
-  console.log('starting new connection ...');
+portal.on('connection', async (socket) => {
+  console.log('portal connected');
   connectCounter++; 
   console.log('users connected: ' + connectCounter);
+  
+  // disconnect user
+  socket.on('disconnect', () => {
+    connectCounter--;
+    console.log('user disconnected: ' + connectCounter);
+    //clearAsyncInterval(interval);
+  });
+});
 
+wol.on('connection', async (socket) => {
+  console.log('wol connected');
+  connectCounter++; 
+  console.log('users connected: ' + connectCounter);
+    
   // disconnect user
   socket.on('disconnect', () => {
     connectCounter--;
@@ -27,13 +41,13 @@ io.on('connection', async (socket) => {
   });
 
   // receive mac and wol
-  socket.on('wakemac', (mac) => {
+  wol.on('wakemac', (mac) => {
     console.log('Wake: ' + mac);
     if (mac != null){ 
       wakeonlan.wake(mac);
     }
-  });
-
+  });  
+  
   // hosts
   var hosts = { 'hosts' : [
 			{ name:'google.com', port:'80'},
@@ -52,7 +66,7 @@ io.on('connection', async (socket) => {
   }
   console.log('[WOL] Sending JSON ...');
   console.log('[WOL] JSON: ' + JSON.stringify(hosts));
-  socket.emit('wol',hosts);
+  wol.emit('wol',hosts);
   
   // hosts interval ping and send
   var interval = setAsyncInterval(async () => {
@@ -68,11 +82,15 @@ io.on('connection', async (socket) => {
     });
     await promise;
 	console.log('[WOL] JSON: ' + JSON.stringify(hosts));
-	socket.emit('wol',hosts); // send	
+	wol.emit('wol',hosts); // send	
     console.log('end');
-  }, 3000);
+  }, 3000); 
   
-  
+});
+
+// new connection
+io.on('connection', async (socket) => { 
+  console.log('starting new connection ...');
 });
 
 app.get('/', (req, res) => {
