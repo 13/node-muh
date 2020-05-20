@@ -17,16 +17,11 @@ io.on('connection', async (socket) => {
   console.log('starting connection ...');
   connectCounter++; 
   console.log('users connected: ' + connectCounter);
-  /*socket.on('connect', () => {
-    connectCounter++;  
-    console.log('user connected ' + connectCounter);
-  });*/
+
   socket.on('disconnect', () => {
     connectCounter--;
     console.log('user disconnected: ' + connectCounter);
-    if (connectCounter < 1){
-      clearInterval(this.interval);
-    }
+    clearAsyncInterval(interval);
   });
 
   socket.on('wakemac', (mac) => {
@@ -54,7 +49,7 @@ io.on('connection', async (socket) => {
   console.log('[WOL] JSON: ' + JSON.stringify(servero));
   socket.emit('wol',servero); // send
   
-  var interval = setInterval(async() => {
+  /*var interval = setInterval(async() => {
 	console.log('[WOL] Sending JSON Interval ...');
   	for (x in servero){
 	  for (y in servero[x]){
@@ -63,7 +58,25 @@ io.on('connection', async (socket) => {
 	}
 	console.log('[WOL] JSON: ' + JSON.stringify(servero));
 	socket.emit('wol',servero); // send
-  },5000);  
+  },5000);*/
+  
+  var interval = setAsyncInterval(async () => {
+    console.log('start');
+	console.log('[WOL] Sending JSON Interval ...');
+  	for (x in servero){
+	  for (y in servero[x]){
+	    servero[x][y].state = await isReachable(servero[x][y].name + ':' + servero[x][y].port);
+	  }
+	}	
+    const promise = new Promise((resolve) => {
+      setTimeout(resolve('all done'), 3000);
+    });
+    await promise;
+	console.log('[WOL] JSON: ' + JSON.stringify(servero));
+	socket.emit('wol',servero); // send	
+    console.log('end');
+  }, 3000);
+  
   
 });
 
@@ -86,4 +99,33 @@ app.get('/wetter', (req, res) => {
 server.listen(server_port, function () {
   console.log('Listening on port: ' + server_port);
 });
+
+
+// async intervals
+
+const asyncIntervals = [];
+
+const runAsyncInterval = async (cb, interval, intervalIndex) => {
+  await cb();
+  if (asyncIntervals[intervalIndex]) {
+    setTimeout(() => runAsyncInterval(cb, interval, intervalIndex), interval);
+  }
+};
+
+const setAsyncInterval = (cb, interval) => {
+  if (cb && typeof cb === "function") {
+    const intervalIndex = asyncIntervals.length;
+    asyncIntervals.push(true);
+    runAsyncInterval(cb, interval, intervalIndex);
+    return intervalIndex;
+  } else {
+    throw new Error('Callback must be a function');
+  }
+};
+
+const clearAsyncInterval = (intervalIndex) => {
+  if (asyncIntervals[intervalIndex]) {
+    asyncIntervals[intervalIndex] = false;
+  }
+};
 
