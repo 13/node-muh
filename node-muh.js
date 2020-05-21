@@ -24,8 +24,34 @@ portal.on('connection', async (socket) => {
   socket.on('disconnect', () => {
     connectCounter--;
     console.log('user disconnected: ' + connectCounter);
-    //clearAsyncInterval(interval);
+    clearAsyncInterval(interval_p);
   });
+ 
+  // hosts
+  var portals = { 'portals' : [
+			{ id:'1', name:"garage", state:true, tstamp:"2020-05-21 07:50:47"},
+			{ id:'2', name:"garagedoor", state:false, tstamp:"2020-05-21 07:10:47"},
+			{ id:'3', name:"garagedoorlock", state:true, tstamp:"2020-05-20 07:12:47"},
+			{ id:'4', name:"housedoor", state:false, tstamp:"2020-05-21 08:55:47"},
+			{ id:'5', name:"housedoorlock", state:true, tstamp:"2020-05-21 09:23:47"}
+		]} 
+  console.log('[PORTAL] Sending JSON ...');
+  console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
+  portal.emit('portal',portals);
+  
+  // hosts interval ping and send
+  var interval_p = setAsyncInterval(async () => {
+    console.log('start');
+	console.log('[PORTAL] Sending JSON Interval ...');
+    const promise = new Promise((resolve) => {
+      setTimeout(resolve('all done'), 3000);
+    });
+    await promise;
+    console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
+	portal.emit('portal',portals); // send	
+    console.log('end');
+  }, 3000);   
+  
 });
 
 wol.on('connection', async (socket) => {
@@ -96,6 +122,10 @@ io.on('connection', async (socket) => {
 });
 
 app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/portal.html')
+});
+
+app.get('/portal', (req, res) => {
   res.sendFile(__dirname + '/public/portal.html')
 });
 

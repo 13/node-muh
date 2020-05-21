@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>WOL</title>
+  <title>Portal</title>
   <link rel="stylesheet" href="css/main.css">
   <!-- development version, includes helpful console warnings 
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
@@ -19,6 +19,7 @@
   
   <style type="text/css">
 	.socketstatus { height: 4px !important; }
+	.dotstatus { height: 1.5em !important; margin-right: 0.4em !important; }
   </style>
 
 </head>
@@ -97,10 +98,10 @@
           </a>
         </li>
       </ul>
-      <p class="menu-label">Examples</p>
+      <p class="menu-label">Home</p>
       <ul class="menu-list">
         <li>
-          <a href="portal.html" class="has-icon">
+          <a href="portal.html" class="is-active has-icon">
             <span class="icon"><i class="mdi mdi-lock"></i></span>
             <span class="menu-item-label">Portal</span>
           </a>
@@ -112,7 +113,7 @@
           </a>
         </li>
         <li>
-          <a href="wol.html" class="is-active has-icon">
+          <a href="wol.html" class="has-icon">
             <span class="icon"><i class="mdi mdi-lan"></i></span>
             <span class="menu-item-label">Wake On Lan</span>
           </a>
@@ -164,14 +165,12 @@
       </div>
     </div>
   </section>-->
-  
-  
   <section class="section is-main-section">
     <div class="card">
       <header class="card-header">
         <p class="card-header-title">
-          <span class="icon"><i class="mdi mdi-lan"></i></span>
-          WOL
+          <span class="icon"><i class="mdi mdi-lock"></i></span>
+          Portal
         </p>
       </header>
       <div class="card-content">
@@ -182,14 +181,25 @@
 			<p class="socketstatus notification is-marginless is-paddingless is-radiusless" v-bind:class="stateToTag(socketState)"></p>
 		</div>
 	</div>
-	<div class="columns is-mobile" v-for="(host, idx) in hosts" v-bind:class="{ 'has-background-light': idx % 2 == 0 }">
-		<a href="#" class="column is-three-quarters" v-on:click="warn(host.mac, $event)">{{ host.name | short }}</a>
-		<a href="#" class="column has-text-right" v-on:click="warn(host.mac, $event); isHidden = !isHidden">
-			<span class="tag is-radiusless" v-bind:class="stateToTag(host.state)">{{ host.state | space }}</span>
+	<div class="columns is-mobile" v-for="(portal, idx) in portals" v-bind:class="{ 'has-background-light': idx % 2 == 0 }">
+		<a href="#" class="column is-three-quarters" v-on:click="warn(portal.id, $event)">{{ portal.name }}</a>
+		<a href="#" class="column has-text-right" v-on:click="warn(portal.id, $event); isHidden = !isHidden">
+			<span class="tag is-radiusless" v-bind:class="stateToTag(portal.state)">{{ portal.state | space }}</span>
 		</a>	
 	</div>
 	<h1 v-if="isHidden">Hide me on click event!</h1>
 
+	<div class="columns is-mobile has-background-light">
+		<div class="column is-half has-text-weight-bold">Haustür</div>
+		<div class="column has-text-right">
+			<span class="tag is-white">13:27</span>
+			<span class="tag is-white">14:35</span>
+		</div>
+	</div>
+	<div class="columns is-mobile has-text-weight-bold">
+		<div class="column is-half"><span class="tag is-danger dotstatus"></span><span>GESCHLOSSEN</span></div>
+		<div class="column"><span class="tag is-success dotstatus"></span>ENTRIEGELT</div>
+	</div>	
 	  
       </div>
     </div>
@@ -249,7 +259,7 @@ var app = new Vue({
     socketState: false,
     isHidden: false,
     json: null,
-    hosts: []
+    portals: []
     },
   mounted: function () {
     this.$nextTick(function () {
@@ -268,7 +278,7 @@ var app = new Vue({
 	getRealtimeData() {
 		socket.on('portal', json => { //get button status from client
 			this.json = json,
-			this.hosts = json.hosts;
+			this.portals = json.portals;
 			this.socketState = true;
 			console.log("socket connect: " + this.socketState);
 		}),
