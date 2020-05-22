@@ -29,11 +29,11 @@ portal.on('connection', async (socket) => {
  
   // hosts
   var portals = { 'portals' : [
-			{ id:'1', name:"garage", state:true, tstamp:"2020-05-21 07:50:47"},
-			{ id:'2', name:"garagedoor", state:false, tstamp:"2020-05-21 07:10:47"},
-			{ id:'3', name:"garagedoorlock", state:true, tstamp:"2020-05-20 07:12:47"},
 			{ id:'4', name:"housedoor", state:false, tstamp:"2020-05-21 08:55:47"},
-			{ id:'5', name:"housedoorlock", state:true, tstamp:"2020-05-21 09:23:47"}
+			{ id:'5', name:"housedoorlock", state:true, tstamp:"2020-05-21 09:23:47"},
+			{ id:'2', name:"garagedoor", state:false, tstamp:"2020-05-21 07:10:47"},
+			{ id:'3', name:"garagedoorlock", state:true, tstamp:"2020-05-20 07:12:47"},			
+			{ id:'1', name:"garage", state:true, tstamp:"2020-05-21 07:50:47"}
 		]} 
   console.log('[PORTAL] Sending JSON ...');
   console.log('[PORTAL] JSON: ' + JSON.stringify(portals));

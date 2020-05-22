@@ -181,14 +181,24 @@
 			<p class="socketstatus notification is-marginless is-paddingless is-radiusless" v-bind:class="stateToTag(socketState)"></p>
 		</div>
 	</div>
-	<div class="columns is-mobile" v-for="(portal, idx) in portals" v-bind:class="{ 'has-background-light': idx % 2 == 0 }">
-		<a href="#" class="column is-three-quarters" v-on:click="warn(portal.id, $event)">{{ portal.name }}</a>
-		<a href="#" class="column has-text-right" v-on:click="warn(portal.id, $event); isHidden = !isHidden">
-			<span class="tag is-radiusless" v-bind:class="stateToTag(portal.state)">{{ portal.state | space }}</span>
-		</a>	
+	
+	<div v-for="(portal, idx) in portals" :key="idx">
+		
+		<div class="columns is-mobile" v-bind:class="{ 'has-background-light': !portal.name.includes('lock') }">
+			<div class="column is-half has-text-weight-bold">{{ portals[idx].name }}</div>
+			<div class="column has-text-right">
+				<span class="tag is-white" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">{{ portals[idx].tstamp }}</span>
+				<span class="tag is-white" v-if="!portal.name.includes('lock')">{{ portal.tstamp }}</span>
+			</div>
+		</div>
+		<div class="columns is-mobile has-text-weight-bold">
+			<div class="column is-half"><span class="tag is-danger dotstatus"></span>{{ portal.state }}</div>
+			<div class="column"><span class="tag is-success dotstatus"></span>{{ portal.state }}</div>
+		</div>
+		
 	</div>
-	<h1 v-if="isHidden">Hide me on click event!</h1>
 
+	<!--
 	<div class="columns is-mobile has-background-light">
 		<div class="column is-half has-text-weight-bold">Haustür</div>
 		<div class="column has-text-right">
@@ -200,6 +210,29 @@
 		<div class="column is-half"><span class="tag is-danger dotstatus"></span><span>GESCHLOSSEN</span></div>
 		<div class="column"><span class="tag is-success dotstatus"></span>ENTRIEGELT</div>
 	</div>	
+	  
+	<div class="columns is-mobile has-background-light">
+		<div class="column is-half has-text-weight-bold">Haustür</div>
+		<div class="column has-text-right">
+			<span class="tag is-white">13:27</span>
+			<span class="tag is-white">14:35</span>
+		</div>
+	</div>
+	<div class="columns is-mobile has-text-weight-bold">
+		<div class="column is-half"><span class="tag is-danger dotstatus"></span><span>GESCHLOSSEN</span></div>
+		<div class="column"><span class="tag is-success dotstatus"></span>ENTRIEGELT</div>
+	</div>		  
+
+	<div class="columns is-mobile has-background-light">
+		<div class="column is-half has-text-weight-bold">Haustür</div>
+		<div class="column has-text-right">
+			<span class="tag is-white">14:35</span>
+		</div>
+	</div>
+	<div class="columns is-mobile has-text-weight-bold">
+		<div class="column is-half"><span class="tag is-danger dotstatus"></span><span>GESCHLOSSEN</span></div>
+	</div>
+	-->
 	  
       </div>
     </div>
