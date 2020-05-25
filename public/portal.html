@@ -174,65 +174,32 @@
         </p>
       </header>
       <div class="card-content">
-
-	  
-	<div class="columns">
-		<div class="column is-full is-paddingless">
-			<p class="socketstatus notification is-marginless is-paddingless is-radiusless" v-bind:class="stateToTag(socketState)"></p>
-		</div>
-	</div>
-	
-	<div v-for="(portal, idx) in portals" :key="idx">
-		
-		<div class="columns is-mobile" v-bind:class="{ 'has-background-light': !portal.name.includes('lock') }">
-			<div class="column is-half has-text-weight-bold">{{ portals[idx].name }}</div>
-			<div class="column has-text-right">
-				<span class="tag is-white" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">{{ portals[idx].tstamp }}</span>
-				<span class="tag is-white" v-if="!portal.name.includes('lock')">{{ portal.tstamp }}</span>
+ 
+		<div class="columns">
+			<div class="column is-full is-paddingless">
+				<p class="socketstatus notification is-marginless is-paddingless is-radiusless" v-bind:class="stateToTag(socketState)"></p>
 			</div>
 		</div>
-		<div class="columns is-mobile has-text-weight-bold">
-			<div class="column is-half"><span class="tag is-danger dotstatus"></span>{{ portal.state }}</div>
-			<div class="column"><span class="tag is-success dotstatus"></span>{{ portal.state }}</div>
+	
+		<div v-for="(portal, idx) in portals" :key="idx">
+			<!-- portal header -->
+			<div class="columns is-mobile" v-bind:class="{ 'has-background-light': !portal.name.includes('lock') }" v-if="!portal.name.includes('lock')">
+				<div class="column is-half has-text-weight-bold">{{ portals[idx].name | translateName }}</div>
+				<div class="column has-text-right">
+					<span class="tag is-white" v-if="!portal.name.includes('lock')">{{ portal.tstamp | shortdate }}</span>
+					<span class="tag is-white" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">{{ portals[incrementItem(idx)].tstamp | shortdate }}</span>
+				</div>
+			</div>
+			<!-- portal footer -->
+			<div class="columns is-mobile has-text-weight-bold" v-if="!portal.name.includes('lock')">
+				<div class="column">
+					<span class="tag dotstatus" v-bind:class="stateToTagVV(portal.state)"></span>{{ portal.state | translateDoorState }}
+				</div>
+				<div class="column is-half" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">
+					<span class="tag dotstatus" v-bind:class="stateToTagVV(portals[incrementItem(idx)].state)"></span>{{ portals[incrementItem(idx)].state | translateDoorState }}
+				</div>
+			</div>
 		</div>
-		
-	</div>
-
-	<!--
-	<div class="columns is-mobile has-background-light">
-		<div class="column is-half has-text-weight-bold">Haustür</div>
-		<div class="column has-text-right">
-			<span class="tag is-white">13:27</span>
-			<span class="tag is-white">14:35</span>
-		</div>
-	</div>
-	<div class="columns is-mobile has-text-weight-bold">
-		<div class="column is-half"><span class="tag is-danger dotstatus"></span><span>GESCHLOSSEN</span></div>
-		<div class="column"><span class="tag is-success dotstatus"></span>ENTRIEGELT</div>
-	</div>	
-	  
-	<div class="columns is-mobile has-background-light">
-		<div class="column is-half has-text-weight-bold">Haustür</div>
-		<div class="column has-text-right">
-			<span class="tag is-white">13:27</span>
-			<span class="tag is-white">14:35</span>
-		</div>
-	</div>
-	<div class="columns is-mobile has-text-weight-bold">
-		<div class="column is-half"><span class="tag is-danger dotstatus"></span><span>GESCHLOSSEN</span></div>
-		<div class="column"><span class="tag is-success dotstatus"></span>ENTRIEGELT</div>
-	</div>		  
-
-	<div class="columns is-mobile has-background-light">
-		<div class="column is-half has-text-weight-bold">Haustür</div>
-		<div class="column has-text-right">
-			<span class="tag is-white">14:35</span>
-		</div>
-	</div>
-	<div class="columns is-mobile has-text-weight-bold">
-		<div class="column is-half"><span class="tag is-danger dotstatus"></span><span>GESCHLOSSEN</span></div>
-	</div>
-	-->
 	  
       </div>
     </div>
@@ -305,7 +272,47 @@ var app = new Vue({
     },
     short (value) {
       return value.substr(0, value.indexOf('.'))
-    }
+    },
+	translateDoorState (value) {
+      return (value ? 'GESCHLOSSEN' : 'OFFEN')
+    },
+    shortdate (value) {
+		var date_now = new Date();
+		var date_past = new Date(value);
+		var days = date_past.getDate();
+		var months = date_past.getMonth()+1;
+		var hours = date_past.getHours();
+		var minutes = date_past.getMinutes();
+		
+		days = days < 10 ? '0'+days : days;
+		months = months < 10 ? '0'+months : months;
+		hours = hours < 10 ? '0'+hours : hours;
+		minutes = minutes < 10 ? '0'+minutes : minutes;
+		var strDate = days + '.' + months + '.';
+		var strTime = hours + ':' + minutes;
+		
+		var diff = date_now.getTime() - date_past.getTime();
+		var diff_hours = Math.floor(diff / (1000 * 60 * 60));
+
+		return ((diff_hours > 22) ? strDate + " " + strTime : strTime);
+    },
+	translateName(value){
+	    var txt;
+		switch (value) {
+			case "housedoor":
+			  txt = "Haustür";
+			  break;
+			case "garagedoor":
+			  txt = "Garagentür";
+			  break;
+			case "garage":
+			  txt = "Garage";
+			  break;
+			default:
+			  txt = value;
+		}
+		return txt;
+	}
   },
   methods: {
 	getRealtimeData() {
@@ -323,6 +330,10 @@ var app = new Vue({
 	stateToTag(value){
 		return (value ? 'is-success' : 'is-danger')
 	},
+	stateToTagVV(value){
+		return (value ? 'is-danger' : 'is-success')
+	},
+	incrementItem: function(item) {return item + 1},
 	warn: function (message, event) {
 		// now we have access to the native event
 		if (event) {

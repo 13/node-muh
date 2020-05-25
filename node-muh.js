@@ -26,14 +26,14 @@ portal.on('connection', async (socket) => {
     console.log('user disconnected: ' + connectCounter);
     clearAsyncInterval(interval_p);
   });
- 
-  // hosts
+ 	
+  // portals
   var portals = { 'portals' : [
-			{ id:'4', name:"housedoor", state:false, tstamp:"2020-05-21 08:55:47"},
-			{ id:'5', name:"housedoorlock", state:true, tstamp:"2020-05-21 09:23:47"},
-			{ id:'2', name:"garagedoor", state:false, tstamp:"2020-05-21 07:10:47"},
-			{ id:'3', name:"garagedoorlock", state:true, tstamp:"2020-05-20 07:12:47"},			
-			{ id:'1', name:"garage", state:true, tstamp:"2020-05-21 07:50:47"}
+			{ id:'4', name:"housedoor", state:true, tstamp:"2020-05-25 08:55:47"},
+			{ id:'5', name:"housedoorlock", state:false, tstamp:"2020-05-25 09:23:47"},
+			{ id:'2', name:"garagedoor", state:false, tstamp:"2020-05-25 07:10:47"},
+			{ id:'3', name:"garagedoorlock", state:true, tstamp:"2020-05-25 07:12:47"},			
+			{ id:'1', name:"garage", state:true, tstamp:"2020-05-24 07:50:47"}
 		]} 
   console.log('[PORTAL] Sending JSON ...');
   console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
