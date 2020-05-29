@@ -20,6 +20,8 @@
   <style type="text/css">
 	.socketstatus { height: 4px !important; }
 	.dotstatus { height: 1.5em !important; margin-right: 0.4em !important; }
+	.a-is-half { width:50%; }
+	.column-padding { padding-left:.27rem; padding-right:.27rem;};
   </style>
 
 </head>
@@ -184,7 +186,7 @@
 		<div v-for="(portal, idx) in portals" :key="idx">
 			<!-- portal header -->
 			<div class="columns is-mobile" v-bind:class="{ 'has-background-light': !portal.name.includes('lock') }" v-if="!portal.name.includes('lock')">
-				<div class="column is-half has-text-weight-bold">{{ portals[idx].name | translateName }}</div>
+				<div class="column is-one-quarter has-text-weight-bold">{{ portals[idx].name | translateName }}</div>
 				<div class="column has-text-right">
 					<span class="tag is-white" v-if="!portal.name.includes('lock')">{{ portal.tstamp | shortdate }}</span>
 					<span class="tag is-white" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">{{ portals[incrementItem(idx)].tstamp | shortdate }}</span>
@@ -192,12 +194,16 @@
 			</div>
 			<!-- portal footer -->
 			<div class="columns is-mobile has-text-weight-bold" v-if="!portal.name.includes('lock')">
-				<div class="column">
-					<span class="tag dotstatus" v-bind:class="stateToTagVV(portal.state)"></span>{{ portal.state | translateDoorState }}
-				</div>
-				<div class="column is-half" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">
-					<span class="tag dotstatus" v-bind:class="stateToTagVV(portals[incrementItem(idx)].state)"></span>{{ portals[incrementItem(idx)].state | translateDoorState }}
-				</div>
+				<a href="#" class="is-full a-is-half">
+					<div class="column column-padding">
+						<span class="tag dotstatus" v-bind:class="stateToTagVV(portal.state)"></span>{{ portal.state | translateDoorState }}
+					</div>
+				</a>
+				<a href="#" class="is-full a-is-half">
+					<div class="column column-padding" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">
+						<span class="tag dotstatus" v-bind:class="stateToTagVV(portals[incrementItem(idx)].state)"></span>{{ portals[incrementItem(idx)].state | translateDoorState }}
+					</div>
+				</a>
 			</div>
 		</div>
 	  

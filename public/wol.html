@@ -18,8 +18,11 @@
   <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet" type="text/css">
   
   <style type="text/css">
-	.socketstatus { height: 4px !important; };
-	a.list-item { border: 0px !important; background-color: #ffffff !important; }
+	.socketstatus { height: 4px !important; }
+	.dotstatus { height: 1.5em !important; margin-right: 0.4em !important; }
+	.a-is-half { width:50%; }
+	.a-is-full { width:100%; }
+	.column-padding { padding-left:.27rem; padding-right:.27rem;};
   </style>
 
 </head>
@@ -166,7 +169,6 @@
     </div>
   </section>-->
   
-  
   <section class="section is-main-section">
     <div class="card">
       <header class="card-header">
@@ -182,9 +184,9 @@
 			<p class="socketstatus notification is-marginless is-paddingless is-radiusless" v-bind:class="stateToTag(socketState)"></p>
 		</div>
 	</div>
-<!--
+	
 	<div class="columns is-mobile" v-for="(host, idx) in hosts" v-bind:class="{ 'has-background-light': idx % 2 == 0 }">
-		<a href="#" v-on:click="notify(host.mac, $event); isHidden = !isHidden">
+		<a href="#" class="is-full" v-on:click="notify(host.mac, $event); isHidden = !isHidden">
 			<div class="column is-three-quarters has-text-weight-bold">
 				{{ host.name | short }}
 			</div>
@@ -192,11 +194,11 @@
 				<span class="tag" v-bind:class="stateToTag(host.state)">{{ host.state | space }}</span>
 			</div>
 		</a>
-	</div>-->
-	<!-- seperator -->
+	</div>
+	<!-- 
 	
-	<div class="list is-hoverable is-shadowless is-radiusless is-borderless" v-for="(host, idx) in hosts">
-		<a class="list-item" href="#" v-on:click="notify(host.mac, $event); isHidden = !isHidden">
+	<div class="list is-hoverable is-shadowless is-radiusless is-borderless" v-for="(host, idx) in hosts" v-bind:class="{ 'has-background-white': idx % 2 == 0 }">
+		<a class="list-item list-itemx" href="#" v-on:click="notify(host.mac, $event); isHidden = !isHidden">
 			<div class="columns is-mobile">
 			<div class="column is-three-quarters has-text-weight-bold">
 				{{ host.name | short }}
@@ -206,7 +208,7 @@
 			</div>
 			</div>
 		</a>
-	</div>
+	</div>seperator -->
 	
 	<div class="notification is-overlay" v-if="isHidden" v-html="notifywol"></div>
 	  
@@ -310,6 +312,7 @@ var app = new Vue({
 			socket.emit("wakemac", message); //send push button status to back to server
 			app.notifywol = "Waking " + message;
 			setTimeout(() => this.isHidden = false, 5000);
+			setTimeout(() => app.notifywol = null, 5001);
 		}
   	}
   },

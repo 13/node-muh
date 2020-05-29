@@ -30,7 +30,7 @@ portal.on('connection', async (socket) => {
   // portals
   var portals = { 'portals' : [
 			{ id:'4', name:"housedoor", state:true, tstamp:"2020-05-25 08:55:47"},
-			{ id:'5', name:"housedoorlock", state:false, tstamp:"2020-05-25 09:23:47"},
+			{ id:'5', name:"housedoorlock", state:true, tstamp:"2020-05-25 09:23:47"},
 			{ id:'2', name:"garagedoor", state:false, tstamp:"2020-05-25 07:10:47"},
 			{ id:'3', name:"garagedoorlock", state:true, tstamp:"2020-05-25 07:12:47"},			
 			{ id:'1', name:"garage", state:true, tstamp:"2020-05-24 07:50:47"}
