@@ -179,24 +179,24 @@
       </header>
       <div class="card-content">
 	  
-	<div class="columns">
-		<div class="column is-full is-paddingless">
+	    <div class="columns">
+		  <div class="column is-full is-paddingless">
 			<p class="socketstatus notification is-marginless is-paddingless is-radiusless" v-bind:class="stateToTag(socketState)"></p>
+		  </div>
+	    </div>
+	    <!-- end -->
+		<div class="columns is-mobile" v-for="(host, idx) in hosts" :key="idx" v-bind:class="{ 'has-background-light': idx % 2 == 0 }">
+			<a href="#" class="is-full a-is-half" v-on:click="notify(host.mac, $event); isHidden = !isHidden">
+				<div class="column column-padding has-text-weight-bold">{{ host.name | short }}</div>
+			</a>
+			<a href="#" class="is-full a-is-half" v-on:click="notify(host.mac, $event); isHidden = !isHidden">
+				<div class="column column-padding has-text-right">
+					<span class="tag" v-bind:class="stateToTag(host.state)">{{ host.state | space }}</span>
+				</div>
+			</a>
 		</div>
-	</div>
-	
-	<div class="columns is-mobile" v-for="(host, idx) in hosts" v-bind:class="{ 'has-background-light': idx % 2 == 0 }">
-		<a href="#" class="is-full" v-on:click="notify(host.mac, $event); isHidden = !isHidden">
-			<div class="column is-three-quarters has-text-weight-bold">
-				{{ host.name | short }}
-			</div>
-			<div class="column is-one-quarter has-text-right">
-				<span class="tag" v-bind:class="stateToTag(host.state)">{{ host.state | space }}</span>
-			</div>
-		</a>
-	</div>
-	<!-- 
-	
+	 
+	<!--
 	<div class="list is-hoverable is-shadowless is-radiusless is-borderless" v-for="(host, idx) in hosts" v-bind:class="{ 'has-background-white': idx % 2 == 0 }">
 		<a class="list-item list-itemx" href="#" v-on:click="notify(host.mac, $event); isHidden = !isHidden">
 			<div class="columns is-mobile">
@@ -210,7 +210,7 @@
 		</a>
 	</div>seperator -->
 	
-	<div class="notification is-overlay" v-if="isHidden" v-html="notifywol"></div>
+		<div class="notification is-overlay" v-if="isHidden" v-html="notifywol"></div>
 	  
       </div>
     </div>

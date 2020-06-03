@@ -21,7 +21,8 @@
 	.socketstatus { height: 4px !important; }
 	.dotstatus { height: 1.5em !important; margin-right: 0.4em !important; }
 	.a-is-half { width:50%; }
-	.column-padding { padding-left:.27rem; padding-right:.27rem;};
+	.column-padding { padding-left:.27rem; padding-right:.27rem;}
+	.is-margin-50 { margin-bottom: .50rem !important; }
   </style>
 
 </head>
@@ -193,7 +194,7 @@
 				</div>
 			</div>
 			<!-- portal footer -->
-			<div class="columns is-mobile has-text-weight-bold" v-if="!portal.name.includes('lock')">
+			<div class="columns is-mobile has-text-weight-bold is-margin-50" v-bind:class="{ 'has-background-white': !portal.name.includes('lock') }" v-if="!portal.name.includes('lock')">
 				<a href="#" class="is-full a-is-half">
 					<div class="column column-padding">
 						<span class="tag dotstatus" v-bind:class="stateToTagVV(portal.state)"></span>{{ portal.state | translateDoorState }}
