@@ -82,6 +82,12 @@ wol.on('connection', async (socket) => {
 			{ name:'p1.muh', port:'22'},
 			{ name:'p3.muh', port:'22'},
 			{ name:'p30.muh', port:'22'}
+			//{ name:'fibert.muh', port:'80'},
+			//{ name:'obiwan.muh', port:'80'},
+			//{ name:'obiwan.muh', port:'80'},
+			//{ name:'wr710.muh', port:'80'},
+			//{ name:'esp32cam1.muh', port:'80'},
+			//{ name:'esp32cam2.muh', port:'80'},
 		]}
   
   // hosts ping and send 
