@@ -99,32 +99,32 @@
 				</header>
 				<section class="modal-card-body">
 					<div class="card-content has-text-centered">
-						<div class="columns buttons">
-							<div class="column">
+						<div class="columns is-multiline is-mobile">
+							<div class="column is-full">
 								<button class="button is-fullwidth">
 									<span class="icon">
 										<i class="mdi mdi-door-open"></i>
 									</span>
 									<span>Öffnen</span>
 								</button>
-								<div class="columns is-mobile">
-									<div class="column is-half">
-										<button class="button is-fullwidth">
-											<span class="icon">
-												<i class="mdi mdi-lock"></i>
-											</span>
-											<span>Verriegeln</span>
-										</button>
-									</div>
-									<div class="column">
-										<button class="button is-fullwidth">
-											<span class="icon">
-												<i class="mdi mdi-lock-open-variant"></i>
-											</span>
-											<span>Entriegeln</span>
-										</button>
-									</div>
-								</div>
+							</div>
+							<div class="column is-half">
+								<button class="button is-fullwidth">
+									<span class="icon">
+										<i class="mdi mdi-lock"></i>
+									</span>
+									<span>Verriegeln</span>
+								</button>
+							</div>
+							<div class="column is-half">
+								<button class="button is-fullwidth">
+									<span class="icon">
+										<i class="mdi mdi-lock-open-variant"></i>
+									</span>
+									<span>Entriegeln</span>
+								</button>
+							</div>
+							<div class="column is-full">
 								<button class="button is-fullwidth" v-on:click="isGaragedoorModalActive = false">Abbrechen</button>	
 							</div>
 						</div>
