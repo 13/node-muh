@@ -5,11 +5,11 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Portal</title>
-  <!--<link rel="stylesheet" href="css/main.css">
+  <!--<link rel="stylesheet" href="css/main.css">-->
    development version, includes helpful console warnings 
-  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
-  <!-- production version, optimized for size and speed -->
-  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <!-- production version, optimized for size and speed 
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>-->
   <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.8.2/css/bulma.min.css">-->
   <link rel="stylesheet" href="https://unpkg.com/buefy/dist/buefy.min.css">
   <!--<link rel="stylesheet" href="https://cdn.rawgit.com/jgthms/minireset.css/master/minireset.min.css">
@@ -58,41 +58,26 @@
 			</div>
 			<!-- portal footer -->
 			<div class="columns is-mobile has-text-weight-bold is-margin-50" v-bind:class="{ 'has-background-white': !portal.name.includes('lock') }" v-if="!portal.name.includes('lock')">
-				<a class="is-full" v-bind:class= "portal.name === 'garage' ? 'a-is-full' : 'a-is-half'" @click="nameToModal(portal.name,true)">
+				<a class="is-full" v-bind:class="portal.name === 'garage' ? 'a-is-full' : 'a-is-half'" @click="nameToModalFunction(portal.name,true)">
 					<div class="column column-padding">
 						<span class="tag dotstatus" v-bind:class="stateToTagVV(portal.state)"></span>{{ portal.state | translateDoorState }}
 					</div>
 				</a>
-				<a class="is-full a-is-half" v-if="!portal.name.includes('lock') && portal.name !== 'garage'" @click="nameToModal(portals[incrementItem(idx)].name,true)">
+				<a class="is-full a-is-half" v-if="!portal.name.includes('lock') && portal.name !== 'garage'" @click="nameToModalFunction(portals[incrementItem(idx)].name,true)">
 					<div class="column column-padding" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">
 						<span class="tag dotstatus" v-bind:class="stateToTagVV(portals[incrementItem(idx)].state)"></span>{{ portals[incrementItem(idx)].state | translateDoorState }}
 					</div>
 				</a>
 			</div>
-		</div>
-	
-		<b-modal :active.sync="isGarageModalActive">
-            <div class="modal-card" style="width: auto">
-				<header class="modal-card-head is-radiusless has-text-centered">
-					<p class="modal-card-title">Garagentor</p>
-				</header>
-				<section class="modal-card-body">
-					<div class="card-content has-text-centered">
-						<div class="buttons">
-							<button class="button is-primary is-fullwidth">
-								<span class="icon">
-									<i class="mdi mdi-arrow-up-down"></i>
-								</span>
-								<span>Bewegen</span>
-							</button>
-							<button class="button is-fullwidth" v-on:click="isGarageModalActive = false">Abbrechen</button>
-						</div>
-					</div>
-				</section>
-            </div>
-		</b-modal>
-	
-		<b-modal :active.sync="isGaragedoorModalActive">
+			<!-- modal -->
+			<!--<b-modal v-bind:class="nameToModalName(portal.name)">-->
+			<!--<b-modal :active.sync="nameToModalName(portal.name)">-->
+			<!--<b-modal v-bind:active.sync="isGarageModalActive">-->
+			<!--<b-modal v-bind:active.sync="nameToModalName(portal.name)">-->
+			<!--<b-modal v-model="isGarageModalActive">-->
+			<!--<b-modal v-on:active.sync="nameToModalClass(portal.name)">-->
+			<!--<b-modal v-model="nameToModalClass(portal.name)">-->
+			<b-modal v-bind:active="nameToModalClass(portal.name)">
             <div class="modal-card" style="width: auto">
 				<header class="modal-card-head is-radiusless has-text-centered">
 					<p class="modal-card-title">Garagentor</p>
@@ -125,21 +110,41 @@
 								</button>
 							</div>
 							<div class="column is-full">
-								<button class="button is-fullwidth" v-on:click="isGaragedoorModalActive = false">Abbrechen</button>	
+								<button class="button is-fullwidth" v-on:click="nameToModalFunction(portal.name,false)">Abbrechen</button>
 							</div>
 						</div>
 					</div>
 				</section>
+			</div>
+			</b-modal>
+		
+		</div><!-- end -->
+	
+		<!--<b-modal :active.sync="isGarageModalActive">
+            <div class="modal-card" style="width: auto">
+				<header class="modal-card-head is-radiusless has-text-centered">
+					<p class="modal-card-title">Garagentor</p>
+				</header>
+				<section class="modal-card-body">
+					<div class="card-content has-text-centered">
+						<div class="buttons">
+							<button class="button is-primary is-fullwidth">
+								<span class="icon">
+									<i class="mdi mdi-arrow-up-down"></i>
+								</span>
+								<span>Bewegen</span>
+							</button>
+							<button class="button is-fullwidth" v-on:click="isGarageModalActive = false">Abbrechen</button>
+						</div>
+					</div>
+				</section>
             </div>
-		</b-modal>
-		
-		
-	  
+		</b-modal>-->
+
       </div>
     </div>
   </section>  
   
-
   <footer class="footer">
     <div class="container-fluid">
       <div class="level">
@@ -182,7 +187,8 @@ var app = new Vue({
 	isHousedoorlockModalActive: false,
 	isGaragedoorModalActive: false,
 	isGaragedoorlockModalActive: false,
-	isGarageModalActive: false
+	isGarageModalActive: false,
+	isModalActive: false
   },
   mounted: function () {
     this.$nextTick(function () {
@@ -259,10 +265,16 @@ var app = new Vue({
 	capitalizeFirstLetter(value) {
 		return value.charAt(0).toUpperCase() + value.slice(1)
 	},	
-	nameToModal(prop,val){
+	nameToModalFunction(prop,val){
 		var modalName = "is" + prop.charAt(0).toUpperCase() + prop.slice(1) + "ModalActive"
 	    console.log(modalName)
 		this[modalName] = val
+	},
+	nameToModalClass(prop){
+		var modalName = "is" + prop.charAt(0).toUpperCase() + prop.slice(1) + "ModalActive"
+	    console.log(modalName)
+		this[modalName]
+		//return modalName
 	},
 	incrementItem: function(item) {return item + 1},
 	warn: function (message, event) {
@@ -272,13 +284,23 @@ var app = new Vue({
     	}
 		console.log(message)
         socket.emit("wakemac", message); //send push button status to back to server
-  	}
+  	},
+	cancel() {
+      this.$refs.modal.close("button");
+    }
   },
   created () {
 	this.getRealtimeData()
   },
-  //computed: {
-  //}
+  computed: {
+	/*nameToModalName: {
+		get: function(val) {
+			var modalName = "is" + val.charAt(0).toUpperCase() + val.slice(1) + "ModalActive"
+			console.log(modalName)
+			return this.modalName
+		},
+	},*/
+  }
 })
 </script>
 <!-- Stuff below is for demo-only 
