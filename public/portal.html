@@ -43,7 +43,7 @@
 <body>
 <div id="app">
 
-  <section class="section is-main-section">
+  <section>
     <div class="card mb-3">
       <div class="card-header">
           <span class="icon"><i class="mdi mdi-lock"></i></span>
@@ -98,7 +98,8 @@
 			  hide-footer
 			  centered
 			>
-				<div class="container">
+				<!-- Doors -->
+				<div class="container" v-if="portal.name !== 'garage'">
 					<div class="row">
 						<div class="col">
 							<b-button variant="light border font-weight-bold" block>
@@ -133,6 +134,26 @@
 						</div>
 					</div>
 				</div>
+				
+				<!-- Garage -->
+				<div class="container" v-else>
+					<div class="row">
+						<div class="col">
+							<b-button variant="light border font-weight-bold" block>
+								<span class="icon">
+									<i class="mdi mdi-arrow-up-down-bold"></i>
+								</span>
+								<span>Bewegen</span>
+							</b-button>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col">
+							<b-button variant="light border font-weight-bold" class="mt-3" block @click="$bvModal.hide(portals[idx].name)">Abbrechen</b-button>
+						</div>
+					</div>
+				</div>				
+				
 			</b-modal>
 		</div>
 		</ul><!-- end -->
@@ -202,6 +223,12 @@ var app = new Vue({
 			case "garagedoor":
 			  txt = "Garagentür";
 			  break;
+			case "garagedoorlock":
+			  txt = "Garagentür";
+			  break;
+			case "housedoorlock":
+			  txt = "Haustür";
+			  break;			  
 			case "garage":
 			  txt = "Garage";
 			  break;
@@ -245,14 +272,6 @@ var app = new Vue({
 	cancel() {
       this.$refs.modal.close("button");
     },
-	nameToModalID(prop){
-		//var modalName = "is" + prop.charAt(0).toUpperCase() + prop.slice(1) + "ModalActive"
-	    //console.log(modalName)
-		//this[modalName]
-		//return modalName
-		console.log(prop)
-		return prop
-	},
   },
   created () {
 	this.getRealtimeData()
