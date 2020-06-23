@@ -26,9 +26,8 @@
 	.socketstatus { height: 4px !important; }
 	.dotstatus { 
 		display: inline-block; 
-		height: .75em !important; 
-		width: .75em !important; 
-		margin-right: 0.25em !important; 
+		height: 1em !important; 
+		width: 1em !important;
 	}
 	.a-is-half { width:50%; }
 	.a-is-full { width:100%; }
@@ -78,24 +77,35 @@
 		</div>
 
 		<div class="list-group">
-			<div class="list-group-item list-group-item-action flex-column align-items-start" v-for="(host, idx) in hosts" :key="idx" v-bind:class="{ 'bg-light': idx % 2 == 0 }">
-				<a v-bind:href="(typeof host.mac !== 'undefined')" @click="notify(host.mac, $event)">
+			<div class="list-group-item list-group-item-action flex-column align-items-start"
+			     v-for="(host, idx) in hosts" :key="idx" 
+			     v-bind:class="{ 'bg-light': idx % 2 == 0 }">
+				 
+				<a v-if="(typeof host.mac !== 'undefined')" @click="notify(host.mac, $event)" href="#">
 					<div class="row">
 						<div class="col">
 							{{ host.name | short }}
 						</div>
 						<div class="col text-right">
-							<span class="m-0 p-0" role="alert" v-bind:class="stateToTag(host.state)">{{ host.state | space }}</span>
+							<!--<span class="m-0 p-0" role="alert" v-bind:class="stateToTag(host.state)">{{ host.state | onoff }}</span>-->
+							<span class="dotstatus m-0 p-0 rounded" v-bind:class="stateToTag(host.state)"></span>
 						</div>
 					</div>
 				</a>
+				<div v-else class="row">
+					<div class="col">
+						{{ host.name | short }}
+					</div>
+					<div class="col text-right">
+						<span class="dotstatus m-0 p-0 rounded" v-bind:class="stateToTag(host.state)"></span>
+					</div>
+				</div>
+				
 			</div>
 		</div>
 	 	  
       </div>
  
-  
-	  
     </div>
   </section>  
   
@@ -124,7 +134,7 @@ var app = new Vue({
     })
   },
   filters: {
-    space (value) {
+    onoff (value) {
       return (value ? 'on' : 'off')
     },
     short (value) {

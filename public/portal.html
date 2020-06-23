@@ -26,8 +26,8 @@
 	.socketstatus { height: 4px !important; }
 	.dotstatus { 
 		display: inline-block; 
-		height: .75em !important; 
-		width: .75em !important; 
+		height: 1em !important; 
+		width: 1em !important; 
 		margin-right: 0.25em !important; 
 	}
 	.a-is-half { width:50%; }
@@ -76,13 +76,13 @@
 				<div class="row font-weight-bold" v-if="!portal.name.includes('lock')" v-bind:class="{ 'has-background-white': !portal.name.includes('lock') }">
 					<a v-b-modal="portal.name" v-bind:class="portal.name === 'garage' ? 'a-is-full' : 'a-is-half'">
 						<div class="col">
-							<span class="dotstatus m-0 p-0" v-bind:class="stateToTagVV(portal.state)"></span>{{ portal.state | translateDoorState }}
+							<span class="dotstatus m-0 p-0 rounded" v-bind:class="stateToTagVV(portal.state)"></span>{{ portal.state | translateDoorState }}
 						</div>
 					<!-- activate if different -->
 					</a>
 					<a v-b-modal="portals[incrementItem(idx)].name" class="a-is-half" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">
 						<div class="col" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">
-							<span class="dotstatus m-0 p-0" role="alert" v-bind:class="stateToTagVV(portals[incrementItem(idx)].state)"></span>{{ portals[incrementItem(idx)].state | translateDoorState }}
+							<span class="dotstatus m-0 p-0 rounded" role="alert" v-bind:class="stateToTagVV(portals[incrementItem(idx)].state)"></span>{{ portals[incrementItem(idx)].state | translateDoorState }}
 						</div>
 					</a>
 				</div>
