@@ -44,25 +44,26 @@
 <div id="app">
 
   <section>
-    <div class="card mb-3">
+    <div class="card">
       <div class="card-header">
           <span class="icon"><i class="mdi mdi-lock"></i></span>
 		  <span class="font-weight-bold">Portal</span>
       </div>
-      <div class="card-body">
- 
-	    <div class="container-fluid">
-			<div class="row">
-				<div class="col m-0 p-0">
-					<p class="socketstatus alert m-0 p-0" v-bind:class="stateToTag(socketState)"></p>
-				</div>
+	  
+	  <div class="container-fluid">
+		<div class="row">
+			<div class="col m-0 p-0">
+				<p class="socketstatus alert rounded-0 m-0 p-0" v-bind:class="stateToTag(socketState)"></p>
 			</div>
 		</div>
-	
-		<ul class="list-group">
+	  </div>	  
+	  
+      <div class="card-body">
+
+		<div class="list-group">
 		<div v-for="(portal, idx) in portals" :key="idx">
 			<!-- portal header -->
-			<li class="list-group-item bg-light" v-if="!portal.name.includes('lock')">
+			<div class="list-group-item bg-light" v-if="!portal.name.includes('lock')" >
 				<div class="row" v-if="!portal.name.includes('lock')" v-bind:class="{ 'bg-light': !portal.name.includes('lock') }">
 					<div class="col font-weight-bold pr-0">{{ portals[idx].name | translateName }}</div>
 					<div class="col-8 text-right pl-0">
@@ -70,9 +71,9 @@
 						<div class="badge bg-white text-dark border" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">{{ portals[incrementItem(idx)].tstamp | shortdate }}</div>
 					</div>
 				</div>
-			</li>
+			</div>
 			<!-- portal footer -->
-			<li class="list-group-item" v-if="!portal.name.includes('lock')" v-bind:class="{ 'border-bottom-0': portal.name !== 'garage' }">
+			<div class="list-group-item" v-if="!portal.name.includes('lock')" v-bind:class="{ 'border-bottom-0': portal.name !== 'garage' }">
 				<div class="row font-weight-bold" v-if="!portal.name.includes('lock')" v-bind:class="{ 'has-background-white': !portal.name.includes('lock') }">
 					<a v-b-modal="portal.name" v-bind:class="portal.name === 'garage' ? 'a-is-full' : 'a-is-half'">
 						<div class="col">
@@ -86,7 +87,7 @@
 						</div>
 					</a>
 				</div>
-			</li>
+			</div>
 					
 			<!-- modal -->
 			<b-modal 
@@ -156,7 +157,7 @@
 				
 			</b-modal>
 		</div>
-		</ul><!-- end -->
+		</div><!-- end -->
 		
       </div>
     </div>

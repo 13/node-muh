@@ -45,49 +45,45 @@
   <section>
     <div class="card">
       <div class="card-header">
-        <p class="card-title">
           <span class="icon"><i class="mdi mdi-lan"></i></span>
-          WOL
-        </p>
+		  <span class="font-weight-bold">WOL</span>
       </div>
 	  
-      <div class="card-body">	  
-
-	<b-alert
-      :show="dismissCountDown"
-      variant="success"
-      @dismissed="dismissCountDown=0"
-      @dismiss-count-down="countDownChanged"
-    >
-      <p>Waking {{ notifywol }} ...</p>
-      <b-progress
-        variant="success"
-        :max="dismissSecs"
-        :value="dismissCountDown"
-        height="2px"
-      ></b-progress>
-	</b-alert>
-	  
-	    <div class="container-fluid">
-			<div class="row">
-				<div class="col m-0 p-0">
-					<p class="socketstatus alert m-0 p-0" v-bind:class="stateToTag(socketState)"></p>
-				</div>
+	  <div class="container-fluid">
+		<div class="row">
+			<div class="col m-0 p-0">
+				<p class="socketstatus alert rounded-0 m-0 p-0" v-bind:class="stateToTag(socketState)"></p>
 			</div>
 		</div>
-
+	  </div>
+	  
+      <div class="card-body">
+		<b-alert
+			:show="dismissCountDown"
+			variant="success"
+			@dismissed="dismissCountDown=0"
+			@dismiss-count-down="countDownChanged"
+		>
+			<p>{{ notifywol }}</p>
+			<b-progress
+				variant="success"
+				:max="dismissSecs"
+				:value="dismissCountDown"
+				height="2px"
+			></b-progress>
+		</b-alert>
+	  
 		<div class="list-group">
-			<div class="list-group-item list-group-item-action flex-column align-items-start"
+			<div class="list-group-item"
 			     v-for="(host, idx) in hosts" :key="idx" 
 			     v-bind:class="{ 'bg-light': idx % 2 == 0 }">
 				 
-				<a v-if="(typeof host.mac !== 'undefined')" @click="notify(host.mac, $event)" href="#">
+				<a v-if="(typeof host.mac !== 'undefined')" @click="notify(host.mac, host.name, $event)" href="#" class="text-decoration-none">
 					<div class="row">
 						<div class="col">
 							{{ host.name | short }}
 						</div>
 						<div class="col text-right">
-							<!--<span class="m-0 p-0" role="alert" v-bind:class="stateToTag(host.state)">{{ host.state | onoff }}</span>-->
 							<span class="dotstatus m-0 p-0 rounded" v-bind:class="stateToTag(host.state)"></span>
 						</div>
 					</div>
@@ -147,11 +143,11 @@ var app = new Vue({
 			this.json = json,
 			this.hosts = json.hosts;
 			this.socketState = true;
-			console.log("socket connect: " + this.socketState);
+			console.log("socket connect: " + this.socketState)
 		}),
 		socket.on('disconnect', socketState => {
 			this.socketState = false
-			console.log('socket disconnect: ' + socketState);
+			console.log('socket disconnect: ' + socketState)
 		});
 	},
 	stateToTag(value){
@@ -160,17 +156,17 @@ var app = new Vue({
 	stateToTagVV(value){
 		return (value ? 'bg-danger' : 'bg-success')
 	},
-	notify: function (message, event) {
+	notify: function (mac, hostname, event) {
 		// now we have access to the native event
 		if (event) {
 			event.preventDefault()
     	}
-		if (typeof message !== 'undefined'){ 
-			console.log("Waking " + message + " ...")
-			socket.emit("wakemac", message); //send push button status to back to server
-			app.notifywol = message;
-			//setTimeout(() => this.isHidden = false, 5000);
-			setTimeout(() => app.notifywol = null, 5001);
+		if (typeof mac !== 'undefined'){ 
+			console.log("Waking " + hostname + " " + mac + " ...")
+			socket.emit("wakemac", mac); //send push button status to back to server
+			app.notifywol = "Waking " + hostname.substr(0, hostname.indexOf('.')) + " ..."
+			//setTimeout(() => this.isHidden = false, 5000)
+			setTimeout(() => app.notifywol = null, this.dismissSecs*1000+200)
 		}
 		this.dismissCountDown = this.dismissSecs
 		//app.notifywol = null;
