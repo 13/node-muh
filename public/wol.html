@@ -24,18 +24,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
   <style type="text/css">
 	.socketstatus { height: 4px !important; }
-	.dotstatus { 
-		display: inline-block; 
-		height: 1em !important; 
-		width: 1em !important;
-	}
-	.a-is-half { width:50%; }
-	.a-is-full { width:100%; }
-	.column-padding { 
-		padding-left: .27rem; 
-		padding-right:.27rem;
-	}
-	.modal-center { margin: 0 auto; }
   </style>
 
 </head>
@@ -77,23 +65,27 @@
 			<div class="list-group-item font-weight-bold"
 			     v-for="(host, idx) in hosts" :key="idx" 
 			     v-bind:class="{ 'bg-light': idx % 2 == 0 }">
-				 
 				<a v-if="(typeof host.mac !== 'undefined')" @click="notify(host.mac, host.name, $event)" href="#" class="text-decoration-none">
 					<div class="row">
 						<div class="col">
 							{{ host.name | short }}
 						</div>
 						<div class="col text-right">
-							<span class="dotstatus m-0 p-0 rounded" v-bind:class="stateToTag(host.state)"></span>
+							<span class="h6 text-right" v-bind:class="stateToTag(host.state)">
+								<b-icon icon="square-fill"></b-icon>
+							</span>
 						</div>
 					</div>
 				</a>
+				<!-- else no link -->
 				<div v-else class="row">
 					<div class="col">
 						{{ host.name | short }}
 					</div>
 					<div class="col text-right">
-						<span class="dotstatus m-0 p-0 rounded" v-bind:class="stateToTag(host.state)"></span>
+						<span class="h6 text-right" v-bind:class="stateToTag(host.state)">
+							<b-icon icon="square-fill"></b-icon>
+						</span>
 					</div>
 				</div>
 				
@@ -151,10 +143,10 @@ var app = new Vue({
 		});
 	},
 	stateToTag(value){
-		return (value ? 'bg-success' : 'bg-danger')
+		return (value ? 'text-success' : 'text-danger')
 	},
 	stateToTagVV(value){
-		return (value ? 'bg-danger' : 'bg-success')
+		return (value ? 'text-danger' : 'text-success')
 	},
 	notify: function (mac, hostname, event) {
 		// now we have access to the native event
