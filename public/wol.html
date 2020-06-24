@@ -24,19 +24,18 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
   <style type="text/css">
 	.socketstatus { height: 4px !important; }
+	.pointer-disabled { pointer-events: none !important; }
   </style>
 
 </head>
 <body>
 <div id="app">
-
   <section>
     <div class="card">
       <div class="card-header">
           <span class="icon"><i class="mdi mdi-lan"></i></span>
 		  <span class="font-weight-bold">WOL</span>
       </div>
-	  
 	  <div class="container-fluid">
 		<div class="row">
 			<div class="col m-0 p-0">
@@ -44,41 +43,27 @@
 			</div>
 		</div>
 	  </div>
-	  
       <div class="card-body">
 		<b-alert
 			:show="dismissCountDown"
-			variant="success"
+			variant="warning"
 			@dismissed="dismissCountDown=0"
 			@dismiss-count-down="countDownChanged"
 		>
-			<p>{{ notifywol }}</p>
+			<p>Waking {{ notifywol }} in {{ dismissCountDown }} ...</p>
 			<b-progress
-				variant="success"
+				variant="warning"
 				:max="dismissSecs"
 				:value="dismissCountDown"
 				height="2px"
 			></b-progress>
 		</b-alert>
-	  
-		<div class="list-group">
-			<div class="list-group-item font-weight-bold"
-			     v-for="(host, idx) in hosts" :key="idx" 
-			     v-bind:class="{ 'bg-light': idx % 2 == 0 }">
-				<a v-if="(typeof host.mac !== 'undefined')" @click="notify(host.mac, host.name, $event)" href="#" class="text-decoration-none">
-					<div class="row">
-						<div class="col">
-							{{ host.name | short }}
-						</div>
-						<div class="col text-right">
-							<span class="h6 text-right" v-bind:class="stateToTag(host.state)">
-								<b-icon icon="square-fill"></b-icon>
-							</span>
-						</div>
-					</div>
-				</a>
-				<!-- else no link -->
-				<div v-else class="row">
+		<div class="list-group font-weight-bold">
+			<a v-for="(host, idx) in hosts" @click="notify(host.mac, host.name, $event)"
+				href="#"
+				class="list-group-item list-group-item-action"
+				v-bind:class="[stateToTagListBg(host.state),{'pointer-disabled' : (typeof host.mac) === 'undefined'}]">
+				<div class="row">
 					<div class="col">
 						{{ host.name | short }}
 					</div>
@@ -88,15 +73,11 @@
 						</span>
 					</div>
 				</div>
-				
-			</div>
+			</a>			
 		</div>
-	 	  
       </div>
- 
     </div>
   </section>  
-  
 </div>  
 <script>
 "use strict"
@@ -112,7 +93,7 @@ var app = new Vue({
     json: null,
     hosts: [],
 	notifywol: null,
-    dismissSecs: 5,
+    dismissSecs: 10,
     dismissCountDown: 0,
     showDismissibleAlert: false
   },
@@ -145,6 +126,10 @@ var app = new Vue({
 	stateToTagBg(value){
 		return (value ? 'bg-success' : 'bg-danger')
 	},
+	stateToTagListBg(value){
+		console.log("stateToTagListBg: " + value);
+		return (value ? 'list-group-item-success' : 'list-group-item-danger')
+	},
 	stateToTag(value){
 		return (value ? 'text-success' : 'text-danger')
 	},
@@ -159,7 +144,8 @@ var app = new Vue({
 		if (typeof mac !== 'undefined'){ 
 			console.log("Waking " + hostname + " " + mac + " ...")
 			socket.emit("wakemac", mac); //send push button status to back to server
-			app.notifywol = "Waking " + hostname.substr(0, hostname.indexOf('.')) + " ..."
+			//app.notifywol = "Waking " + hostname.substr(0, hostname.indexOf('.')) + " in " + this.dismissCountDown + " ..."
+			app.notifywol = hostname.substr(0, hostname.indexOf('.'))
 			//setTimeout(() => this.isHidden = false, 5000)
 			setTimeout(() => app.notifywol = null, this.dismissSecs*1000+200)
 		}
