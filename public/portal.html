@@ -37,6 +37,14 @@
 		padding-right:.27rem;
 	}
 	.modal-center { margin: 0 auto; }
+	.rounded-t-0 {
+        border-top-left-radius: 0px !important;
+        border-top-right-radius: 0px !important;
+	}
+	.rounded-b-0 {
+        border-bottom-right-radius: 0px !important;
+        border-bottom-left-radius: 0px !important;
+	}
   </style>
 
 </head>
@@ -60,21 +68,20 @@
 	  
       <div class="card-body">
 
-		<div class="list-group">
-		<div v-for="(portal, idx) in portals" :key="idx">
+		<div class="list-group" v-for="(portal, idx) in portals" :key="idx">
 			<!-- portal header -->
-			<div class="list-group-item bg-light" v-if="!portal.name.includes('lock')" >
-				<div class="row" v-if="!portal.name.includes('lock')" v-bind:class="{ 'bg-light': !portal.name.includes('lock') }">
+			<div v-if="!portal.name.includes('lock')" class="list-group-item bg-light" v-bind:class="{ 'rounded-t-0': idx !== 0 }">
+				<div v-if="!portal.name.includes('lock')" v-bind:class="{ 'bg-light': !portal.name.includes('lock') }" class="row">
 					<div class="col font-weight-bold pr-0">{{ portals[idx].name | translateName }}</div>
 					<div class="col-8 text-right pl-0">
-						<div class="badge bg-white text-dark border" v-if="!portal.name.includes('lock')">{{ portal.tstamp | shortdate }}</div>
-						<div class="badge bg-white text-dark border" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">{{ portals[incrementItem(idx)].tstamp | shortdate }}</div>
+						<div v-if="!portal.name.includes('lock')" class="badge bg-white text-dark border" >{{ portal.tstamp | shortdate }}</div>
+						<div v-if="!portal.name.includes('lock') && portal.name !== 'garage'" class="badge bg-white text-dark border">{{ portals[incrementItem(idx)].tstamp | shortdate }}</div>
 					</div>
 				</div>
 			</div>
 			<!-- portal footer -->
-			<div class="list-group-item" v-if="!portal.name.includes('lock')" v-bind:class="{ 'border-bottom-0': portal.name !== 'garage' }">
-				<div class="row font-weight-bold" v-if="!portal.name.includes('lock')" v-bind:class="{ 'has-background-white': !portal.name.includes('lock') }">
+			<div v-if="!portal.name.includes('lock')" class="list-group-item" v-bind:class="{ 'border-bottom-0': portal.name !== 'garage', 'rounded-b-0': !isLast(idx) }">
+				<div v-if="!portal.name.includes('lock')" v-bind:class="{ 'bg-white': !portal.name.includes('lock') }" class="row font-weight-bold">
 					<a v-b-modal="portal.name" v-bind:class="portal.name === 'garage' ? 'a-is-full' : 'a-is-half'">
 						<div class="col">
 							<span class="dotstatus m-0 p-0 rounded" v-bind:class="stateToTagVV(portal.state)"></span>{{ portal.state | translateDoorState }}
@@ -156,7 +163,6 @@
 				</div>				
 				
 			</b-modal>
-		</div>
 		</div><!-- end -->
 		
       </div>
@@ -273,6 +279,9 @@ var app = new Vue({
 	cancel() {
       this.$refs.modal.close("button");
     },
+	isLast (index) {      
+		return this.portals.length === index + 1
+    }
   },
   created () {
 	this.getRealtimeData()
