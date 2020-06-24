@@ -49,7 +49,7 @@
 	  <div class="container-fluid">
 		<div class="row">
 			<div class="col m-0 p-0">
-				<p class="socketstatus alert rounded-0 m-0 p-0" v-bind:class="stateToTag(socketState)"></p>
+				<p class="socketstatus alert rounded-0 m-0 p-0" v-bind:class="stateToTagBg(socketState)"></p>
 			</div>
 		</div>
 	  </div>	  
@@ -256,6 +256,9 @@ var app = new Vue({
 			this.socketState = false
 			console.log('socket disconnect: ' + socketState);
 		});
+	},
+	stateToTagBg(value){
+		return (value ? 'bg-success' : 'bg-danger')
 	},
 	stateToTag(value){
 		return (value ? 'text-success' : 'text-danger')
