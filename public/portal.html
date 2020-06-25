@@ -24,6 +24,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
   <style type="text/css">
 	.socketstatus { height: 4px !important; }
+	.pointer-disabled { pointer-events: none !important; }
 	.modal-center { margin: 0 auto; }
 	.rounded-top-0 {
         border-top-left-radius: 0px !important;
@@ -147,13 +148,23 @@
 				
 				<!-- Garage -->
 				<div class="container" v-else>
+					<!--<div class="row m-0 pb-3">
+						<div class="col text-center btn-outline-success rounded">-->
+					<div class="row m-0 pb-3">
+						<div class="col font-weight-bold btn list-group-item-success pointer-disabled">
+							<span class="h6" v-bind:class="stateToTagVV(portal.state)">
+								<b-icon icon="square-fill"></b-icon>
+							</span>
+							<span>{{ portal.state | translateDoorState }}</span>							
+						</div>
+					</div>
 					<div class="row">
 						<div class="col">
-							<b-button variant="font-weight-bold btn-success" block>
+							<b-button variant="font-weight-bold btn-light border" block>
 								<span class="icon">
 									<i class="mdi mdi-arrow-up-down-bold"></i>
 								</span>
-								<span>Bewegen</span>
+								<span class="font-weight-bold">Bewegen</span>
 							</b-button>
 						</div>
 					</div>
