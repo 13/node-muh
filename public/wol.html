@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Portal</title>
+  <title>WOL</title>
   <!-- Load required Bootstrap and BootstrapVue CSS -->
   <link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
   <link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
@@ -145,9 +145,9 @@ var app = new Vue({
 			console.log("Waking " + hostname + " " + mac + " ...")
 			socket.emit("wakemac", mac); //send push button status to back to server
 			//app.notifywol = "Waking " + hostname.substr(0, hostname.indexOf('.')) + " in " + this.dismissCountDown + " ..."
-			app.notifywol = hostname.substr(0, hostname.indexOf('.'))
+			this.notifywol = hostname.substr(0, hostname.indexOf('.'))
 			//setTimeout(() => this.isHidden = false, 5000)
-			setTimeout(() => app.notifywol = null, this.dismissSecs*1000+200)
+			//setTimeout(() => this.notifywol = null, this.dismissSecs*1000+1000)
 		}
 		this.dismissCountDown = this.dismissSecs
 		//app.notifywol = null;

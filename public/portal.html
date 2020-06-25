@@ -25,11 +25,11 @@
   <style type="text/css">
 	.socketstatus { height: 4px !important; }
 	.modal-center { margin: 0 auto; }
-	.rounded-t-0 {
+	.rounded-top-0 {
         border-top-left-radius: 0px !important;
         border-top-right-radius: 0px !important;
 	}
-	.rounded-b-0 {
+	.rounded-bottom-0 {
         border-bottom-right-radius: 0px !important;
         border-bottom-left-radius: 0px !important;
 	}
@@ -58,36 +58,42 @@
 
 		<div class="list-group" v-for="(portal, idx) in portals" :key="idx">
 			<!-- portal header -->
-			<div v-if="!portal.name.includes('lock')" class="list-group-item bg-light" v-bind:class="{ 'rounded-t-0': idx !== 0 }">
-				<div v-if="!portal.name.includes('lock')" v-bind:class="{ 'bg-light': !portal.name.includes('lock') }" class="row">
-					<div class="col font-weight-bold pr-0">{{ portals[idx].name | translateName }}</div>
-					<div class="col-8 text-right pl-0">
-						<div v-if="!portal.name.includes('lock')" class="badge bg-white text-dark border" >{{ portal.tstamp | shortdate }}</div>
-						<div v-if="!portal.name.includes('lock') && portal.name !== 'garage'" class="badge bg-white text-dark border">{{ portals[incrementItem(idx)].tstamp | shortdate }}</div>
+			<a href="#" class="list-group-item list-group-item-action text-dark disabled"
+			   v-if="!portal.name.includes('lock')" v-bind:class="{ 'border-top-0 rounded-top-0': idx !== 0 }">
+				<div v-if="!portal.name.includes('lock')" class="container-fluid p-0">
+					<div class="row">
+						<div class="col font-weight-bold pr-0">{{ portals[idx].name | translateName }}</div>
+						<div class="col-8 text-right pl-0">
+							<div v-if="!portal.name.includes('lock')" class="badge bg-white text-dark border" >{{ portal.tstamp | shortdate }}</div>
+							<div v-if="!portal.name.includes('lock') && portal.name !== 'garage'" class="badge bg-white text-dark border">{{ portals[incrementItem(idx)].tstamp | shortdate }}</div>
+						</div>
 					</div>
 				</div>
-			</div>
+			</a>
 			<!-- portal footer -->
-			<div v-if="!portal.name.includes('lock')" class="list-group-item" v-bind:class="{ 'border-bottom-0': portal.name !== 'garage', 'rounded-b-0': !isLast(idx) }">
-				<div v-if="!portal.name.includes('lock')" v-bind:class="{ 'bg-white': !portal.name.includes('lock') }" class="row font-weight-bold">
-					<a class="w-100" v-b-modal="portal.name"> <!-- v-bind:class="portal.name === 'garage' ? 'a-is-full' : 'a-is-half'">-->
-					<div class="row">
-						<div class="col">
+			<div class="container-fluid" v-if="!portal.name.includes('lock')">
+				<div v-if="!portal.name.includes('lock')" class="row font-weight-bold">
+					<a v-b-modal="portal.name"
+					   class="list-group-item list-group-item-action pr-0 border-top-0"
+					   v-if="!portal.name.includes('lock')"
+					   v-bind:class="[isLastRounded(idx), stateToTagListBgVV(portal.state), halfOrFull(portal.name)]">
+						<div class="col p-0">
 							<span class="h6" v-bind:class="stateToTagVV(portal.state)">
 								<b-icon icon="square-fill"></b-icon>
 							</span>
 							<span>{{ portal.state | translateDoorState }}</span>
 						</div>
-					<!-- activate if different -->
-					<!--</a>
-					<a v-b-modal="portals[incrementItem(idx)].name" class="a-is-half" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">-->
-						<div v-if="!portal.name.includes('lock') && portal.name !== 'garage'" class="col">
+					</a>
+					<a v-b-modal="portals[incrementItem(idx)].name"
+					   v-if="!portal.name.includes('lock') && portal.name !== 'garage'"
+					   class="list-group-item list-group-item-action pr-0 border-top-0 border-left-0"
+					   v-bind:class="[stateToTagListBgVV(portals[incrementItem(idx)].state), halfOrFull(portals[incrementItem(idx)].name)]">
+						<div class="col p-0" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">
 							<span class="h6" v-bind:class="stateToTagVV(portals[incrementItem(idx)].state)">
 								<b-icon icon="square-fill"></b-icon>
 							</span>
 							<span>{{ portals[incrementItem(idx)].state | translateDoorLockState }}</span>							
 						</div>
-					</div>
 					</a>
 				</div>
 			</div>
@@ -257,6 +263,10 @@ var app = new Vue({
 			console.log('socket disconnect: ' + socketState);
 		});
 	},
+	stateToTagListBgVV(value){
+		console.log("stateToTagListBg: " + value);
+		return (!value ? 'list-group-item-success' : 'list-group-item-danger')
+	},
 	stateToTagBg(value){
 		return (value ? 'bg-success' : 'bg-danger')
 	},
@@ -268,7 +278,19 @@ var app = new Vue({
 	},
 	capitalizeFirstLetter(value) {
 		return value.charAt(0).toUpperCase() + value.slice(1)
-	},	
+	},
+	halfOrFull(value){
+		console.log("halfOrFull: " + value);
+	    var ret;
+		switch (value) {	  
+			case "garage":
+			  ret = "w-100";
+			  break;
+			default:
+			  ret = "w-50";
+		}
+		return ret;
+	},
 	incrementItem: function(item) {return item + 1},
 	warn: function (message, event) {
 		// now we have access to the native event
@@ -283,6 +305,9 @@ var app = new Vue({
     },
 	isLast (index) {      
 		return this.portals.length === index + 1
+    },
+	isLastRounded (index) {      
+		return (this.isLast(index) ? 'rounded-bottom' : 'rounded-bottom-0')
     }
   },
   created () {
