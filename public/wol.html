@@ -50,12 +50,12 @@
 			@dismissed="dismissCountDown=0"
 			@dismiss-count-down="countDownChanged"
 		>
-			<p>Waking {{ notifywol }} in {{ dismissCountDown }} ...</p>
+			<p class="h6 text-center p-0 font-weight-bold">Waking {{ notifywol }} in {{ dismissCountDown }} ...</p>
 			<b-progress
 				variant="warning"
 				:max="dismissSecs"
 				:value="dismissCountDown"
-				height="2px"
+				height="4px"
 			></b-progress>
 		</b-alert>
 		<div class="list-group font-weight-bold">
@@ -93,7 +93,7 @@ var app = new Vue({
     json: null,
     hosts: [],
 	notifywol: null,
-    dismissSecs: 10,
+    dismissSecs: 18,
     dismissCountDown: 0,
     showDismissibleAlert: false
   },

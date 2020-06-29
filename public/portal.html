@@ -49,8 +49,10 @@
 
 </head>
 <body>
+
 <div id="app">
-  <section>
+
+  <main>
     <div class="card">
       <div class="card-header">
           <span class="icon"><i class="mdi mdi-lock"></i></span>
@@ -69,7 +71,7 @@
 
 		<div class="list-group" v-for="(portal, idx) in portals" :key="idx">
 			<!-- portal header -->
-			<a href="#" class="list-group-item list-group-item-action text-dark disabled"
+			<a href="#" class="list-group-item list-group-item-action text-dark disabled bg-light"
 			   v-if="!portal.name.includes('lock')" v-bind:class="{ 'border-top-0 rounded-top-0': idx !== 0 }">
 				<div v-if="!portal.name.includes('lock')" class="container-fluid p-0">
 					<div class="row">
@@ -234,8 +236,8 @@
 		
       </div>
     </div>
-  </section>  
-  
+  </main>  
+
 </div>
 <script>
 "use strict"
@@ -387,7 +389,7 @@ var app = new Vue({
 			//app.notifywol = "Waking " + hostname.substr(0, hostname.indexOf('.')) + " in " + this.dismissCountDown + " ..."
 			//this.notifymv = hostname.substr(0, hostname.indexOf('.'))
 			this.dismissSecs = secs
-			this.notifymv = action + " "
+			this.notifymv = "... " + action + " "
 			//setTimeout(() => this.isHidden = false, 5000)
 			//setTimeout(() => this.notifywol = null, this.dismissSecs*1000+1000)
 		//}
