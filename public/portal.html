@@ -22,6 +22,7 @@
   <script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue-icons.min.js"></script>
   <!-- include socket.io client side script -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+  
   <style type="text/css">
 	.socketstatus { height: 4px !important; }
 	.pointer-disabled { pointer-events: none !important; }
@@ -45,14 +46,54 @@
 	.border-trans {
 		border: 1px solid rgba(0,0,0,.125);
 	}
+	
+	/* dashboard */
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }	  
   </style>
 
 </head>
 <body>
-
 <div id="app">
-
-  <main>
+	<b-navbar toggleable="lg" class="font-weight-bold text-dark bg-light navbar sticky-top flex-md-nowrap d-md-none">
+		<b-navbar-brand href="/">muh</b-navbar-brand>
+		<b-navbar-toggle target="nav-collapse"></b-navbar-toggle>	
+	</b-navbar>
+<div class="container-fluid">
+  <div class="row">
+  
+    <b-navbar toggleable="lg" class="col font-weight-bold text-dark bg-light d-inline-block align-top pb-0">
+		<b-collapse id="nav-collapse" is-nav>
+			<b-navbar-nav class="nav flex-column w-100">
+				<b-nav-item href="dashboard">
+					<span class="icon"><i class="mdi mdi-home"></i></span>
+					Dashboard
+				</b-nav-item>
+				<b-nav-item href="portal">
+					<span class="icon"><i class="mdi mdi-lock"></i></span>
+					Portal
+				</b-nav-item>
+				<b-nav-item href="wol">
+					<span class="icon"><i class="mdi mdi-lan"></i></span>
+					WOL
+				</b-nav-item>
+			</b-navbar-nav>
+		</b-collapse>
+	</b-navbar>
+  
+  <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
     <div class="card">
       <div class="card-header">
           <span class="icon"><i class="mdi mdi-lock"></i></span>
@@ -136,7 +177,8 @@
 						  variant="warning"
 						  :max="dismissSecs"
 						  :value="dismissCountDown"
-						  height="2px"
+						  height="4px"
+						  animated
 						></b-progress>-->
 					</b-alert>
 					<div class="row m-0 pb-3">
@@ -155,7 +197,7 @@
 					</div>
 					<div class="row">
 						<div class="col">
-							<b-button variant="font-weight-bold border btn-light" block @click="notifyMvmnt(portals[idx].name, 'Öffnen', 1.5, $event)">
+							<b-button variant="font-weight-bold border btn-light" block @click="notifyMvmnt(portals[idx].name, 'Öffnen', 2, $event)">
 								<span class="icon">
 									<i class="mdi mdi-door-open"></i>
 								</span>
@@ -165,7 +207,7 @@
 					</div>
 					<div class="row">
 						<div class="col">
-							<b-button variant="font-weight-bold border btn-light" class="mt-3" block @click="notifyMvmnt(portals[idx].name, 'Verriegeln', 1.5, $event)">
+							<b-button variant="font-weight-bold border btn-light" class="mt-3" block @click="notifyMvmnt(portals[idx].name, 'Verriegeln', 2, $event)">
 								<span class="icon">
 									<i class="mdi mdi-lock"></i>
 								</span>
@@ -173,7 +215,7 @@
 							</b-button>
 						</div>
 						<div class="col">
-							<b-button variant="font-weight-bold border btn-light" class="mt-3" block @click="notifyMvmnt(portals[idx].name, 'Entriegeln', 1.5, $event)">
+							<b-button variant="font-weight-bold border btn-light" class="mt-3" block @click="notifyMvmnt(portals[idx].name, 'Entriegeln', 2, $event)">
 								<span class="icon">
 									<i class="mdi mdi-lock-open-variant"></i>
 								</span>
@@ -202,7 +244,8 @@
 						  variant="warning"
 						  :max="dismissSecs"
 						  :value="dismissCountDown"
-						  height="2px"
+						  height="4px"
+						  animated
 						></b-progress>-->
 					</b-alert>
 					<div class="row m-0 pb-3">
@@ -215,7 +258,7 @@
 					</div>
 					<div class="row">
 						<div class="col">
-							<b-button variant="font-weight-bold btn-light border" block @click="notifyMvmnt(portals[idx].name, 'Bewegen', 1.5, $event)">
+							<b-button variant="font-weight-bold btn-light border" block @click="notifyMvmnt(portals[idx].name, 'Bewegen', 2, $event)">
 								<span class="icon">
 									<i class="mdi mdi-arrow-up-down-bold"></i>
 								</span>
@@ -236,9 +279,12 @@
 		
       </div>
     </div>
-  </main>  
+  </main>
 
+  </div>
 </div>
+
+</div><!-- app -->
 <script>
 "use strict"
 
@@ -333,7 +379,7 @@ var app = new Vue({
 		});
 	},
 	stateToTagListBgVV(value){
-		console.log("stateToTagListBg: " + value);
+		//console.log("stateToTagListBg: " + value);
 		return (!value ? 'list-group-item-success' : 'list-group-item-danger')
 	},
 	stateToTagBg(value){
@@ -349,7 +395,7 @@ var app = new Vue({
 		return value.charAt(0).toUpperCase() + value.slice(1)
 	},
 	halfOrFull(value){
-		console.log("halfOrFull: " + value);
+		//console.log("halfOrFull: " + value);
 	    var ret;
 		switch (value) {	  
 			case "garage":
@@ -366,8 +412,8 @@ var app = new Vue({
 		if (event) {
 			event.preventDefault()
     	}
-		console.log(message)
-        socket.emit("wakemac", message); //send push button status to back to server
+		console.log("Waking " + message)
+        socket.emit("wakemac", message) //send push button status to back to server
   	},
 	cancel() {
       this.$refs.modal.close("button");
