@@ -1,168 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>WOL</title>
-  <!-- Load required Bootstrap and BootstrapVue CSS -->
-  <link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
-  <link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
-  <link rel="stylesheet" href="https://cdn.materialdesignicons.com/5.3.45/css/materialdesignicons.min.css">
-  <!-- Load polyfills to support older browsers -->
-  <script src="//polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver" crossorigin="anonymous"></script>
-  <!-- Load Vue followed by BootstrapVue -->
-  <!-- dev mode -->
-  <script src="//unpkg.com/vue@latest/dist/vue.js"></script>
-  <script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
-  <!-- production mode 
-  <script src="//unpkg.com/vue@latest/dist/vue.min.js"></script>
-  <script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>-->
-  <!-- Load the following for BootstrapVueIcons support -->
-  <script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue-icons.min.js"></script>
-  <!-- include socket.io client side script -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
-  <style type="text/css">
-	.socketstatus { height: 4px !important; }
-	.pointer-disabled { pointer-events: none !important; }
-  </style>
-
-</head>
-<body>
-<div id="app">
-  <section>
-    <div class="card">
-      <div class="card-header">
-          <span class="icon"><i class="mdi mdi-lan"></i></span>
-		  <span class="font-weight-bold">WOL</span>
-      </div>
-	  <div class="container-fluid">
-		<div class="row">
-			<div class="col m-0 p-0">
-				<p class="socketstatus alert rounded-0 m-0 p-0" v-bind:class="stateToTagBg(socketState)"></p>
-			</div>
-		</div>
-	  </div>
-      <div class="card-body">
-		<b-alert
-			:show="dismissCountDown"
-			variant="warning"
-			@dismissed="dismissCountDown=0"
-			@dismiss-count-down="countDownChanged"
-		>
-			<p class="h6 text-center p-0 font-weight-bold">Waking {{ notifywol }} in {{ dismissCountDown }} ...</p>
-			<b-progress
-				variant="warning"
-				:max="dismissSecs"
-				:value="dismissCountDown"
-				height="4px"
-				animated
-			></b-progress>
-		</b-alert>
-		<div class="list-group font-weight-bold">
-			<a v-for="(host, idx) in hosts" @click="notify(host.mac, host.name, $event)"
-				href="#"
-				class="list-group-item list-group-item-action"
-				v-bind:class="[stateToTagListBg(host.state),{'pointer-disabled' : (typeof host.mac) === 'undefined'}]">
-				<div class="row">
-					<div class="col">
-						{{ host.name | short }}
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>WOL</title>
+		<!-- Load required Bootstrap and BootstrapVue CSS -->
+		<link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+		<link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
+		<link rel="stylesheet" href="https://cdn.materialdesignicons.com/5.3.45/css/materialdesignicons.min.css">
+		<!-- Load polyfills to support older browsers -->
+		<script src="//polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver" crossorigin="anonymous"></script>
+		<!-- Load Vue followed by BootstrapVue -->
+		<!-- dev mode -->
+		<script src="//unpkg.com/vue@latest/dist/vue.js"></script>
+		<script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
+		<!-- production mode 
+			<script src="//unpkg.com/vue@latest/dist/vue.min.js"></script>
+		<script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>-->
+		<!-- Load the following for BootstrapVueIcons support -->
+		<script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue-icons.min.js"></script>
+		<!-- include socket.io client side script -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+		<style type="text/css">
+			.socketstatus { height: 4px !important; }
+			.pointer-disabled { pointer-events: none !important; }
+		</style>
+		
+	</head>
+	<body>
+		<div id="app">
+			<section>
+				<div class="card">
+					<div class="card-header">
+						<span class="icon"><i class="mdi mdi-lan"></i></span>
+						<span class="font-weight-bold">WOL</span>
 					</div>
-					<div class="col text-right">
-						<span class="h6 text-right" v-bind:class="stateToTag(host.state)">
-							<b-icon icon="square-fill"></b-icon>
-						</span>
+					<div class="container-fluid">
+						<div class="row">
+							<div class="col m-0 p-0">
+								<p class="socketstatus alert rounded-0 m-0 p-0" v-bind:class="stateToTagBg(socketState)"></p>
+							</div>
+						</div>
+					</div>
+					<div class="card-body">
+						<b-alert
+						:show="dismissCountDown"
+						variant="warning"
+						@dismissed="dismissCountDown=0"
+						@dismiss-count-down="countDownChanged"
+						>
+							<p class="h6 text-center p-0 font-weight-bold">Waking {{ notifywol }} in {{ dismissCountDown }} ...</p>
+							<b-progress
+							variant="warning"
+							:max="dismissSecs"
+							:value="dismissCountDown"
+							height="4px"
+							animated
+							></b-progress>
+						</b-alert>
+						<div class="list-group font-weight-bold">
+							<a v-for="(host, idx) in hosts" @click="notify(host.mac, host.name, $event)"
+							href="#"
+							class="list-group-item list-group-item-action"
+							v-bind:class="[stateToTagListBg(host.state),{'pointer-disabled' : (typeof host.mac) === 'undefined'}]">
+								<div class="row">
+									<div class="col">
+										{{ host.name | short }}
+									</div>
+									<div class="col text-right">
+										<span class="h6 text-right" v-bind:class="stateToTag(host.state)">
+											<b-icon icon="square-fill"></b-icon>
+										</span>
+									</div>
+								</div>
+							</a>			
+						</div>
 					</div>
 				</div>
-			</a>			
-		</div>
-      </div>
-    </div>
-  </section>  
-</div>  
-<script>
-"use strict"
-
-var socket = io('/wol'); //load socket.io-client and connect to the host that serves the page
-
-// Vue
-var app = new Vue({
-  el: '#app',
-  data: {
-    socketState: false,
-    isHidden: false,
-    json: null,
-    hosts: [],
-	notifywol: null,
-    dismissSecs: 18,
-    dismissCountDown: 0,
-    showDismissibleAlert: false
-  },
-  mounted: function () {
-    this.$nextTick(function () {
-	// ...
-    })
-  },
-  filters: {
-    onoff (value) {
-      return (value ? 'on' : 'off')
-    },
-    short (value) {
-      return value.substr(0, value.indexOf('.'))
-    }
-  },
-  methods: {
-	getRealtimeData() {
-		socket.on('wol', json => { //get button status from client
-			this.json = json,
-			this.hosts = json.hosts;
-			this.socketState = true;
-			console.log("socket connect: " + this.socketState)
-		}),
-		socket.on('disconnect', socketState => {
-			this.socketState = false
-			console.log('socket disconnect: ' + socketState)
-		});
-	},
-	stateToTagBg(value){
-		return (value ? 'bg-success' : 'bg-danger')
-	},
-	stateToTagListBg(value){
-		console.log("stateToTagListBg: " + value);
-		return (value ? 'list-group-item-success' : 'list-group-item-danger')
-	},
-	stateToTag(value){
-		return (value ? 'text-success' : 'text-danger')
-	},
-	stateToTagVV(value){
-		return (value ? 'text-danger' : 'text-success')
-	},
-	notify: function (mac, hostname, event) {
-		// now we have access to the native event
-		if (event) {
-			event.preventDefault()
-    	}
-		if (typeof mac !== 'undefined'){ 
-			console.log("Waking " + hostname + " " + mac + " ...")
-			socket.emit("wakemac", mac); //send push button status to back to server
-			//app.notifywol = "Waking " + hostname.substr(0, hostname.indexOf('.')) + " in " + this.dismissCountDown + " ..."
-			this.notifywol = hostname.substr(0, hostname.indexOf('.'))
-			//setTimeout(() => this.isHidden = false, 5000)
-			//setTimeout(() => this.notifywol = null, this.dismissSecs*1000+1000)
-		}
-		this.dismissCountDown = this.dismissSecs
-		//app.notifywol = null;
-  	},
-      countDownChanged(dismissCountDown) {
-        this.dismissCountDown = dismissCountDown
-      }
-  },
-  created () {
-	this.getRealtimeData()
-  },
-  //computed: {
-  //}
-})
-</script>
-</body>
+			</section>  
+		</div>  
+		<script>
+			"use strict"
+			
+			var socket = io('/wol'); //load socket.io-client and connect to the host that serves the page
+			
+			// Vue
+			var app = new Vue({
+				el: '#app',
+				data: {
+					socketState: false,
+					isHidden: false,
+					json: null,
+					hosts: [],
+					notifywol: null,
+					dismissSecs: 18,
+					dismissCountDown: 0,
+					showDismissibleAlert: false
+				},
+				mounted: function () {
+					this.$nextTick(function () {
+						// ...
+					})
+				},
+				filters: {
+					onoff (value) {
+						return (value ? 'on' : 'off')
+					},
+					short (value) {
+						return value.substr(0, value.indexOf('.'))
+					}
+				},
+				methods: {
+					getRealtimeData() {
+						socket.on('wol', json => { //get button status from client
+							this.json = json,
+							this.hosts = json.hosts;
+							this.socketState = true;
+							console.log("socket connect: " + this.socketState)
+						}),
+						socket.on('disconnect', socketState => {
+							this.socketState = false
+							console.log('socket disconnect: ' + socketState)
+						});
+					},
+					stateToTagBg(value){
+						return (value ? 'bg-success' : 'bg-danger')
+					},
+					stateToTagListBg(value){
+						console.log("stateToTagListBg: " + value);
+						return (value ? 'list-group-item-success' : 'list-group-item-danger')
+					},
+					stateToTag(value){
+						return (value ? 'text-success' : 'text-danger')
+					},
+					stateToTagVV(value){
+						return (value ? 'text-danger' : 'text-success')
+					},
+					notify: function (mac, hostname, event) {
+						// now we have access to the native event
+						if (event) {
+							event.preventDefault()
+						}
+						if (typeof mac !== 'undefined'){ 
+							console.log("Waking " + hostname + " " + mac + " ...")
+							socket.emit("wakemac", mac); //send push button status to back to server
+							//app.notifywol = "Waking " + hostname.substr(0, hostname.indexOf('.')) + " in " + this.dismissCountDown + " ..."
+							this.notifywol = hostname.substr(0, hostname.indexOf('.'))
+							//setTimeout(() => this.isHidden = false, 5000)
+							//setTimeout(() => this.notifywol = null, this.dismissSecs*1000+1000)
+						}
+						this.dismissCountDown = this.dismissSecs
+						//app.notifywol = null;
+					},
+					countDownChanged(dismissCountDown) {
+						this.dismissCountDown = dismissCountDown
+					}
+				},
+				created () {
+					this.getRealtimeData()
+				},
+				//computed: {
+				//}
+			})
+		</script>
+	</body>
 </html>
