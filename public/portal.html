@@ -46,22 +46,27 @@
 			.border-trans {
 				border: 1px solid rgba(0,0,0,.125);
 			}
-			
-			/* dashboard */
-			.bd-placeholder-img {
-				font-size: 1.125rem;
-				text-anchor: middle;
-				-webkit-user-select: none;
-				-moz-user-select: none;
-				-ms-user-select: none;
-				user-select: none;
-			}
-			
-			@media (min-width: 768px) {
-				.bd-placeholder-img-lg {
-				font-size: 3.5rem;
+			/* sidebar */
+			@media (min-width:768px) {
+				.sidebar {
+					width:14rem!important;
+					min-height: 100vh;
+					padding:0;
+					border-right: 1px solid rgba(0,0,0,.125)
 				}
-			}	  
+				.nav-item {
+					padding: .75rem 1.25rem;
+				}
+				.nav-link {
+					padding: 0 !important;
+				}
+			}
+			@media (max-width:576px) {
+				.col-main {
+					padding: 0 !important;
+					border: none !important;
+				}
+			}
 		</style>
 		
 	</head>
@@ -74,7 +79,7 @@
 			<div class="container-fluid">
 				<div class="row">
 					
-					<b-navbar toggleable="lg" class="col font-weight-bold text-dark bg-light d-inline-block align-top pb-0">
+					<b-navbar toggleable="lg" class="sidebar col font-weight-bold text-dark bg-light d-inline-block align-top pb-0">
 						<b-collapse id="nav-collapse" is-nav>
 							<b-navbar-nav class="nav flex-column w-100">
 								<b-nav-item href="dashboard">
@@ -84,16 +89,40 @@
 								<b-nav-item href="portal">
 									<span class="icon"><i class="mdi mdi-lock"></i></span>
 									Portal
+								</b-nav-item>								
+								<b-nav-item href="cams">
+									<span class="icon"><i class="mdi mdi-camera"></i></span>
+									Cams
+								</b-nav-item>
+								<b-nav-item href="aufnahmen">
+									<span class="icon"><i class="mdi mdi-image-multiple"></i></span>
+									Aufnahmen
 								</b-nav-item>
 								<b-nav-item href="wol">
 									<span class="icon"><i class="mdi mdi-lan"></i></span>
 									WOL
 								</b-nav-item>
+								<b-nav-item href="weather">
+									<span class="icon"><i class="mdi mdi-weather-partly-cloudy"></i></span>
+									Wetter
+								</b-nav-item>
+								<b-nav-item href="solar">
+									<span class="icon"><i class="mdi mdi-coolant-temperature"></i></span>
+									Solar
+								</b-nav-item>
+								<b-nav-item href="temperaturen">
+									<span class="icon"><i class="mdi mdi-thermometer"></i></span>
+									Temperaturen
+								</b-nav-item>
+								<b-nav-item href="sounds">
+									<span class="icon"><i class="mdi mdi-music"></i></span>
+									Sounds
+								</b-nav-item>
 							</b-navbar-nav>
 						</b-collapse>
 					</b-navbar>
 					
-					<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+					<main role="main" class="col-main col-md-9 ml-sm-auto col-lg-10 px-md-4">
 						<div class="card">
 							<div class="card-header">
 								<span class="icon"><i class="mdi mdi-lock"></i></span>
