@@ -62,6 +62,10 @@
 				}
 			}
 			@media (max-width:576px) {
+				.sidebar {
+					padding-top: 0.1px;
+					padding-bottom: 0px;
+				}
 				.col-main {
 					padding: 0 !important;
 					border: none !important;
@@ -72,17 +76,17 @@
 	</head>
 	<body>
 		<div id="app">
-			<b-navbar toggleable="lg" class="font-weight-bold text-dark bg-light navbar sticky-top flex-md-nowrap d-md-none">
-				<b-navbar-brand href="/">muh</b-navbar-brand>
+			<b-navbar toggleable="lg" type="dark" variant="dark" class="font-weight-bold navbar sticky-top flex-md-nowrap d-md-none">
+				<b-navbar-brand href="/"></b-navbar-brand>
 				<b-navbar-toggle target="nav-collapse"></b-navbar-toggle>	
 			</b-navbar>
 			<div class="container-fluid">
 				<div class="row">
 					
-					<b-navbar toggleable="lg" class="sidebar col font-weight-bold text-dark bg-light d-inline-block align-top pb-0">
+					<b-navbar toggleable="lg" type="dark" variant="dark" class="sidebar col font-weight-bold d-inline-block align-top">
 						<b-collapse id="nav-collapse" is-nav>
 							<b-navbar-nav class="nav flex-column w-100">
-								<b-nav-item href="dashboard">
+								<b-nav-item href="dashboard" active>
 									<span class="icon"><i class="mdi mdi-home"></i></span>
 									Dashboard
 								</b-nav-item>
