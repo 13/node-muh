@@ -10,173 +10,93 @@
 		<link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
 		<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
 		<!-- include socket.io client side script -->
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
-		
-		<style type="text/css">
-			.socketstatus { height: 4px !important; }
-			.pointer-disabled { pointer-events: none !important; }
-			.modal-center { margin: 0 auto; }
-			.rounded-top-0 {
-				border-top-left-radius: 0px !important;
-				border-top-right-radius: 0px !important;
-			}
-			.rounded-bottom-0 {
-				border-bottom-right-radius: 0px !important;
-				border-bottom-left-radius: 0px !important;
-			}
-			.rounded-left-0 {
-				border-top-left-radius: 0rem !important;
-				border-bottom-left-radius: 0rem !important;
-			}
-			.rounded-right-0 {
-				border-top-right-radius: 0rem !important;
-				border-bottom-right-radius: 0rem !important;
-			}
-			.border-trans {
-				border: 1px solid rgba(0,0,0,.125);
-			}
-			/* sidebar */
-			@media (min-width:768px) {
-				.sidebar {
-					width:14rem!important;
-					min-height: 100vh;
-					padding:0;
-					border-right: 1px solid rgba(0,0,0,.125)
-				}
-				.nav-item {
-					padding: .75rem 1.25rem;
-				}
-				.nav-link {
-					padding: 0 !important;
-				}
-			}
-			@media (max-width:576px) {
-				.sidebar {
-					padding-top: 0.1px;
-					padding-bottom: 0px;
-				}
-				.col-main {
-					padding: 0 !important;
-					border: none !important;
-				}
-			}
-		</style>
-		
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>	
 	</head>
 	<body>
 		<div id="app">
-			<b-navbar toggleable="lg" type="dark" variant="dark" class="font-weight-bold navbar sticky-top flex-md-nowrap d-md-none">
-				<b-navbar-brand href="/"></b-navbar-brand>
-				<b-navbar-toggle target="nav-collapse"></b-navbar-toggle>	
-			</b-navbar>
-			<div class="container-fluid">
-				<div class="row">
-					
-					<b-navbar toggleable="lg" type="dark" variant="dark" class="sidebar col font-weight-bold d-inline-block align-top">
-						<b-collapse id="nav-collapse" is-nav>
-							<b-navbar-nav class="nav flex-column w-100">
-								<b-nav-item href="dashboard" active>
-									<span class="icon"><i class="mdi mdi-home"></i></span>
-									Dashboard
-								</b-nav-item>
-								<b-nav-item href="portal">
-									<span class="icon"><i class="mdi mdi-lock"></i></span>
-									Portal
-								</b-nav-item>								
-								<b-nav-item href="cams">
-									<span class="icon"><i class="mdi mdi-camera"></i></span>
-									Cams
-								</b-nav-item>
-								<b-nav-item href="aufnahmen">
-									<span class="icon"><i class="mdi mdi-image-multiple"></i></span>
-									Aufnahmen
-								</b-nav-item>
-								<b-nav-item href="wol">
-									<span class="icon"><i class="mdi mdi-lan"></i></span>
-									WOL
-								</b-nav-item>
-								<b-nav-item href="weather">
-									<span class="icon"><i class="mdi mdi-weather-partly-cloudy"></i></span>
-									Wetter
-								</b-nav-item>
-								<b-nav-item href="solar">
-									<span class="icon"><i class="mdi mdi-coolant-temperature"></i></span>
-									Solar
-								</b-nav-item>
-								<b-nav-item href="temperaturen">
-									<span class="icon"><i class="mdi mdi-thermometer"></i></span>
-									Temperaturen
-								</b-nav-item>
-								<b-nav-item href="sounds">
-									<span class="icon"><i class="mdi mdi-music"></i></span>
-									Sounds
-								</b-nav-item>
-							</b-navbar-nav>
-						</b-collapse>
-					</b-navbar>
-					
-					<main role="main" class="col-main col-md-9 ml-sm-auto col-lg-10 px-md-4">
-						<div class="card">
-							<div class="card-header">
-								<span class="icon"><i class="mdi mdi-lock"></i></span>
-								<span class="font-weight-bold">Portal</span>
-							</div>
-							
-							<div class="container-fluid">
-								<div class="row">
-									<div class="col m-0 p-0">
-										<p class="socketstatus alert rounded-0 m-0 p-0" v-bind:class="stateToTagBg(socketState)"></p>
-									</div>
-								</div>
-							</div>	  
-							
-							<div class="card-body">
+		<v-app>
+			<v-main>
+				<v-card
+					class="mx-auto"
+				>
+					<!-- card header -->
+				    <v-list-item>
+						<v-list-item-icon>
+							<v-icon>mdi-lock</v-icon>
+						</v-list-item-icon>	
+						<v-list-item-content>
+							<v-list-item-title class="headline">Portal</v-list-item-title>
+						</v-list-item-content>
+					</v-list-item>
+
+					<!-- socket state -->
+					<v-progress-linear
+					  class="mb-0"
+					  value="100"
+					  v-bind:color="stateToTag(socketState)"
+					></v-progress-linear>
 								
-								<div class="list-group" v-for="(portal, idx) in portals" :key="idx">
+								<v-list>
+								<v-list-item
+								  v-for="(portal, idx) in portals"
+								  :key="idx"
+								  v-if="!portal.name.includes('lock')"
+								>
 									<!-- portal header -->
-									<a href="#" class="list-group-item list-group-item-action text-dark disabled bg-light"
-									v-if="!portal.name.includes('lock')" v-bind:class="{ 'border-top-0 rounded-top-0': idx !== 0 }">
-										<div v-if="!portal.name.includes('lock')" class="container-fluid p-0">
-											<div class="row">
-												<div class="col font-weight-bold pr-0">{{ portals[idx].name | translateName }}</div>
-												<div class="col-8 text-right pl-0">
-													<div v-if="!portal.name.includes('lock')" class="badge bg-white text-dark border" >{{ portal.tstamp | shortdate }}</div>
-													<div v-if="!portal.name.includes('lock') && portal.name !== 'garage'" class="badge bg-white text-dark border">
+									<v-list-item-content v-if="!portal.name.includes('lock')">
+										<v-container fluid v-if="!portal.name.includes('lock')" class="pa-0">
+											<v-row no-gutters
+											  align="center"
+											  justify="center">
+												<v-col :cols="3">{{ portals[idx].name | translateName }}</v-col>
+												<v-col class="text-right">
+													<v-chip
+													  label
+													  small
+													  v-if="!portal.name.includes('lock')"
+													>
+													  {{ portal.tstamp | shortdate }}
+													</v-chip>
+													<v-chip
+													  label
+													  small
+													  v-if="!portal.name.includes('lock') && portal.name !== 'garage'">
 														{{ portals[incrementItem(idx)].tstamp | shortdate }}
-													</div>
-												</div>
-											</div>
-										</div>
-									</a>
+													</v-chip>
+												</v-col>
+											</v-row>
+										</v-container>
+									<!--</v-list-item-content>-->
 									<!-- portal footer -->
-									<div class="container-fluid" v-if="!portal.name.includes('lock')">
-										<div v-if="!portal.name.includes('lock')" class="row font-weight-bold">
+										<v-container fluid v-if="!portal.name.includes('lock')" class="pa-0">
+										    <v-row no-gutters>
 											<a v-b-modal="portal.name"
 											class="list-group-item list-group-item-action pr-0 border-top-0"
 											v-if="!portal.name.includes('lock')"
 											v-bind:class="[isLastRounded(idx), stateToTagListBgVV(portal.state), halfOrFull(portal.name)]">
-												<div class="col p-0">
+												<v-col>
 													<span class="h6" v-bind:class="stateToTagVV(portal.state)">
 														<b-icon icon="square-fill"></b-icon>
 													</span>
 													<span>{{ portal.state | translateDoorState }}</span>
-												</div>
+												</v-col>
 											</a>
 											<a v-b-modal="portal.name"
 											v-if="!portal.name.includes('lock') && portal.name !== 'garage'"
 											class="list-group-item list-group-item-action pr-0 border-top-0 border-left-0"
 											v-bind:class="[stateToTagListBgVV(portals[incrementItem(idx)].state), halfOrFull(portals[incrementItem(idx)].name)]">
-												<div class="col p-0" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">
+												<v-col v-if="!portal.name.includes('lock') && portal.name !== 'garage'">
 													<span class="h6" v-bind:class="stateToTagVV(portals[incrementItem(idx)].state)">
 														<b-icon icon="square-fill"></b-icon>
 													</span>
 													<span>{{ portals[incrementItem(idx)].state | translateDoorLockState }}</span>							
-												</div>
+												</v-col>
 											</a>
-										</div>
-									</div>	
+											</v-row>
+										</v-container>
+									</v-list-item-content>
 									<!-- modal -->
-									<b-modal 
+									<!--<b-modal 
 									v-bind:id="portals[idx].name" 
 									v-bind:title="portals[idx].name | translateName" 
 									title-class="modal-center font-weight-bold"
@@ -184,8 +104,8 @@
 									hide-header-close 
 									hide-footer
 									centered
-									>
-										<!-- Doors -->
+									>-->
+										<!-- Doors 
 										<div class="container" v-if="portal.name !== 'garage'">
 											<b-alert
 											:show="dismissCountDown"
@@ -193,7 +113,7 @@
 											@dismissed="dismissCountDown=0"
 											@dismiss-count-down="countDownChanged"
 											>
-												<p class="h6 text-center p-0 m-0 font-weight-bold">{{ notifymv }} ...</p>
+										<p class="h6 text-center p-0 m-0 font-weight-bold">{{ notifymv }} ...</p>-->
 												<!--<p class="h6 text-center p-0 m-0 font-weight-bold">{{ notifymv }} in {{ dismissCountDown }} ...</p>
 													<b-progress
 													variant="warning"
@@ -202,7 +122,7 @@
 													height="4px"
 													animated
 												></b-progress>-->
-											</b-alert>
+												<!--</b-alert>
 											<div class="row m-0 pb-3">
 												<div class="col font-weight-bold btn pointer-disabled rounded-right-0 border-trans" v-bind:class="stateToTagListBgVV(portal.state)">
 													<span class="h6 d-none d-sm-inline" v-bind:class="stateToTagVV(portal.state)">
@@ -250,9 +170,9 @@
 													<b-button variant="light border font-weight-bold" class="mt-3" block @click="$bvModal.hide(portals[idx].name)">Abbrechen</b-button>
 												</div>
 											</div>
-										</div>
+												</div>-->
 										
-										<!-- Garage -->
+										<!-- Garage 
 										<div class="container" v-else>
 											<b-alert
 											:show="dismissCountDown"
@@ -260,7 +180,7 @@
 											@dismissed="dismissCountDown=0"
 											@dismiss-count-down="countDownChanged"
 											>
-												<p class="h6 text-center p-0 m-0 font-weight-bold">{{ notifymv }} ...</p>
+												<p class="h6 text-center p-0 m-0 font-weight-bold">{{ notifymv }} ...</p>-->
 												<!--<p class="h6 text-center p-0 m-0 font-weight-bold">{{ notifymv }} in {{ dismissCountDown }} ...</p>
 													<b-progress
 													variant="warning"
@@ -269,7 +189,7 @@
 													height="4px"
 													animated
 												></b-progress>-->
-											</b-alert>
+												<!--</b-alert>
 											<div class="row m-0 pb-3">
 												<div class="col font-weight-bold btn pointer-disabled border-trans" v-bind:class="stateToTagListBgVV(portal.state)">
 													<span class="h6" v-bind:class="stateToTagVV(portal.state)">
@@ -296,16 +216,13 @@
 											</div>
 										</div>				
 										
-									</b-modal>
-								</div><!-- end -->
-								
-							</div>
-						</div>
-					</main>
-					
-				</div>
-			</div>
-			
+												</b-modal>-->
+								</v-list-item>
+								</v-list>
+
+				</v-card>
+			</v-main>
+		</v-app>
 		</div><!-- app -->
 		
 		<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
@@ -328,11 +245,6 @@
 					dismissSecs: 5,
 					dismissCountDown: 0,
 					showDismissibleAlert: false
-				},
-				mounted: function () {
-					this.$nextTick(function () {
-						// ...
-					})
 				},
 				filters: {
 					space (value) {
@@ -412,7 +324,7 @@
 						return (value ? 'bg-success' : 'bg-danger')
 					},
 					stateToTag(value){
-						return (value ? 'text-success' : 'text-danger')
+						return (value ? 'green' : 'red')
 					},
 					stateToTagVV(value){
 						return (value ? 'text-danger' : 'text-success')
