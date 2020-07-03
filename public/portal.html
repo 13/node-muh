@@ -92,6 +92,10 @@
 													<span>{{ portals[incrementItem(idx)].state | translateDoorLockState }}</span>							
 												</v-col>
 											</a>
+											          <v-responsive
+            v-if="portal.name === garage"
+            width="100%"
+          ></v-responsive>
 											</v-row>
 										</v-container>
 									</v-list-item-content>
