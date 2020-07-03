@@ -16,9 +16,7 @@
 		<div id="app">
 		<v-app>
 			<v-main>
-				<v-card
-					class="mx-auto"
-				>
+				<v-card class="mx-auto">
 					<!-- card header -->
 				    <v-list-item>
 						<v-list-item-icon>
@@ -35,15 +33,36 @@
 					  value="100"
 					  v-bind:color="stateToTag(socketState)"
 					></v-progress-linear>
-								
-								<v-list>
-								<v-list-item
-								  v-for="(portal, idx) in portals"
-								  :key="idx"
-								  v-if="!portal.name.includes('lock')"
-								>
-									<!-- portal header -->
-									<v-list-item-content v-if="!portal.name.includes('lock')">
+					
+					<!-- portal -->
+					<v-list>
+					<div v-for="(portal, idx) in portals" :key="idx">
+						<v-list-item
+						  v-if="!portal.name.includes('lock')"
+						  @click=""
+						>
+							<!-- portal header -->
+							<v-list-item-content v-if="!portal.name.includes('lock')">
+								<v-list-item-title class="headline">
+									{{ portals[idx].name | translateName }}
+								</v-list-item-title>
+							</v-list-item-content>
+							<v-chip
+							  label
+							  small
+							  v-if="!portal.name.includes('lock')"
+							>
+								{{ portal.tstamp | shortdate }}
+							</v-chip>
+							<v-chip
+							  label
+							  small
+							  v-if="!portal.name.includes('lock') && portal.name !== 'garage'"
+							>
+								{{ portals[incrementItem(idx)].tstamp | shortdate }}
+							</v-chip>
+						</v-list-item>
+									<!--<v-list-item-content v-if="!portal.name.includes('lock')">
 										<v-container fluid v-if="!portal.name.includes('lock')" class="pa-0">
 											<v-row no-gutters
 											  align="center"
@@ -66,39 +85,101 @@
 												</v-col>
 											</v-row>
 										</v-container>
+									<v-list-item-content>-->
 									<!--</v-list-item-content>-->
 									<!-- portal footer -->
-										<v-container fluid v-if="!portal.name.includes('lock')" class="pa-0">
-										    <v-row no-gutters>
-											<a v-b-modal="portal.name"
-											class="list-group-item list-group-item-action pr-0 border-top-0"
+									<!--
+									<div class="container">
+									<div class="row">
+									<div class="col-md-6 col-12">
+										<div class="v-card v-sheet v-sheet--outlined theme--light">
+											<a href="/en/styles/flex/" class="v-list-item--doc v-list-item v-list-item--link theme--light primary--text" tabindex="0">
+												<div class="v-avatar v-list-item__avatar deep-purple accent-4" style="height: 40px; min-width: 40px; width: 40px;">
+													<i aria-hidden="true" class="v-icon notranslate mdi mdi-checkbox-blank theme--dark"></i>
+												</div>
+												<div class="v-list-item__content">
+													<div class="v-list-item__title">
+														<span>{{ portal.state | translateDoorState }}</span>
+													</div>
+												</div>
+												<div class="v-list-item__action">
+													<i aria-hidden="true" class="v-icon notranslate mdi mdi-arrow-right theme--light"></i>
+												</div>
+											</a>
+										</div>
+									</div>
+									<div class="col-md-6 col-12">
+										<div class="v-card v-sheet v-sheet--outlined theme--light">
+											<a href="/en/customization/breakpoints/" class="v-list-item--doc v-list-item v-list-item--link theme--light primary--text" tabindex="0">
+												<div class="v-avatar v-list-item__avatar red lighten-2" style="height: 40px; min-width: 40px; width: 40px;">
+													<i aria-hidden="true" class="v-icon notranslate mdi mdi-checkbox-blank theme--dark"></i>
+												</div>
+												<div class="v-list-item__content">
+													<div class="v-list-item__title">
+														<span>breakpoints</span>
+													</div>
+													<div class="v-list-item__subtitle">
+														<span>customization</span>
+													</div>
+												</div>
+												<div class="v-list-item__action">
+														<i aria-hidden="true" class="v-icon notranslate mdi mdi-arrow-right theme--light"></i>
+												</div>
+											</a>
+										</div>
+									</div>
+									</div>
+									</div>-->
+									<!-- container new line -->
+									<!--
+									<v-container class="pa-0" v-if="!portal.name.includes('lock')">
+										<v-row v-if="!portal.name.includes('lock')">
+											<v-col class="pa-0">										
+												<v-list-item-icon class="ma-0">
+													<v-icon>mdi-checkbox-blank</v-icon>
+												</v-list-item-icon>
+												<v-list-item-content class="d-inline-flex">
+													<v-list-item-title class="headline">
+														{{ portal.state | translateDoorState }}
+													</v-list-item-title>
+												</v-list-item-content>
+											</v-col>
+											<v-col class="pa-0" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">
+												<v-list-item-icon class="ma-0">
+													<v-icon>mdi-checkbox-blank</v-icon>
+												</v-list-item-icon>
+												<v-list-item-content class="d-inline-flex">
+													<v-list-item-title class="headline">
+														{{ portals[incrementItem(idx)].state | translateDoorLockState }}
+													</v-list-item-title>
+												</v-list-item-content>	
+											</v-col>
+										</v-row>
+									</v-container>-->
+									
+										<!--<v-container fluid v-if="!portal.name.includes('lock')" class="pa-0">-->
+										    <!--<v-row v-if="!portal.name.includes('lock')">
+											 <a v-b-modal="portal.name"
 											v-if="!portal.name.includes('lock')"
-											v-bind:class="[isLastRounded(idx), stateToTagListBgVV(portal.state), halfOrFull(portal.name)]">
-												<v-col>
-													<span class="h6" v-bind:class="stateToTagVV(portal.state)">
-														<b-icon icon="square-fill"></b-icon>
-													</span>
-													<span>{{ portal.state | translateDoorState }}</span>
+											v-bind:class="[stateToTagListBgVV(portal.state), halfOrFull(portal.name)]">
+												<v-col class="col-md-6 col-12">
+													<v-card>
+														<v-icon v-bind:color="stateToTag(!portal.state)">mdi-checkbox-blank</v-icon>
+														<span>{{ portal.state | translateDoorState }}</span>													
+													</v-card>
 												</v-col>
 											</a>
 											<a v-b-modal="portal.name"
 											v-if="!portal.name.includes('lock') && portal.name !== 'garage'"
-											class="list-group-item list-group-item-action pr-0 border-top-0 border-left-0"
 											v-bind:class="[stateToTagListBgVV(portals[incrementItem(idx)].state), halfOrFull(portals[incrementItem(idx)].name)]">
-												<v-col v-if="!portal.name.includes('lock') && portal.name !== 'garage'">
-													<span class="h6" v-bind:class="stateToTagVV(portals[incrementItem(idx)].state)">
-														<b-icon icon="square-fill"></b-icon>
-													</span>
+												<v-col class="col-md-6 col-12" v-if="!portal.name.includes('lock') && portal.name !== 'garage'">
+													<v-icon v-bind:color="stateToTag(!portals[incrementItem(idx)].state)">mdi-checkbox-blank</v-icon>
 													<span>{{ portals[incrementItem(idx)].state | translateDoorLockState }}</span>							
 												</v-col>
 											</a>
-											          <v-responsive
-            v-if="portal.name === garage"
-            width="100%"
-          ></v-responsive>
-											</v-row>
-										</v-container>
-									</v-list-item-content>
+											</v-row>-->
+										<!--</v-container>-->
+								<!--</v-list-item-content>-->
 									<!-- modal -->
 									<!--<b-modal 
 									v-bind:id="portals[idx].name" 
@@ -221,7 +302,7 @@
 										</div>				
 										
 												</b-modal>-->
-								</v-list-item>
+								</div>
 								</v-list>
 
 				</v-card>
@@ -322,7 +403,7 @@
 					},
 					stateToTagListBgVV(value){
 						//console.log("stateToTagListBg: " + value);
-						return (!value ? 'list-group-item-success' : 'list-group-item-danger')
+						return (!value ? 'green lighten-4' : 'red lighten-4')
 					},
 					stateToTagBg(value){
 						return (value ? 'bg-success' : 'bg-danger')
