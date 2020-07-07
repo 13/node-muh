@@ -34,13 +34,23 @@
 						  v-bind:color="stateToTag(socketState)"
 						></v-progress-linear>
 						
+						<!-- snackbar -->
+						<v-snackbar
+						  v-model="sb_portal"
+						  :timeout="sb_timeout"
+						  color="green lighten-1"
+						  bottom
+						>
+						  {{ sb_text }}
+						</v-snackbar>	
+						
 						<!-- portal -->
 						<v-list>
 							<div v-for="(portal, idx) in portals" :key="idx">
 								<v-list-item
-								v-if="!portal.name.includes('lock')"
-								@click=""
-								disabled
+								  v-if="!portal.name.includes('lock')"
+								  @click=""
+								  disabled
 								>
 									<!-- portal header -->
 									<v-list-item-content v-if="!portal.name.includes('lock')">
@@ -49,17 +59,17 @@
 										</v-list-item-title>
 									</v-list-item-content>
 									<v-chip
-									label
-									small
-									v-if="!portal.name.includes('lock')"
+									  label
+									  small
+									  v-if="!portal.name.includes('lock')"
 									>
 										{{ portal.tstamp | shortdate }}
 									</v-chip>
 									<v-chip
-									label
-									small
-									v-if="!portal.name.includes('lock') && portal.name !== 'garage'"
-									class="ml-2"
+									  label
+									  small
+									  v-if="!portal.name.includes('lock') && portal.name !== 'garage'"
+									  class="ml-2"
 									>
 										{{ portals[incrementItem(idx)].tstamp | shortdate }}
 									</v-chip>
@@ -103,13 +113,13 @@
 								</v-container>
 								<!-- dialog -->
 								<v-dialog
-								v-model="$data[toUpperCaseFirstChar(portal.name) + 'Dialog']"
-								max-width="480"
+								  v-model="$data[toUpperCaseFirstChar(portal.name) + 'Dialog']"
+								  max-width="480"
 								>
 									<v-card>
 										<v-card-title
-										class="headline grey lighten-2"
-										primary-title
+										  class="headline grey lighten-2"
+										  primary-title
 										>
 											{{ portals[idx].name | translateName }}
 										</v-card-title>
@@ -132,7 +142,7 @@
 												</v-row>
 												<v-row>
 													<v-col>
-														<v-btn block @click="setDialogState(portal.name,false)">
+														<v-btn block @click="notifyPortal(portals[idx].name, 'Öffnen', $event)">
 															<v-icon left dark>mdi-door-open</v-icon>
 															Öffnen
 														</v-btn>
@@ -140,13 +150,13 @@
 												</v-row>
 												<v-row>
 													<v-col>
-														<v-btn block @click="setDialogState(portal.name,false)">
+														<v-btn block @click="notifyPortal(portals[idx].name, 'Entriegeln', $event)">
 															<v-icon left dark>mdi-lock-open-variant</v-icon>
 															Entriegeln
 														</v-btn>
 													</v-col>
 													<v-col>
-														<v-btn block @click="setDialogState(portal.name,false)">
+														<v-btn block @click="notifyPortal(portals[idx].name, 'Verriegeln', $event)">
 															<v-icon left dark>mdi-lock</v-icon>
 															Verriegeln
 														</v-btn>
@@ -170,7 +180,7 @@
 												</v-row>
 												<v-row>
 													<v-col>
-														<v-btn block @click="setDialogState(portal.name,false)">
+														<v-btn block @click="notifyPortal(portals[idx].name, 'Bewegen', $event)">
 															<v-icon left dark>mdi-arrow-up-down-bold</v-icon>
 															Bewegen
 														</v-btn>
@@ -185,9 +195,6 @@
 										</v-card-text>
 									</v-card>
 								</v-dialog>
-								
-								
-								
 							</div>
 						</v-list>	
 					</v-card>
@@ -211,9 +218,9 @@
 					isHidden: false,
 					json: null,
 					portals: [],
-					notifymv: null,
-					dismissSecs: 5,
-					dismissCountDown: 0,
+					sb_portal: false,
+					sb_text: null,
+					sb_timeout: 2000,
 					showDismissibleAlert: false,
 					HousedoorDialog: false,
 					HousedoorlockDialog: false,
@@ -322,31 +329,15 @@
 					isLastRounded (index) {      
 						return (this.isLast(index) ? 'rounded-bottom' : 'rounded-bottom-0')
 					},
-					notifyMvmnt: function (name, action, secs, event) {
+					notifyPortal: function (name, action, event) {
 						// now we have access to the native event
 						if (event) {
 							event.preventDefault()
 						}
-						//if (typeof mac !== 'undefined'){ 
-						console.log(action + " " + name + " " + secs)
+						console.log(name + " " + action + " ...")
 						//socket.emit("wakemac", mac); //send push button status to back to server
-						//app.notifywol = "Waking " + hostname.substr(0, hostname.indexOf('.')) + " in " + this.dismissCountDown + " ..."
-						//this.notifymv = hostname.substr(0, hostname.indexOf('.'))
-						this.dismissSecs = secs
-						this.notifymv = "... " + action + " "
-						//setTimeout(() => this.isHidden = false, 5000)
-						//setTimeout(() => this.notifywol = null, this.dismissSecs*1000+1000)
-						//}
-						this.dismissCountDown = this.dismissSecs
-						//app.notifywol = null;
-					},
-					notifyMvmntCancel() {
-						this.dismissSecs = 0
-						this.dismissCountDown = 0
-						this.showDismissibleAlert= false
-					},
-					countDownChanged(dismissCountDown) {
-						this.dismissCountDown = dismissCountDown
+						this.sb_text = this.$options.filters.translateName(name) + " " + action + " ..."
+						this.sb_portal = true
 					},
 					setDialogState(prop,val){
 						var modalName = prop.charAt(0).toUpperCase() + prop.slice(1) + "Dialog"
