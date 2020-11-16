@@ -11,7 +11,7 @@ const Gpio = require('onoff').Gpio;
 const isReachable = require('is-reachable');
 const wakeonlan = require('wake_on_lan');
 
-const server_port = 8080;
+const server_port = 80;
 
 var connectCounter = 0;
 
