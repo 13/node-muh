@@ -433,7 +433,7 @@
 					event.preventDefault()
 				}
 				console.log(name + " " + action + " ...")
-				//socket.emit("wakemac", mac); //send push button status to back to server
+				//socket.emit("pushportal", name); //send push button status to back to server
 				this.sb_text = this.$options.filters.translateName(name) + " " + action + " ..."
 				this.sb_portal = true
 			},
