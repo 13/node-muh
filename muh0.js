@@ -14,7 +14,7 @@ const io = require('socket.io')(server);
 const portal = io.of('/portal');
 const wol = io.of('/wol');
 
-//const Gpio = require('onoff').Gpio;
+const Gpio = require('onoff').Gpio;
 
 const isReachable = require('is-reachable');
 const wakeonlan = require('wake_on_lan');
@@ -25,7 +25,7 @@ var connectCounter = 0;
 
 let stopBlinking = false;
 
-//var LED = new Gpio(24, 'out'); // LED Haustür
+var LED = new Gpio(24, 'out'); // LED Haustür
 
 var portals = { 'portals' : [
 			{ id:4, pin:25, 
@@ -56,24 +56,24 @@ for (x in portals){
   for (y in portals[x]){
 	//eval('portal' + portals[x][y].id + ' = ' + portals[x][y].pin + ';');
 	//eval('portal' + portals[x][y].id + ' = new Gpio(' + portals[x][y].pin + ', \'in\', \'both\');');
-	eval('portal' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin + ';');
-	//eval('portal' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', \'in\', \'both\');');	
+	//eval('portal' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin + ';');
+	eval('portal' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', \'in\', \'both\');');	
 	if (portals[x][y].hasOwnProperty('pin_lock')){
-	  eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_lock + ';');
-	  //eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_lock + ', \'out\');');
+	  //eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_lock + ';');
+	  eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_lock + ', \'out\');');
 	}
 	if (portals[x][y].hasOwnProperty('pin_unlock')){
-	  eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_unlock + ';');
-	  //eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_unlock + ', \'out\');');
+	  //eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_unlock + ';');
+	  eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_unlock + ', \'out\');');
 	}
 	if (portals[x][y].hasOwnProperty('pin_move')){
-	  eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_move + ';');
-	  //eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_move + ', \'out\');');
+	  //eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_move + ';');
+	  eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_move + ', \'out\');');
 	}
   }
 }
 
-/*
+
 portalHDL.read((err, value) => {
   var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'HDL') ? x.id : null)[0].id;
   processPortal(id,value);
@@ -90,7 +90,7 @@ portalG.watch((err, value) => {
   var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].id;
   processPortal(id,value);
 });
-*/
+
 
 /*
 portal5.read((err, value) => {
@@ -371,7 +371,6 @@ const clearAsyncInterval = (intervalIndex) => {
 };
 
 // onoff unload 
-/*
 function unexportOnClose() {
   LED.writeSync(0);
   LED.unexport();
@@ -392,7 +391,6 @@ function unexportOnClose() {
   moveRelayG.unexport();
 };
 process.on('SIGINT', unexportOnClose); //function to run when user closes using ctrl+c 
-*/
 
 function addZero(x,n) {
   while (x.toString().length < n) {
