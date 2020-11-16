@@ -6,7 +6,7 @@ const io = require('socket.io')(server);
 const portal = io.of('/portal');
 const wol = io.of('/wol');
 
-const Gpio = require('onoff').Gpio;
+//const Gpio = require('onoff').Gpio;
 
 const isReachable = require('is-reachable');
 const wakeonlan = require('wake_on_lan');
@@ -15,18 +15,72 @@ const server_port = 8080;
 
 var connectCounter = 0;
 
-var portals = { 'portals' : [
-			{ id:'1', name:"garage", state:false, tstamp:"2020-05-24 07:50:47"},
-			{ id:'2', name:"garagedoor", state:false, tstamp:"2020-05-25 07:10:47"},
-			{ id:'3', name:"garagedoorlock", state:false, tstamp:"2020-05-25 07:12:47"},			
-			{ id:'4', name:"housedoor", state:false, tstamp:"2020-05-25 08:55:47"},
-			{ id:'5', name:"housedoorlock", state:false, tstamp:"2020-05-25 09:23:47"}
-		]} 
+//var LED = new Gpio(24, 'out'); // LED Haustür
 
-var LED = new Gpio(24, 'out'); // LED Haustür
+var portals = { 'portals' : [
+			{ id:4, pin:25, name:"housedoor", state:1, tstamp:"2020-05-25 08:55:47", name_long:"Haustür"},
+			{ id:5, pin:8,  name:"housedoorlock", state:false, tstamp:"2020-05-25 09:23:47", name_long:"Haustür Riegel"},
+			{ id:2, pin:13, name:"garagedoor", state:1, tstamp:"2020-05-25 07:10:47", name_long:"Garagentür"},
+			{ id:3, pin:6,  name:"garagedoorlock", state:1, tstamp:"2020-05-25 07:12:47", name_long:"Garagentür Riegel"},	
+			{ id:1, pin:5,  name:"garage", state:false, tstamp:"2020-05-24 07:50:47", name_long:"Garage"}
+		]} 
+		
+console.log('INFO: id ' + portals.portals.filter(x => (x.id == 1) ? x.id : null)[0].id);
+console.log('INFO: id ' + portals.portals.filter(x => (x.name == "garage") ? x.id : null)[0].id);
+console.log('INFO: pin ' + portals.portals.filter(x => (x.name == "garage") ? x.id : null)[0].pin);
+console.log('INFO: state ' + portals.portals.filter(x => (x.name == "garage") ? x.id : null)[0].state);
+portals.portals.filter(x => (x.name == "garage") ? x.id : null)[0].state = 1;
+console.log('INFO: state ' + portals.portals.filter(x => (x.name == "garage") ? x.id : null)[0].state);
+
+for (x in portals){
+  for (y in portals[x]){
+	eval('portal' + portals[x][y].id + ' = ' + portals[x][y].pin + ';');
+	//eval('portal' + portals[x][y].id + ' = new Gpio(' + portals[x][y].pin + ', \'in\', \'both\');');
+  }
+}
+
+/*
+portal5.read((err, value) => {
+  if (err) { throw err; }
+  console.log('NAME: ' + arguments.callee.name);
+  var id = portals.portals.filter(x => (x.id == 5) ? x.id : null)[0].id;
+  //processPortal(id,value);
+  console.log('[' + getTime() + '] STATE:' + value + ' P:' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].pin + ' N:' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name);
+  console.log('INFO: id ' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].id);
+  console.log('INFO: state ' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state);
+  portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = value;
+  console.log('INFO: state ' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state);
+});
+portal5.watch((err, value) => {
+  if (err) { throw err; }
+  console.log('NAME: ' + arguments.callee.name);
+  var id = portals.portals.filter(x => (x.id == 5) ? x.id : null)[0].id;
+  console.log('[' + getTime() + '] STATE:' + value + ' P:' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].pin + ' N:' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name);
+  console.log('INFO: id ' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].id);
+  console.log('INFO: state ' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state);
+  portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = value;
+  console.log('INFO: state ' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state);
+  LED.writeSync(value);
+});
+*/
+
+function processPortal(id,value){
+  console.log('X[' + getTime() + '] STATE:' + value + ' P:' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].pin + ' N:' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name);
+  console.log('XINFO: id ' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].id);
+  console.log('XINFO: state ' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state);
+  if (portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state != value){
+    console.log('XINFO: old state ' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state);
+    portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = value;
+	console.log('XINFO: new state ' + portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state);
+  }
+  // doorlock specific
+  if (portals.portals.filter(x => (x.id == id) ? x.id : null)[0].id == 5){
+    LED.writeSync(value);
+  }
+}
 
 // PIN_NUM, STATE, PIN_NUM_INTERNAL, DESC
-var reedSensors = {};
+/*var reedSensors = {};
 reedSensors["P1"] = [ 5, undefined, 1, "Garage"];             // G
 reedSensors["P2"] = [13, undefined, 2, "Garage Tür"];         // GT
 reedSensors["P3"] = [ 6, undefined, 3, "Garage Tür Riegel"];  // GTR
@@ -40,21 +94,21 @@ for(var reedSensor in reedSensors) {
 reedSensor5.read((err, value) => { // Asynchronous read
   if (err) { throw err; }
   console.log('[' + getTime() + '] STATE:' + value + ' P:' + reedSensors["P5"][0] + ' N:' + reedSensors["P5"][3]);
-  console.log(portals.portals[4].id);
-  console.log(portals.portals[4].state);
-  portals.portals[4].state = value;
-  console.log(portals.portals[4].state);
+  console.log('INFO: id ' + portals.portals.filter(x => (x.name == "garage") ? x.id : null)[0].id);
+  console.log('INFO: state ' + portals.portals.filter(x => (x.name == "garage") ? x.id : null)[0].state);
+  portals.portals.filter(x => (x.name == "garage") ? x.id : null)[0].state = 1;
+  console.log('INFO: state ' + portals.portals.filter(x => (x.name == "garage") ? x.id : null)[0].state);
   
 });
 reedSensor5.watch((err, value) => { 
   if (err) { throw err; }
   console.log('[' + getTime() + '] STATE:' + value + ' P:' + reedSensors["P5"][0] + ' N:' + reedSensors["P5"][3]);
-  console.log(portals.portals[4].id);
-  console.log(portals.portals[4].state);
-  portals.portals[4].state = value;
-  console.log(portals.portals[4].state);
+  console.log('INFO: id ' + portals.portals.filter(x => (x.name == "garage") ? x.id : null)[0].id);
+  console.log('INFO: state ' + portals.portals.filter(x => (x.name == "garage") ? x.id : null)[0].state);
+  portals.portals.filter(x => (x.name == "garage") ? x.id : null)[0].state = 1;
+  console.log('INFO: state ' + portals.portals.filter(x => (x.name == "garage") ? x.id : null)[0].state);
   LED.writeSync(value); //turn LED on or off depending on the button state (0 or 1)
-});
+});*/
 
 app.use(express.static(__dirname + '/public'));
 
@@ -71,9 +125,23 @@ portal.on('connection', async (socket) => {
   });
 
   // receive portal command
-  /*socket.on('pushportal', (cmd) => {
-    console.log('cmd: ' + cmd);
-  });*/ 
+  socket.on('pushportal', (name, action) => {
+    console.log('pushportal: ' + name + ' ' + action );
+	/*if (name == 'housedoor'){
+		if (action == 'lock'){ pin = 16; }
+		if (action == 'unlock'){ pin = 20; }
+		if (action == 'open'){ pin = 20; }
+	}
+	if (name == 'garage'){
+		if (action == 'move'){ 
+			pin = 12;
+			time = 0.1;
+			var garageRelay = new Gpio(pin, 'out');
+			garageRelay.writeSync(1)
+			garageRelay.writeSync(0)
+		}
+	}*/
+  }); 
  	
   console.log('[PORTAL] Sending JSON ...');
   console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
@@ -219,7 +287,7 @@ const clearAsyncInterval = (intervalIndex) => {
     asyncIntervals[intervalIndex] = false;
   }
 };
-
+/*
 function unexportOnClose() { //function to run when exiting program
   LED.writeSync(0); // Turn LED off
   LED.unexport(); // Unexport LED GPIO to free resources
@@ -231,7 +299,7 @@ function unexportOnClose() { //function to run when exiting program
 };
 
 process.on('SIGINT', unexportOnClose); //function to run when user closes using ctrl+c 
-
+*/
 function addZero(x,n) {
   while (x.toString().length < n) {
     x = "0" + x;
