@@ -6,25 +6,28 @@ const io = require('socket.io')(server);
 const portal = io.of('/portal');
 const wol = io.of('/wol');
 
-const Gpio = require('onoff').Gpio;
+//const Gpio = require('onoff').Gpio;
 
 const isReachable = require('is-reachable');
 const wakeonlan = require('wake_on_lan');
+
+//const dayjs = require('dayjs/locale/de');
+const dayjs = require('dayjs');
 
 const server_port = 80;
 
 var connectCounter = 0;
 
-var LED = new Gpio(24, 'out'); // LED Haustür
+//var LED = new Gpio(24, 'out'); // LED Haustür
 let stopBlinking = false;
 
 var portals = { 'portals' : [
 			{ id:4, pin:25, 
 			  name:"housedoor", name_short:"hd", name_long:"Haustür", 
-			  state:0, tstamp:"2020-05-25 08:55:47" },
+			  state:0, tstamp:dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss') },
 			{ id:5, pin:8, pin_lock:16, pin_unlock:20, pin_hold: 500,
 			  name:"housedoorlock", name_short:"hdl", name_long:"Haustür Riegel",
-			  state:0, tstamp:"2020-05-25 09:23:47" },
+			  state:0, tstamp:dayjs('2020-11-16 09:30:00').format('YYYY-MM-DD HH:mm:ss') },
 			{ id:2, pin:13, 
 			  name:"garagedoor", name_short:"gd", name_long:"Garagentür", 
 			  state:0, tstamp:"2020-05-25 07:10:47" },
@@ -38,23 +41,23 @@ var portals = { 'portals' : [
 
 for (x in portals){
   for (y in portals[x]){
-    //eval('portal' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin + ';');
-    eval('portal' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', \'in\', \'both\');');	
+    eval('portal' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin + ';');
+    //eval('portal' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', \'in\', \'both\');');	
 	if (portals[x][y].hasOwnProperty('pin_lock')){
-	  //eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_lock + ';');
-	  eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_lock + ', \'high\', {activeLow:true});');
+	  eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_lock + ';');
+	  //eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_lock + ', \'high\', {activeLow:true});');
 	}
 	if (portals[x][y].hasOwnProperty('pin_unlock')){
-	  //eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_unlock + ';');
-	  eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_unlock + ', \'high\', {activeLow:true});');
+	  eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_unlock + ';');
+	  //eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_unlock + ', \'high\', {activeLow:true});');
 	}
 	if (portals[x][y].hasOwnProperty('pin_move')){
-	  //eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_move + ';');
-	  eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_move + ', \'high\', {activeLow:true});');
+	  eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_move + ';');
+	  //eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_move + ', \'high\', {activeLow:true});');
 	}
   }
 }
-
+/*
 portalHD.read((err, value) => {
   var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'HD') ? x.id : null)[0].id;
   processPortal(id,value,true);
@@ -96,7 +99,7 @@ portalG.watch((err, value) => {
   var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].id;
   processPortal(id,value);
 });
-
+*/
 const blinkLED = _ => {
   if (stopBlinking) {
     return 
@@ -122,6 +125,8 @@ function processPortal(id,state,initial=false){
   if (state_old != state){
     console.log(getTime() + ' Change ' + name_short + ' STATE: ' + state + ' STATE_OLD: ' + state_old);
     portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
+	// save datetime
+	portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss');
   }
 
   if (name_short == 'G'){ 
@@ -401,4 +406,3 @@ function getTime() {
   var ms = addZero(d.getMilliseconds(), 3);
   return (h + ":" + m + ":" + s + ":" + ms);
 }
-
