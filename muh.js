@@ -8,15 +8,24 @@ const io = require('socket.io')(server);
 const portal = io.of('/portal');
 const wol = io.of('/wol');
 
-// influxdb
+// influxdb 1.8
 const {InfluxDB, Point, HttpError, FluxTableMetaData} = require('@influxdata/influxdb-client')
+const {url, org, token18, bucket} = require('./env')
+const writeApi = new InfluxDB({url:url,token:token18}).getWriteApi(org, bucket, 'ns')
+const queryApi = new InfluxDB({url:url,token:token18}).getQueryApi(org)
+
+// influxdb 2+
+/*const {InfluxDB, Point, HttpError, FluxTableMetaData} = require('@influxdata/influxdb-client')
 const {url, token, org, bucket} = require('./env')
 const {hostname} = require('os')
 const writeApi = new InfluxDB({url, token}).getWriteApi(org, bucket, 'ns')
 //writeApi.useDefaultTags({location: hostname()})
-const queryApi = new InfluxDB({url, token}).getQueryApi(org)
+const queryApi = new InfluxDB({url, token}).getQueryApi(org)*/
 
-//const Gpio = require('onoff').Gpio;
+// onoff
+const Gpio = require('onoff').Gpio;
+var LED = new Gpio(24, 'out'); // LED Haustür
+let stopBlinking = false;
 
 const isReachable = require('is-reachable');
 const wakeonlan = require('wake_on_lan');
@@ -25,13 +34,9 @@ const wakeonlan = require('wake_on_lan');
 const dayjs = require('dayjs');
 
 const server_port = 80;
-
 var connectCounter = 0;
 
-//var LED = new Gpio(24, 'out'); // LED Haustür
-let stopBlinking = false;
-
-var portals = { 'portals' : [
+/*var portals = { 'portals' : [
 			{ id:4, pin:25, 
 			  name:"housedoor", name_short:"hd", name_long:"Haustür", 
 			  state:0, tstamp:dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss') },
@@ -47,29 +52,41 @@ var portals = { 'portals' : [
 			{ id:1, pin:5, pin_move:12, pin_hold: 400, led:false,
 			  name:"garage", name_short:"g", name_long:"Garage", 
 			  state:0, tstamp:"2020-05-24 07:50:47" }
+		]}*/
+var portals = { 'portals' : [
+			{ id:4, pin:25, 
+			  name:"housedoor", name_short:"hd", name_long:"Haustür" },
+			{ id:5, pin:8, pin_lock:16, pin_unlock:20, pin_hold: 500,
+			  name:"housedoorlock", name_short:"hdl", name_long:"Haustür Riegel" },
+			{ id:2, pin:13, 
+			  name:"garagedoor", name_short:"gd", name_long:"Garagentür" },
+			{ id:3, pin:6, pin_lock:19, pin_unlock:26, pin_hold: 500, led:false,
+			  name:"garagedoorlock", name_short:"gdl", name_long:"Garagentür Riegel" },
+			{ id:1, pin:5, pin_move:12, pin_hold: 400, led:false,
+			  name:"garage", name_short:"g", name_long:"Garage" }
 		]} 
 
 for (x in portals){
   for (y in portals[x]){
-    insertInfluxdb(portals[x][y].name_short.toUpperCase(),Math.floor(Math.random()*2));
-	portals[x][y].tstamp = queryInfluxdb(portals[x][y].name_short.toUpperCase());
-    eval('portal' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin + ';');
-    //eval('portal' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', \'in\', \'both\');');	
-	if (portals[x][y].hasOwnProperty('pin_lock')){
-	  eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_lock + ';');
-	  //eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_lock + ', \'high\', {activeLow:true});');
-	}
-	if (portals[x][y].hasOwnProperty('pin_unlock')){
-	  eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_unlock + ';');
-	  //eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_unlock + ', \'high\', {activeLow:true});');
-	}
-	if (portals[x][y].hasOwnProperty('pin_move')){
-	  eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_move + ';');
-	  //eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_move + ', \'high\', {activeLow:true});');
-	}
+    //insertInfluxdb(portals[x][y].name_short.toUpperCase(),Math.floor(Math.random()*2));
+    //portals[x][y].tstamp = queryInfluxdb(portals[x][y].name_short.toUpperCase());
+    //eval('portal' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin + ';');
+    eval('portal' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', \'in\', \'both\');');	
+    if (portals[x][y].hasOwnProperty('pin_lock')){
+      //eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_lock + ';');
+      eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_lock + ', \'high\', {activeLow:true});');
+    }
+    if (portals[x][y].hasOwnProperty('pin_unlock')){
+      //eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_unlock + ';');
+      eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_unlock + ', \'high\', {activeLow:true});');
+    }
+    if (portals[x][y].hasOwnProperty('pin_move')){
+      eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_move + ';');
+      //eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_move + ', \'high\', {activeLow:true});');
+    }
   }
 }
-/*
+
 portalHD.read((err, value) => {
   var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'HD') ? x.id : null)[0].id;
   processPortal(id,value,true);
@@ -111,7 +128,7 @@ portalG.watch((err, value) => {
   var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].id;
   processPortal(id,value);
 });
-*/
+
 const blinkLED = _ => {
   if (stopBlinking) {
     return 
@@ -127,29 +144,39 @@ function processPortal(id,state,initial=false){
   var name = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name;
   var name_short = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_short.toUpperCase();
   var state_old = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state;
+  //var tstamp = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp
 
   if (initial == true){
     console.log(getTime() + ' Intializing ' + name_short + ' STATE: ' + state);
-	// read influxdb
-	portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = queryInfluxdb(name_short);
+    portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
+
+    // read influxdb & write if empty
+    queryInfluxdb(id,name_short,state)
+    //if (typeof lastTimestamp === 'undefined'){
+    if (typeof portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp === 'undefined'){
+    //  console.log(getTime() + ' No last entry ' + name_short + ' STATE: ' + state + ' tstamp: ' + tstamp);
+      //portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
+
+      //insertInfluxdb(name_short,state);
+      //queryInfluxdb(id,name_short)
+    }
   } else {
     console.log(getTime() + ' ' + name_short + ' STATE: ' + state);
   }
 
-  if (state_old != state){
-    console.log(getTime() + ' Change ' + name_short + ' STATE: ' + state + ' STATE_OLD: ' + state_old);
+  if (typeof state === 'undefined' && state != state_old){
+    console.log(getTime() + ' Change ' + name_short + ' STATE: ' + state_old + ' -> ' + state);
     portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
-	// save datetime
-	portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss');
-	// write influxdb
-	insertInfluxdb(name_short,state);
+    // save datetime
+    portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss');
+    // write influxdb
+    insertInfluxdb(name_short,state);
 	
-	// automatic lock
-	/*if (name_short == 'GDL'){
-	  if (!state){
-		 
-	  }
-	}*/
+    // automatic lock
+    /*if (name_short == 'GDL'){
+      if (!state){
+      }
+    }*/
   }
 
   if (name_short == 'G'){ 
@@ -415,68 +442,60 @@ function unexportOnClose() {
 };
 process.on('SIGINT', unexportOnClose); //function to run when user closes using ctrl+c 
 
-function addZero(x,n) {
-  while (x.toString().length < n) {
-    x = "0" + x;
-  }
-  return x;
-}
 function getTime() {
-  var d = new Date();
-  var h = addZero(d.getHours(), 2);
-  var m = addZero(d.getMinutes(), 2);
-  var s = addZero(d.getSeconds(), 2);
-  var ms = addZero(d.getMilliseconds(), 3);
-  return (h + ":" + m + ":" + s + ":" + ms);
+  return dayjs().format('HH:mm:ss')
 }
 
 // influxdb writeapi
 function insertInfluxdb(portal, state){
-const point = new Point('portal')
-  .tag('portal_name', portal)
-  .floatField('state', state)
-writeApi.writePoint(point)
+  const point = new Point('portal')
+    .tag('portal_name', portal)
+    .floatField('state', state)
+  writeApi.writePoint(point)
 
-writeApi
+  writeApi
     .close()
     .then(() => {
-        console.log('INSERT: ' + point)
+      console.log('influxdb: write ' + point)
     })
     .catch(e => {
-        console.error(e)
-		if (e instanceof HttpError && e.statusCode === 401) {
-		  console.log('ERR: ' + e)
-		}
-        console.log('ERR: ' + e)
+       console.error(e)
+       if (e instanceof HttpError && e.statusCode === 401) {
+         console.log('ERR: ' + e)
+       }	
+       console.log('ERR: ' + e)
     })	
 }
 
-function queryInfluxdb(portal){
-var time;
-const fluxQuery = `from(bucket:"homeautomation") 
+function queryInfluxdb(id, name_short, state){
+  const fluxQuery = `from(bucket:"homeautomation") 
                  |> range(start: 0) 
-				 |> filter(fn: (r) => r["_measurement"] == "portal")
-                 |> filter(fn: (r) => r["portal_name"] == "GDL")
+		 |> filter(fn: (r) => r["_measurement"] == "portal")
+                 |> filter(fn: (r) => r["portal_name"] == "${name_short}")
                  |> filter(fn: (r) => r["_field"] == "state")
-				 |> sort(columns:["_time"], desc: true)
+		 |> sort(columns:["_time"], desc: true)
                  |> limit(n:1)`;
 
-queryApi.queryRows(fluxQuery, {
-  next(row, tableMeta) {
-    const o = tableMeta.toObject(row)
-    //console.log(JSON.stringify(o, null, 2))
-    console.log(
-      `${o._time} ${o._measurement} ${o.portal_name} ${o._field}=${o._value}`
-    )
-	time = o._time;
-  },
-  error(e) {
-    console.error(e)
-    console.log('ERR: ' + e)
-  },
-  complete() {
-    console.log('TIME: ' + time)
-  },
-})
-return dayjs(time).format('YYYY-MM-DD HH:mm:ss')
+  queryApi.queryRows(fluxQuery, {
+    next(row, tableMeta) {
+      const o = tableMeta.toObject(row)
+      //console.log(JSON.stringify(o, null, 2))
+      //console.log(`${o._time} ${o._measurement} ${o.portal_name} ${o._field}=${o._value}`)
+      time = o._time;
+    },
+    error(e) {
+      console.error(e)
+      console.log('ERR: ' + e)
+    },
+    complete() {
+      if (typeof time === 'undefined'){
+        console.log('influxdb: empty db')
+        insertInfluxdb(name_short,state);
+        portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = dayjs().format('YYYY-MM-DD HH:mm:ss')
+      } else {
+        console.log('influxdb: read ' + time)
+        portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = dayjs(time).format('YYYY-MM-DD HH:mm:ss')
+      }
+    },
+  })
 }

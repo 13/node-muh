@@ -4,8 +4,11 @@
   "description": "muh hosts hosts online and wake on lan",
   "main": "express.js",
   "dependencies": {
+    "@influxdata/influxdb-client": "^1.8.0",
+    "dayjs": "^1.9.6",
     "express": "^4.17.1",
     "is-reachable": "^4.0.0",
+    "onoff": "^6.0.1",
     "socket.io": "^2.3.0",
     "vuetify": "^2.3.3",
     "wake_on_lan": "^1.0.0"
