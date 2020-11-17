@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const express = require('express');
 const app = express();
 
@@ -5,6 +7,14 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const portal = io.of('/portal');
 const wol = io.of('/wol');
+
+// influxdb
+const {InfluxDB, Point, HttpError, FluxTableMetaData} = require('@influxdata/influxdb-client')
+const {url, token, org, bucket} = require('./env')
+const {hostname} = require('os')
+const writeApi = new InfluxDB({url, token}).getWriteApi(org, bucket, 'ns')
+//writeApi.useDefaultTags({location: hostname()})
+const queryApi = new InfluxDB({url, token}).getQueryApi(org)
 
 //const Gpio = require('onoff').Gpio;
 
@@ -41,6 +51,8 @@ var portals = { 'portals' : [
 
 for (x in portals){
   for (y in portals[x]){
+    insertInfluxdb(portals[x][y].name_short.toUpperCase(),Math.floor(Math.random()*2));
+	portals[x][y].tstamp = queryInfluxdb(portals[x][y].name_short.toUpperCase());
     eval('portal' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin + ';');
     //eval('portal' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', \'in\', \'both\');');	
 	if (portals[x][y].hasOwnProperty('pin_lock')){
@@ -118,6 +130,8 @@ function processPortal(id,state,initial=false){
 
   if (initial == true){
     console.log(getTime() + ' Intializing ' + name_short + ' STATE: ' + state);
+	// read influxdb
+	portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = queryInfluxdb(name_short);
   } else {
     console.log(getTime() + ' ' + name_short + ' STATE: ' + state);
   }
@@ -127,6 +141,15 @@ function processPortal(id,state,initial=false){
     portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
 	// save datetime
 	portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss');
+	// write influxdb
+	insertInfluxdb(name_short,state);
+	
+	// automatic lock
+	/*if (name_short == 'GDL'){
+	  if (!state){
+		 
+	  }
+	}*/
   }
 
   if (name_short == 'G'){ 
@@ -405,4 +428,55 @@ function getTime() {
   var s = addZero(d.getSeconds(), 2);
   var ms = addZero(d.getMilliseconds(), 3);
   return (h + ":" + m + ":" + s + ":" + ms);
+}
+
+// influxdb writeapi
+function insertInfluxdb(portal, state){
+const point = new Point('portal')
+  .tag('portal_name', portal)
+  .floatField('state', state)
+writeApi.writePoint(point)
+
+writeApi
+    .close()
+    .then(() => {
+        console.log('INSERT: ' + point)
+    })
+    .catch(e => {
+        console.error(e)
+		if (e instanceof HttpError && e.statusCode === 401) {
+		  console.log('ERR: ' + e)
+		}
+        console.log('ERR: ' + e)
+    })	
+}
+
+function queryInfluxdb(portal){
+var time;
+const fluxQuery = `from(bucket:"homeautomation") 
+                 |> range(start: 0) 
+				 |> filter(fn: (r) => r["_measurement"] == "portal")
+                 |> filter(fn: (r) => r["portal_name"] == "GDL")
+                 |> filter(fn: (r) => r["_field"] == "state")
+				 |> sort(columns:["_time"], desc: true)
+                 |> limit(n:1)`;
+
+queryApi.queryRows(fluxQuery, {
+  next(row, tableMeta) {
+    const o = tableMeta.toObject(row)
+    //console.log(JSON.stringify(o, null, 2))
+    console.log(
+      `${o._time} ${o._measurement} ${o.portal_name} ${o._field}=${o._value}`
+    )
+	time = o._time;
+  },
+  error(e) {
+    console.error(e)
+    console.log('ERR: ' + e)
+  },
+  complete() {
+    console.log('TIME: ' + time)
+  },
+})
+return dayjs(time).format('YYYY-MM-DD HH:mm:ss')
 }
