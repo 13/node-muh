@@ -175,6 +175,15 @@ function processPortal(id,state,initial=false){
     // write influxdb
     insertInfluxdb(name_short,state);
 	
+	// play sound
+    if (name_short == 'HD'){ 
+	    if (state){
+          playSound(dong)
+      } else {
+          playSound(ding)
+      }
+    }	
+	
     // automatic lock
     /*if (name_short == 'GDL'){
       if (!state){
@@ -182,6 +191,7 @@ function processPortal(id,state,initial=false){
     }*/
   }
 
+  // LED
   if (name_short == 'G'){ 
     if (state){
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].led = true;
