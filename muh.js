@@ -254,29 +254,29 @@ portal.on('connection', async (socket) => {
     console.log('pushportal: ' + name + ' ' + action );
     if (name == 'housedoor'){
       if (action == 'lock'){ 
-        handlePortal(lockRelayHDL,name,action,10);
+        handlePortal('lockRelayHDL',name,action,10);
       }
       if (action == 'unlock'){ 
-        handlePortal(unlockRelayHDL,name,action,10);
+        handlePortal('unlockRelayHDL',name,action,10);
       }
       if (action == 'open'){ 
-        handlePortal(unlockRelayHDL,name,action,500);
+        handlePortal('unlockRelayHDL',name,action,500);
       }
     }
     if (name == 'garagedoor'){
       if (action == 'lock'){ 
-        handlePortal(lockRelayGDL,name,action,10);
+        handlePortal('lockRelayGDL',name,action,10);
       }
       if (action == 'unlock'){ 
-        handlePortal(unlockRelayGDL,name,action,10);
+        handlePortal('unlockRelayGDL',name,action,10);
       }
       if (action == 'open'){ 
-        handlePortal(unlockRelayGDL,name,action,500);
+        handlePortal('unlockRelayGDL',name,action,500);
       }
     }
     if (name == 'garage'){
       if (action == 'move'){ 
-        handlePortal(moveRelayG,name,action,400);
+        handlePortal('moveRelayG',name,action,400);
       }
     }
   }); 	
