@@ -81,8 +81,8 @@ for (x in portals){
       eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_unlock + ', \'high\', {activeLow:true});');
     }
     if (portals[x][y].hasOwnProperty('pin_move')){
-      eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_move + ';');
-      //eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_move + ', \'high\', {activeLow:true});');
+      //eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_move + ';');
+      eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_move + ', \'high\', {activeLow:true});');
     }
   }
 }
@@ -219,12 +219,11 @@ function processPortal(id,state,initial=false){
 
 app.use(express.static(__dirname + '/public'));
 
-function setRelay(value,state) {
+function setRelay(gpio,state) {
   if (state){
-    console.log(value)
-    value.write(1)
+    gpio.write(1)
   } else {
-    value.write(0)
+    gpio.write(0)
   }
 }
 
@@ -254,29 +253,29 @@ portal.on('connection', async (socket) => {
     console.log('pushportal: ' + name + ' ' + action )
     if (name == 'housedoor'){
       if (action == 'lock'){ 
-        handlePortal('lockRelayHDL',name,action,10)
+        handlePortal(lockRelayHDL,name,action,10)
       }
       if (action == 'unlock'){ 
-        handlePortal('unlockRelayHDL',name,action,10)
+        handlePortal(unlockRelayHDL,name,action,10)
       }
       if (action == 'open'){ 
-        handlePortal('unlockRelayHDL',name,action,500)
+        handlePortal(unlockRelayHDL,name,action,500)
       }
     }
     if (name == 'garagedoor'){
       if (action == 'lock'){ 
-        handlePortal('lockRelayGDL',name,action,10)
+        handlePortal(lockRelayGDL,name,action,10)
       }
       if (action == 'unlock'){ 
-        handlePortal('unlockRelayGDL',name,action,10)
+        handlePortal(unlockRelayGDL,name,action,10)
       }
       if (action == 'open'){ 
-        handlePortal('unlockRelayGDL',name,action,500)
+        handlePortal(unlockRelayGDL,name,action,500)
       }
     }
     if (name == 'garage'){
       if (action == 'move'){ 
-        handlePortal('moveRelayG',name,action,400)
+        handlePortal(moveRelayG,name,action,400)
       }
     }
   }); 	
