@@ -38,6 +38,7 @@ const dayjs = require('dayjs');
 
 const server_port = 80;
 var connectCounter = 0;
+var timer = null;
 
 /*var portals = { 'portals' : [
 			{ id:4, pin:25, 
@@ -59,7 +60,7 @@ var connectCounter = 0;
 var portals = { 'portals' : [
 			{ id:4, pin:25, 
 			  name:"housedoor", name_short:"hd", name_long:"Haustür" },
-			{ id:5, pin:8, pin_lock:16, pin_unlock:20, pin_hold: 500,
+			{ id:5, pin:8, pin_lock:16, pin_unlock:20, pin_hold: 500, lock_timer: false,
 			  name:"housedoorlock", name_short:"hdl", name_long:"Haustür Riegel" },
 			{ id:2, pin:13, 
 			  name:"garagedoor", name_short:"gd", name_long:"Garagentür" },
@@ -185,10 +186,28 @@ function processPortal(id,state,initial=false){
     }	
 	
     // automatic lock
-    /*if (name_short == 'GDL'){
-      if (!state){
-      }
-    }*/
+  /*if (name_short == 'GD'){
+      if (state){
+	    // set timer 10m
+		//portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
+		//startTimer()
+      } else {
+	    // delete timer & disable autolock
+	    //portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
+		//clearTimeout(timer);
+	  }
+    }
+    if (name_short == 'GDL'){
+      if (state){
+	    // delete timer & disable autolock
+	    //portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
+		//clearTimeout(timer);
+      } else {
+	    // set timer 10m
+		//portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
+		//startTimer()
+	  }
+    } */	
   }
 
   // LED
@@ -231,6 +250,15 @@ function processPortal(id,state,initial=false){
 }
 
 app.use(express.static(__dirname + '/public'));
+
+function startTimer(){
+  var timer = null;
+  console.log(getTime() + ' Timer started')
+  var timer = setTimeout(function () {
+    console.log(getTime() + ' Timer finished');
+    //handlePortal(lockRelayGDL,'garagedoorlock','lock',10)
+  }, 10000)
+}
 
 playSound(sound){
   var folder = '/home/ben/sounds/'
