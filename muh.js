@@ -27,6 +27,9 @@ const Gpio = require('onoff').Gpio;
 var LED = new Gpio(24, 'out'); // LED Haustür
 let stopBlinking = false;
 
+// play-sound
+const player = require('play-sound')(opts = {})
+
 const isReachable = require('is-reachable');
 const wakeonlan = require('wake_on_lan');
 
@@ -218,6 +221,20 @@ function processPortal(id,state,initial=false){
 }
 
 app.use(express.static(__dirname + '/public'));
+
+playSound(sound){
+  var folder = '/home/ben/sounds/'
+  if (sound == 'ding'){
+    mp3 = 'door/elevator1.mp3'
+  }
+  if (sound == 'dong'){
+    mp3 = 'door/elevator2.mp3'
+  }
+  console.log(getTime() + ' Playing ' + folder.concat(mp3));
+  player.play(folder.concat(mp3), function(err){
+	if (err) throw err
+  })
+}
 
 function setRelay(gpio,state) {
   if (state){
