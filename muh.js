@@ -264,9 +264,15 @@ function playSound(sound){
   var folder = '/home/ben/sounds/'
   if (sound == 'ding'){
     mp3 = 'door/elevator1.mp3'
+    if (dayjs().month() == 12 && dayjs().date() >= 23 && dayjs().date() <= 26){
+      mp3 = 'door/otannenbaum.mp3'
+    }
   }
   if (sound == 'dong'){
     mp3 = 'door/elevator2.mp3'
+    if (dayjs().month() == 12 && dayjs().date() >= 23 && dayjs().date() <= 26){
+      mp3 = 'door/chime6.mp3'
+    }
   }
   console.log(getTime() + ' Playing ' + folder.concat(mp3))
   player.play(folder.concat(mp3), function(err){
