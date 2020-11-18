@@ -11,8 +11,8 @@ const wol = io.of('/wol');
 // influxdb 1.8
 const {InfluxDB, Point, HttpError, FluxTableMetaData} = require('@influxdata/influxdb-client')
 const {url, org, token18, bucket} = require('./env')
-const writeApi = new InfluxDB({url:url,token:token18}).getWriteApi(org, bucket, 'ns')
-const queryApi = new InfluxDB({url:url,token:token18}).getQueryApi(org)
+//const writeApi = new InfluxDB({url:url,token:token18}).getWriteApi(org, bucket, 'ns')
+//const queryApi = new InfluxDB({url:url,token:token18}).getQueryApi(org)
 
 // influxdb 2+
 /*const {InfluxDB, Point, HttpError, FluxTableMetaData} = require('@influxdata/influxdb-client')
@@ -153,18 +153,18 @@ function processPortal(id,state,initial=false){
     // read influxdb & write if empty
     queryInfluxdb(id,name_short,state)
     //if (typeof lastTimestamp === 'undefined'){
-    if (typeof portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp === 'undefined'){
+    //if (typeof portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp === 'undefined'){
     //  console.log(getTime() + ' No last entry ' + name_short + ' STATE: ' + state + ' tstamp: ' + tstamp);
       //portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
 
       //insertInfluxdb(name_short,state);
       //queryInfluxdb(id,name_short)
-    }
+    //}
   } else {
     console.log(getTime() + ' ' + name_short + ' STATE: ' + state);
   }
 
-  if (typeof state === 'undefined' && state != state_old){
+  if (typeof state_old !== 'undefined' && state != state_old){
     console.log(getTime() + ' Change ' + name_short + ' STATE: ' + state_old + ' -> ' + state);
     portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
     // save datetime
@@ -448,11 +448,11 @@ function getTime() {
 
 // influxdb writeapi
 function insertInfluxdb(portal, state){
+  const writeApi = new InfluxDB({url:url,token:token18}).getWriteApi(org, bucket, 'ns')
   const point = new Point('portal')
     .tag('portal_name', portal)
     .floatField('state', state)
   writeApi.writePoint(point)
-
   writeApi
     .close()
     .then(() => {
@@ -461,9 +461,9 @@ function insertInfluxdb(portal, state){
     .catch(e => {
        console.error(e)
        if (e instanceof HttpError && e.statusCode === 401) {
-         console.log('ERR: ' + e)
+         console.log('ERR1: ' + e)
        }	
-       console.log('ERR: ' + e)
+       console.log('ERR2: ' + e)
     })	
 }
 
@@ -476,6 +476,7 @@ function queryInfluxdb(id, name_short, state){
 		 |> sort(columns:["_time"], desc: true)
                  |> limit(n:1)`;
 
+  const queryApi = new InfluxDB({url:url,token:token18}).getQueryApi(org)
   queryApi.queryRows(fluxQuery, {
     next(row, tableMeta) {
       const o = tableMeta.toObject(row)
