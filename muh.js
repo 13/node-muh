@@ -217,15 +217,16 @@ function processPortal(id,state,initial=false){
   }
 }
 
+app.use(express.static(__dirname + '/public'));
+
 function setRelay(gpio,state) {
   if (state){
+    console.log(gpio)
     gpio.write(1);
   } else {
     gpio.write(0);
   }
 }
-
-app.use(express.static(__dirname + '/public'));
 
 function handlePortal(portal,name,action,hold){
   console.log(getTime() + ' ' + name + ' ' + action);
