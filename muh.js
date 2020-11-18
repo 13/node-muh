@@ -219,22 +219,22 @@ function processPortal(id,state,initial=false){
 
 app.use(express.static(__dirname + '/public'));
 
-function setRelay(gpio,state) {
+function setRelay(value,state) {
   if (state){
-    console.log(gpio)
-    gpio.write(1);
+    console.log(value)
+    value.write(1)
   } else {
-    gpio.write(0);
+    value.write(0)
   }
 }
 
 function handlePortal(portal,name,action,hold){
   console.log(getTime() + ' ' + name + ' ' + action);
-  setRelay(portal,true);
+  setRelay(portal,true)
   setTimeout(function () {
     console.log(getTime() + ' ' + name + ' ' + action + ' OK');
-    setRelay(portal,false);
-  }, hold);  
+    setRelay(portal,false)
+  }, hold)
 }
 
 portal.on('connection', async (socket) => {
@@ -251,32 +251,32 @@ portal.on('connection', async (socket) => {
 
   // receive portal command
   socket.on('pushportal', (name, action) => {
-    console.log('pushportal: ' + name + ' ' + action );
+    console.log('pushportal: ' + name + ' ' + action )
     if (name == 'housedoor'){
       if (action == 'lock'){ 
-        handlePortal('lockRelayHDL',name,action,10);
+        handlePortal('lockRelayHDL',name,action,10)
       }
       if (action == 'unlock'){ 
-        handlePortal('unlockRelayHDL',name,action,10);
+        handlePortal('unlockRelayHDL',name,action,10)
       }
       if (action == 'open'){ 
-        handlePortal('unlockRelayHDL',name,action,500);
+        handlePortal('unlockRelayHDL',name,action,500)
       }
     }
     if (name == 'garagedoor'){
       if (action == 'lock'){ 
-        handlePortal('lockRelayGDL',name,action,10);
+        handlePortal('lockRelayGDL',name,action,10)
       }
       if (action == 'unlock'){ 
-        handlePortal('unlockRelayGDL',name,action,10);
+        handlePortal('unlockRelayGDL',name,action,10)
       }
       if (action == 'open'){ 
-        handlePortal('unlockRelayGDL',name,action,500);
+        handlePortal('unlockRelayGDL',name,action,500)
       }
     }
     if (name == 'garage'){
       if (action == 'move'){ 
-        handlePortal('moveRelayG',name,action,400);
+        handlePortal('moveRelayG',name,action,400)
       }
     }
   }); 	
