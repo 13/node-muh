@@ -176,38 +176,38 @@ function processPortal(id,state,initial=false){
     // write influxdb
     insertInfluxdb(name_short,state);
 	
-	// play sound
+    // play sound
     if (name_short == 'HD'){ 
-	    if (state){
-          playSound(dong)
+      if (state){
+         playSound('dong')
       } else {
-          playSound(ding)
+         playSound('ding')
       }
     }	
 	
     // automatic lock
-  /*if (name_short == 'GD'){
+    if (name_short == 'GD'){
       if (state){
-	    // set timer 10m
-		//portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
-		//startTimer()
+	// set timer 10m
+        portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
+        startTimer()
       } else {
-	    // delete timer & disable autolock
-	    //portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
-		//clearTimeout(timer);
-	  }
+        // delete timer & disable autolock
+        portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
+	clearTimeout(timer);
+      }
     }
     if (name_short == 'GDL'){
       if (state){
-	    // delete timer & disable autolock
-	    //portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
-		//clearTimeout(timer);
+	 // delete timer & disable autolock
+	 portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
+	 clearTimeout(timer);
       } else {
-	    // set timer 10m
-		//portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
-		//startTimer()
-	  }
-    } */	
+        // set timer 10m
+	portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
+	startTimer()
+      }
+    } 
   }
 
   // LED
@@ -231,18 +231,18 @@ function processPortal(id,state,initial=false){
     if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state == 1 &&
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state == 1){
       // LED on
-      console.log(getTime() + ' LED ON');
+      console.log(getTime() + ' LED: ON');
       stopBlinking = true;
       LED.write(1);
     } else if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state == 1 ||
                portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state == 1){
       // LED blink
-      console.log(getTime() + ' LED BLINK');
+      console.log(getTime() + ' LED: BLINK');
       stopBlinking = false;
       blinkLED();
     } else {
       // LED off
-      console.log(getTime() + ' LED OFF');
+      console.log(getTime() + ' LED: OFF');
       stopBlinking = true;
       LED.write(0);
     }
@@ -260,7 +260,7 @@ function startTimer(){
   }, 10000)
 }
 
-playSound(sound){
+function playSound(sound){
   var folder = '/home/ben/sounds/'
   if (sound == 'ding'){
     mp3 = 'door/elevator1.mp3'
@@ -268,9 +268,9 @@ playSound(sound){
   if (sound == 'dong'){
     mp3 = 'door/elevator2.mp3'
   }
-  console.log(getTime() + ' Playing ' + folder.concat(mp3));
+  console.log(getTime() + ' Playing ' + folder.concat(mp3))
   player.play(folder.concat(mp3), function(err){
-	if (err) throw err
+    if (err) throw err
   })
 }
 
@@ -511,7 +511,7 @@ function insertInfluxdb(portal, state){
   writeApi
     .close()
     .then(() => {
-      console.log('influxdb: write ' + point)
+      console.log(getTime() + ' influxdb: write ' + point)
     })
     .catch(e => {
        console.error(e)
@@ -545,11 +545,11 @@ function queryInfluxdb(id, name_short, state){
     },
     complete() {
       if (typeof time === 'undefined'){
-        console.log('influxdb: empty db')
+        console.log(getTime() + 'influxdb: no record found for ' + name_short)
         insertInfluxdb(name_short,state);
         portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = dayjs().format('YYYY-MM-DD HH:mm:ss')
       } else {
-        console.log('influxdb: read ' + time)
+        console.log(getTime() + ' influxdb: read ' + name_short + ' ' + time)
         portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = dayjs(time).format('YYYY-MM-DD HH:mm:ss')
       }
     },
