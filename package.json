@@ -5,6 +5,7 @@
   "main": "express.js",
   "dependencies": {
     "@influxdata/influxdb-client": "^1.8.0",
+    "@mdi/font": "^5.8.55",
     "dayjs": "^1.9.6",
     "express": "^4.17.1",
     "is-reachable": "^4.0.0",
