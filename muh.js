@@ -23,8 +23,8 @@ const writeApi = new InfluxDB({url, token}).getWriteApi(org, bucket, 'ns')
 const queryApi = new InfluxDB({url, token}).getQueryApi(org)*/
 
 // mqtt
-/*var mqtt = require('mqtt')
-var mqttClient  = mqtt.connect('mqtt://test.mosquitto.org')*/
+var mqtt = require('mqtt')
+var mqttClient  = mqtt.connect('mqtt://localhost')
 
 // onoff
 const Gpio = require('onoff').Gpio;
@@ -152,14 +152,15 @@ function processPortal(id,state,initial=false){
   var name = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name;
   var name_short = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_short.toUpperCase();
   var state_old = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state;
-  //var tstamp = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp
 
   if (initial == true){
-    console.log(getTime() + ' Intializing ' + name_short + ' STATE: ' + state);
+    console.log(getTime() + 'Intializing ' + name_short + ' STATE: ' + state);
     portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
 
     // read influxdb & write if empty
     queryInfluxdb(id,name_short,state)
+    // publish mqtt
+    publishMQTT(name_short,JSON.stringify(portals.portals.filter(x => (x.id == id) ? x.id : null)[0]))
     //if (typeof lastTimestamp === 'undefined'){
     //if (typeof portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp === 'undefined'){
     //  console.log(getTime() + ' No last entry ' + name_short + ' STATE: ' + state + ' tstamp: ' + tstamp);
@@ -169,16 +170,18 @@ function processPortal(id,state,initial=false){
       //queryInfluxdb(id,name_short)
     //}
   } else {
-    console.log(getTime() + ' ' + name_short + ' STATE: ' + state);
+    console.log(getTime() + '' + name_short + ' STATE: ' + state);
   }
 
   if (typeof state_old !== 'undefined' && state != state_old){
-    console.log(getTime() + ' Change ' + name_short + ' STATE: ' + state_old + ' -> ' + state);
+    console.log(getTime() + 'Change ' + name_short + ' STATE: ' + state_old + ' -> ' + state);
     portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
     // save datetime
     portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss');
     // write influxdb
     insertInfluxdb(name_short,state);
+    // publish mqtt
+    publishMQTT(name_short,JSON.stringify(portals.portals.filter(x => (x.id == id) ? x.id : null)[0]))
 	
     // play sound
     if (name_short == 'HD'){ 
@@ -235,18 +238,18 @@ function processPortal(id,state,initial=false){
     if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state == 1 &&
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state == 1){
       // LED on
-      console.log(getTime() + ' LED: ON');
+      console.log(getTime() + 'LED: ON');
       stopBlinking = true;
       LED.write(1);
     } else if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state == 1 ||
                portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state == 1){
       // LED blink
-      console.log(getTime() + ' LED: BLINK');
+      console.log(getTime() + 'LED: BLINK');
       stopBlinking = false;
       blinkLED();
     } else {
       // LED off
-      console.log(getTime() + ' LED: OFF');
+      console.log(getTime() + 'LED: OFF');
       stopBlinking = true;
       LED.write(0);
     }
@@ -257,9 +260,9 @@ app.use(express.static(__dirname + '/public'));
 
 function startTimer(){
   var timer = null;
-  console.log(getTime() + ' Timer started')
+  console.log(getTime() + 'Timer started')
   var timer = setTimeout(function () {
-    console.log(getTime() + ' Timer finished');
+    console.log(getTime() + 'Timer finished');
     //handlePortal(lockRelayGDL,'garagedoorlock','lock',10)
   }, 10000)
 }
@@ -278,7 +281,7 @@ function playSound(sound){
       mp3 = 'door/chime6.mp3'
     }
   }
-  console.log(getTime() + ' Playing ' + folder.concat(mp3))
+  console.log(getTime() + 'Playing ' + folder.concat(mp3))
   player.play(folder.concat(mp3), function(err){
     if (err) throw err
   })
@@ -293,10 +296,10 @@ function setRelay(gpio,state) {
 }
 
 function handlePortal(portal,name,action,hold){
-  console.log(getTime() + ' ' + name + ' ' + action);
+  console.log(getTime() + '' + name + ' ' + action);
   setRelay(portal,true)
   setTimeout(function () {
-    console.log(getTime() + ' ' + name + ' ' + action + ' OK');
+    console.log(getTime() + '' + name + ' ' + action + ' OK');
     setRelay(portal,false)
   }, hold)
 }
@@ -508,7 +511,7 @@ function unexportOnClose() {
 process.on('SIGINT', unexportOnClose); //function to run when user closes using ctrl+c 
 
 function getTime() {
-  return dayjs().format('HH:mm:ss')
+  return dayjs().format('HH:mm:ss.SSS ')
 }
 
 // influxdb writeapi
@@ -521,7 +524,7 @@ function insertInfluxdb(portal, state){
   writeApi
     .close()
     .then(() => {
-      console.log(getTime() + ' influxdb: write ' + point)
+      console.log(getTime() + 'influxdb: write ' + point)
     })
     .catch(e => {
        console.error(e)
@@ -559,15 +562,18 @@ function queryInfluxdb(id, name_short, state){
         insertInfluxdb(name_short,state);
         portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = dayjs().format('YYYY-MM-DD HH:mm:ss')
       } else {
-        console.log(getTime() + ' influxdb: read ' + name_short + ' ' + time)
+        console.log(getTime() + 'influxdb: read ' + name_short + ' ' + time)
         portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = dayjs(time).format('YYYY-MM-DD HH:mm:ss')
       }
     },
   })
 }
 
-/*function publishMQTT(topic,msg){
-  // check if connected
-  mqttClient.publish('presence', 'hello!')
-  mqttClient.end()
-}*/
+function publishMQTT(name_short, json){
+  //mqttClient.on('connected',function(){
+  console.log(getTime() + 'mqtt: publish ' + name_short)
+  mqttClient.publish('portal/' + name_short + '/json', json)
+  //})
+  //mqttClient.end()
+}
+
