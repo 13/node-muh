@@ -22,6 +22,10 @@ const writeApi = new InfluxDB({url, token}).getWriteApi(org, bucket, 'ns')
 //writeApi.useDefaultTags({location: hostname()})
 const queryApi = new InfluxDB({url, token}).getQueryApi(org)*/
 
+// nodemailer
+/*const nodemailer = require('nodemailer')
+const smtpTransport = require('nodemailer-smtp-transport')*/
+
 // mqtt
 var mqtt = require('mqtt')
 var mqttClient  = mqtt.connect('mqtt://localhost')
@@ -182,6 +186,8 @@ function processPortal(id,state,initial=false){
     insertInfluxdb(name_short,state);
     // publish mqtt
     publishMQTT(name_short,JSON.stringify(portals.portals.filter(x => (x.id == id) ? x.id : null)[0]))
+    // send mail
+    //sendMail(name_short,state)
 	
     // play sound
     if (name_short == 'HD'){ 
@@ -577,3 +583,27 @@ function publishMQTT(name_short, json){
   //mqttClient.end()
 }
 
+/*var transporter = nodemailer.createTransport(smtpTransport({
+  service: 'gmail',
+  host: 'smtp.gmail.com',
+  auth: {
+      user: '@gmail.com',
+      pass: ''
+  }
+}));
+
+function sendMail(name,state){
+  var mailOptions = {
+    from: 'gmail.com',
+    to: '@gmail.com',
+    subject: name + ' ' + state + ' ' + dayjs().format('HH:mm:ss.SSS DD.MM.YYYY'),
+    text: 'from: p4'
+  };
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(getTime() + 'nodemailer: error ' + error)
+    } else {
+      console.log(getTime() + 'nodemailer: sent ' + info.response)
+    }
+  });  
+}*/
