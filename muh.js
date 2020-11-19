@@ -22,6 +22,10 @@ const writeApi = new InfluxDB({url, token}).getWriteApi(org, bucket, 'ns')
 //writeApi.useDefaultTags({location: hostname()})
 const queryApi = new InfluxDB({url, token}).getQueryApi(org)*/
 
+// mqtt
+/*var mqtt = require('mqtt')
+var mqttClient  = mqtt.connect('mqtt://test.mosquitto.org')*/
+
 // onoff
 const Gpio = require('onoff').Gpio;
 var LED = new Gpio(24, 'out'); // LED Haustür
@@ -561,3 +565,9 @@ function queryInfluxdb(id, name_short, state){
     },
   })
 }
+
+/*function publishMQTT(topic,msg){
+  // check if connected
+  mqttClient.publish('presence', 'hello!')
+  mqttClient.end()
+}*/
