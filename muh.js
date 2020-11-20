@@ -30,7 +30,7 @@ const smtpTransport = require('nodemailer-smtp-transport')*/
 var mqtt = require('mqtt')
 var mqttClient  = mqtt.connect('mqtt://localhost')
 
-// onoff
+// onoff gpio
 const Gpio = require('onoff').Gpio;
 var LED = new Gpio(24, 'out'); // LED Haustür
 let stopBlinking = false;
@@ -75,15 +75,19 @@ var portals = { 'portals' : [
 			{ id:3, pin:6, pin_lock:19, pin_unlock:26, pin_hold: 500, led:false,
 			  name:"garagedoorlock", name_short:"gdl", name_long:"Garagentür Riegel" },
 			{ id:1, pin:5, pin_move:12, pin_hold: 400, led:false,
-			  name:"garage", name_short:"g", name_long:"Garage" }
+			  name:"garage", name_short:"g", name_long:"Garage" },
+			{ id:100, pin_button:7, 
+			  name:"bell", name_short:"b", name_long:"Klingel" }  
 		]} 
 
 for (x in portals){
   for (y in portals[x]){
+	if (portals[x][y].hasOwnProperty('pin')){
     //insertInfluxdb(portals[x][y].name_short.toUpperCase(),Math.floor(Math.random()*2));
     //portals[x][y].tstamp = queryInfluxdb(portals[x][y].name_short.toUpperCase());
     //eval('portal' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin + ';');
-    eval('portal' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', \'in\', \'both\');');	
+      eval('portal' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', \'in\', \'both\');');
+	}
     if (portals[x][y].hasOwnProperty('pin_lock')){
       //eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_lock + ';');
       eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_lock + ', \'high\', {activeLow:true});');
@@ -96,6 +100,10 @@ for (x in portals){
       //eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_move + ';');
       eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_move + ', \'high\', {activeLow:true});');
     }
+    if (portals[x][y].hasOwnProperty('pin_button')){
+      //eval('button' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_button + ';');
+      eval('button' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_button + ', \'in\', \'rising\', {debounceTimeout: 10});');
+    }	
   }
 }
 
@@ -138,6 +146,11 @@ portalGDL.watch((err, value) => {
 });
 portalG.watch((err, value) => {
   var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].id;
+  processPortal(id,value);
+});
+// bell
+buttonB.watch((err, value) => {
+  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'B') ? x.id : null)[0].id;
   processPortal(id,value);
 });
 
@@ -201,7 +214,7 @@ function processPortal(id,state,initial=false){
     // automatic lock
     if (name_short == 'GD'){
       if (state){
-	// set timer 10m
+        // set timer 10m
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
         startTimer()
       } else {
@@ -212,15 +225,23 @@ function processPortal(id,state,initial=false){
     }
     if (name_short == 'GDL'){
       if (state){
-	 // delete timer & disable autolock
-	 portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
-	 clearTimeout(timer);
+        // delete timer & disable autolock
+        portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
+        clearTimeout(timer);
       } else {
         // set timer 10m
-	portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
-	startTimer()
+        portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
+        startTimer()
       }
-    } 
+    }
+	
+	// bell
+    if (name_short == 'B'){ 
+      if (state){
+         playSound('bell')
+		 // push msg
+      }
+    }		
   }
 
   // LED
@@ -287,6 +308,13 @@ function playSound(sound){
       mp3 = 'door/chime6.mp3'
     }
   }
+  // bell  
+  if (sound == 'bell'){
+    mp3 = 'bell/HausKlingel.mp3'
+    if (dayjs().month() == 12 && dayjs().date() >= 23 && dayjs().date() <= 26){
+      mp3 = 'bell/db-westminster1.mp3'
+    }
+  }  
   console.log(getTime() + 'Playing ' + folder.concat(mp3))
   player.play(folder.concat(mp3), function(err){
     if (err) throw err
@@ -513,6 +541,7 @@ function unexportOnClose() {
   lockRelayGDL.unexport();
   unlockRelayGDL.unexport();
   moveRelayG.unexport();
+  buttonB.unexport();
 };
 process.on('SIGINT', unexportOnClose); //function to run when user closes using ctrl+c 
 

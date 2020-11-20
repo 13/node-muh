@@ -145,12 +145,12 @@
 					<v-list>
 						<div v-for="(portal, idx) in portals" :key="idx">
 							<v-list-item
-							v-if="!portal.name.includes('lock')"
+							v-if="!portal.name.includes('lock') || !portal.name.includes('bell')"
 							@click=""
 							disabled
 							>
 								<!-- portal header -->
-								<v-list-item-content v-if="!portal.name.includes('lock')">
+								<v-list-item-content v-if="!portal.name.includes('lock') || !portal.name.includes('bell')">
 									<v-list-item-title class="headline">
 										{{ portals[idx].name | translateName }}
 									</v-list-item-title>
@@ -158,48 +158,48 @@
 								<v-chip
 								label
 								small
-								v-if="!portal.name.includes('lock')"
+								v-if="!portal.name.includes('lock') || !portal.name.includes('bell')"
 								>
 									{{ portal.tstamp | shortdate }}
 								</v-chip>
 								<v-chip
 								label
 								small
-								v-if="!portal.name.includes('lock') && portal.name !== 'garage'"
+								v-if="(!portal.name.includes('lock') && portal.name !== 'garage') || !portal.name.includes('bell')"
 								class="ml-2"
 								>
 									{{ portals[incrementItem(idx)].tstamp | shortdate }}
 								</v-chip>
 							</v-list-item>
 							<!-- portal footer -->
-							<v-container fluid v-if="!portal.name.includes('lock')" class="pa-0">
+							<v-container fluid v-if="!portal.name.includes('lock') || !portal.name.includes('bell')" class="pa-0">
 								<v-row no-gutters
 								align="center"
 								justify="center">	
 									<v-col>
 										<v-list-item
-										v-if="!portal.name.includes('lock')"
+										v-if="!portal.name.includes('lock') || !portal.name.includes('bell')"
 										@click.stop="setDialogState(portal.name,true)"
 										>
 											<v-list-item-icon>
 												<v-icon v-bind:color="stateToTagVV(portal.state)">mdi-checkbox-blank</v-icon>
 											</v-list-item-icon>	
-											<v-list-item-content v-if="!portal.name.includes('lock')">
+											<v-list-item-content v-if="!portal.name.includes('lock') || !portal.name.includes('bell')">
 												<v-list-item-title class="headline">
 													{{ portal.state | translateDoorState }}
 												</v-list-item-title>
 											</v-list-item-content>
 										</v-list-item>
 									</v-col>
-									<v-col v-if="!portal.name.includes('lock') && portal.name !== 'garage'">
+									<v-col v-if="(!portal.name.includes('lock') && portal.name !== 'garage') || !portal.name.includes('bell')">
 										<v-list-item
-										v-if="!portal.name.includes('lock')"
+										v-if="!portal.name.includes('lock') || !portal.name.includes('bell')"
 										@click.stop="setDialogState(portal.name,true)"
 										>
 											<v-list-item-icon>
 												<v-icon v-bind:color="stateToTagVV(portals[incrementItem(idx)].state)">mdi-checkbox-blank</v-icon>
 											</v-list-item-icon>										
-											<v-list-item-content v-if="!portal.name.includes('lock')">
+											<v-list-item-content v-if="!portal.name.includes('lock') || !portal.name.includes('bell')">
 												<v-list-item-title class="headline">
 													{{ portals[incrementItem(idx)].state | translateDoorLockState }}
 												</v-list-item-title>
@@ -222,7 +222,7 @@
 									</v-card-title>
 									<v-card-text>
 										<!-- IF Dialog NOT Garage -->
-										<v-container fluid v-if="portal.name !== 'garage'">
+										<v-container fluid v-if="portal.name !== 'garage' || !portal.name.includes('bell')">
 											<v-row>
 												<v-col>
 													<v-btn block text>
