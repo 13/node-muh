@@ -76,7 +76,7 @@ var portals = { 'portals' : [
 			  name:"garagedoorlock", name_short:"gdl", name_long:"Garagentür Riegel" },
 			{ id:1, pin:5, pin_move:12, pin_hold: 400, led:false,
 			  name:"garage", name_short:"g", name_long:"Garage" },
-			{ id:100, pin_button:7, 
+			{ id:100, pin_button:7, state:0,
 			  name:"bell", name_short:"b", name_long:"Klingel" }  
 		]} 
 
@@ -239,7 +239,7 @@ function processPortal(id,state,initial=false){
     if (name_short == 'B'){ 
       if (state){
          playSound('bell')
-		 // push msg
+         // push msg
       }
     }		
   }
@@ -382,19 +382,19 @@ portal.on('connection', async (socket) => {
     }
   }); 	
 	
-  console.log('[PORTAL] Sending JSON ...');
-  console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
+  //console.log('[PORTAL] Sending JSON ...');
+  //console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
   portal.emit('portal',portals);
   
   // hosts interval ping and send
   var interval_p = setAsyncInterval(async () => {
     //console.log('start');
-    console.log('[PORTAL] Sending JSON Interval ...');
+    //console.log('[PORTAL] Sending JSON Interval ...');
     const promise = new Promise((resolve) => {
       setTimeout(resolve('all done'), 3000);
     });
     await promise;
-    console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
+    //console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
     portal.emit('portal',portals); // send	
     //console.log('end');
   }, 3000);   
