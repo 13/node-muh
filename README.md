@@ -20,9 +20,9 @@ node muh unified homeautomation
 - [x] add relays
 - [x] add influxdb
 - [x] add mqtt
-- [x] add mail (nodemailer)
-- [ ] add pushmessage (gotify)
-- [ ] add klingel
+- [ ] add mail (mstmp-queue)
+- [x] add pushmessage (pushover
+- [x] add klingel
 - [ ] add rfid
 
 ### Secondary features

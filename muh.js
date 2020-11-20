@@ -10,7 +10,7 @@ const wol = io.of('/wol');
 
 // influxdb 1.8
 const {InfluxDB, Point, HttpError, FluxTableMetaData} = require('@influxdata/influxdb-client')
-const {url, org, token18, bucket} = require('./env')
+const {url, org, token18, bucket, po_user, po_token} = require('./env')
 //const writeApi = new InfluxDB({url:url,token:token18}).getWriteApi(org, bucket, 'ns')
 //const queryApi = new InfluxDB({url:url,token:token18}).getQueryApi(org)
 
@@ -40,6 +40,10 @@ const player = require('play-sound')(opts = {})
 
 // loudness
 const loudness = require('loudness')
+
+// node-pushover
+const Push = require( 'pushover-notifications' )
+var fs = require( 'fs' )
 
 const isReachable = require('is-reachable');
 const wakeonlan = require('wake_on_lan');
@@ -105,7 +109,7 @@ for (x in portals){
     }
     if (portals[x][y].hasOwnProperty('pin_button')){
       //eval('button' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_button + ';');
-      eval('button' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_button + ', \'in\', \'rising\', {debounceTimeout: 10});');
+      eval('button' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_button + ', \'in\', \'rising\', {debounceTimeout: 500});');
     }	
   }
 }
@@ -174,7 +178,7 @@ function processPortal(id,state,initial=false){
   var state_old = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state;
 
   if (initial == true){
-    console.log(getTime() + 'Intializing ' + name_short + ' STATE: ' + state);
+    console.log(getTime() + 'portal: intializing ' + name_short + ' STATE: ' + state);
     portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
 
     // read influxdb & write if empty
@@ -190,11 +194,12 @@ function processPortal(id,state,initial=false){
       //queryInfluxdb(id,name_short)
     //}
   } else {
-    console.log(getTime() + '' + name_short + ' STATE: ' + state);
+    console.log(getTime() + 'portal: ' + name_short + ' ' + state);
   }
 
   if (typeof state_old !== 'undefined' && state != state_old){
-    console.log(getTime() + 'Change ' + name_short + ' STATE: ' + state_old + ' -> ' + state);
+    console.log(getTime() + 'portal: change ' + name_short + ' ' + state_old + ' -> ' + state);
+    checkAlarm(id)
     portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
     // save datetime
     portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss');
@@ -238,17 +243,18 @@ function processPortal(id,state,initial=false){
       }
     }
 	
-	// bell
+    // bell
     if (name_short == 'B'){ 
       if (state){
-        await loudness.setVolume(100)
+        loudness.setVolume(100)
         playSound('bell')
-		await loudness.setVolume(85)
-        // push msg
+        loudness.setVolume(85)
+        // pushover
+        sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,'img')
         // reset bell
         portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = 0 
       }
-    }		
+    }
   }
 
   // LED
@@ -272,18 +278,18 @@ function processPortal(id,state,initial=false){
     if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state == 1 &&
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state == 1){
       // LED on
-      console.log(getTime() + 'LED: ON');
+      console.log(getTime() + 'portal: LED on')
       stopBlinking = true;
       LED.write(1);
     } else if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state == 1 ||
                portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state == 1){
       // LED blink
-      console.log(getTime() + 'LED: BLINK');
+      console.log(getTime() + 'portal: LED blink')
       stopBlinking = false;
       blinkLED();
     } else {
       // LED off
-      console.log(getTime() + 'LED: OFF');
+      console.log(getTime() + 'portal: LED off')
       stopBlinking = true;
       LED.write(0);
     }
@@ -294,9 +300,9 @@ app.use(express.static(__dirname + '/public'));
 
 function startTimer(){
   var timer = null;
-  console.log(getTime() + 'Timer started')
+  console.log(getTime() + 'portal: timer started')
   var timer = setTimeout(function () {
-    console.log(getTime() + 'Timer finished');
+    console.log(getTime() + 'portal: timer finished')
     //handlePortal(lockRelayGDL,'garagedoorlock','lock',10)
   }, 10000)
 }
@@ -322,7 +328,7 @@ function playSound(sound){
       mp3 = 'bell/db-westminster1.mp3'
     }
   }  
-  console.log(getTime() + 'Playing ' + folder.concat(mp3))
+  console.log(getTime() + 'portal: playing ' + folder.concat(mp3))
   player.play(folder.concat(mp3), function(err){
     if (err) throw err
   })
@@ -337,29 +343,29 @@ function setRelay(gpio,state) {
 }
 
 function handlePortal(portal,name,action,hold){
-  console.log(getTime() + '' + name + ' ' + action);
+  console.log(getTime() + 'portal: ' + name + ' ' + action);
   setRelay(portal,true)
   setTimeout(function () {
-    console.log(getTime() + '' + name + ' ' + action + ' OK');
+    console.log(getTime() + 'portal: ' + name + ' ' + action + ' OK')
     setRelay(portal,false)
   }, hold)
 }
 
 portal.on('connection', async (socket) => {
-  console.log('portal connected');
+  console.log(getTime() + 'socketio: portal connected')
   connectCounter++; 
-  console.log('users connected: ' + connectCounter);
+  console.log(getTime() + 'socketio: users connected ' + connectCounter)
   
   // disconnect user
   socket.on('disconnect', () => {
     connectCounter--;
-    console.log('user disconnected: ' + connectCounter);
+    console.log(getTime() + 'socketio: users disconnected ' + connectCounter)
     clearAsyncInterval(interval_p);
   });
 
   // receive portal command
   socket.on('pushportal', (name, action) => {
-    console.log('pushportal: ' + name + ' ' + action )
+    console.log(getTime() + 'socketio: pushportal ' + name + ' ' + action)
     if (name == 'housedoor'){
       if (action == 'lock'){ 
         handlePortal(lockRelayHDL,name,action,10)
@@ -479,7 +485,7 @@ wol.on('connection', async (socket) => {
 io.on('connection', async (socket) => { 
   var socketId = socket.id;
   var clientIp = socket.request.connection.remoteAddress;
-  console.log('New connection ' + clientIp);
+  console.log(getTime() + 'socketio: new connection ' + clientIp)
 });
 
 app.get('/', (req, res) => {
@@ -503,13 +509,11 @@ app.get('/wetter', (req, res) => {
 });
 
 server.listen(server_port, function () {
-  console.log('Listening on port: ' + server_port);
+  console.log(getTime() + 'socketio: listening on port ' + server_port)
 });
 
 // async intervals
-
 const asyncIntervals = [];
-
 const runAsyncInterval = async (cb, interval, intervalIndex) => {
   await cb();
   if (asyncIntervals[intervalIndex]) {
@@ -643,3 +647,37 @@ function sendMail(name,state){
     }
   });  
 }*/
+
+function sendPushover(name_long,image){
+  fs.readFile('/home/ben/test.png', function(err, data) {
+  var p = new Push({
+    user: po_user,
+    token: po_token
+  })
+  var msg = {
+    message: dayjs(new Date()).format('HH:mm:ss DD.MM.YYYY'),
+    title: name_long,
+    sound: 'magic',
+    device: 'p1',
+    priority: 1,
+    file: { name: 'test.png', data: data }
+  }
+  p.send( msg, function( err, result ) {
+    if (err) { throw err }
+    console.log(getTime() + 'pushover: sent')
+  })
+})
+}
+
+function checkAlarm(id){
+  // alarm
+  // all doors closed and change
+  if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'HD') ? x.id : null)[0].state &&
+      portals.portals.filter(x => (x.name_short.toUpperCase() == 'HDL') ? x.id : null)[0].state &&
+      portals.portals.filter(x => (x.name_short.toUpperCase() == 'GD') ? x.id : null)[0].state &&
+      portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state &&
+      portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state){
+        sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,'img')
+  }
+}
+
