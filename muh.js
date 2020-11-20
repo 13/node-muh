@@ -238,8 +238,10 @@ function processPortal(id,state,initial=false){
 	// bell
     if (name_short == 'B'){ 
       if (state){
-         playSound('bell')
-         // push msg
+        playSound('bell')
+        // push msg
+        // reset bell
+        portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = 0 
       }
     }		
   }
