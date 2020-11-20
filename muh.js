@@ -38,6 +38,9 @@ var stopBlinking = false;
 // play-sound
 const player = require('play-sound')(opts = {})
 
+// loudness
+const loudness = require('loudness')
+
 const isReachable = require('is-reachable');
 const wakeonlan = require('wake_on_lan');
 
@@ -238,7 +241,9 @@ function processPortal(id,state,initial=false){
 	// bell
     if (name_short == 'B'){ 
       if (state){
+        await loudness.setVolume(100)
         playSound('bell')
+		await loudness.setVolume(85)
         // push msg
         // reset bell
         portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = 0 
