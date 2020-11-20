@@ -27,13 +27,13 @@ const queryApi = new InfluxDB({url, token}).getQueryApi(org)*/
 const smtpTransport = require('nodemailer-smtp-transport')*/
 
 // mqtt
-var mqtt = require('mqtt')
-var mqttClient  = mqtt.connect('mqtt://localhost')
+const mqtt = require('mqtt')
+const mqttClient  = mqtt.connect('mqtt://localhost')
 
 // onoff gpio
 const Gpio = require('onoff').Gpio;
 var LED = new Gpio(24, 'out'); // LED Haustür
-let stopBlinking = false;
+var stopBlinking = false;
 
 // play-sound
 const player = require('play-sound')(opts = {})
@@ -85,7 +85,7 @@ for (x in portals){
 	if (portals[x][y].hasOwnProperty('pin')){
     //insertInfluxdb(portals[x][y].name_short.toUpperCase(),Math.floor(Math.random()*2));
     //portals[x][y].tstamp = queryInfluxdb(portals[x][y].name_short.toUpperCase());
-    //eval('portal' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin + ';');
+      //eval('portal' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin + ';');
       eval('portal' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', \'in\', \'both\');');
 	}
     if (portals[x][y].hasOwnProperty('pin_lock')){
@@ -382,19 +382,19 @@ portal.on('connection', async (socket) => {
     }
   }); 	
 	
-  //console.log('[PORTAL] Sending JSON ...');
-  //console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
+  console.log('[PORTAL] Sending JSON ...');
+  console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
   portal.emit('portal',portals);
   
   // hosts interval ping and send
   var interval_p = setAsyncInterval(async () => {
     //console.log('start');
-    //console.log('[PORTAL] Sending JSON Interval ...');
+    console.log('[PORTAL] Sending JSON Interval ...');
     const promise = new Promise((resolve) => {
       setTimeout(resolve('all done'), 3000);
     });
     await promise;
-    //console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
+    console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
     portal.emit('portal',portals); // send	
     //console.log('end');
   }, 3000);   
