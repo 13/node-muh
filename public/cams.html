@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-    <title>WOL</title>
+    <title>Cams</title>
     <link rel="icon" href="favicon.png" type="image/png" sizes="16x16"> 
     <!-- vuetify -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
@@ -123,10 +123,10 @@
 						<!-- card header -->
 						<v-list-item>
 							<v-list-item-icon>
-								<v-icon>mdi-lan</v-icon>
+								<v-icon>mdi-cctv</v-icon>
 							</v-list-item-icon>	
 							<v-list-item-content>
-								<v-list-item-title class="headline">WOL</v-list-item-title>
+								<v-list-item-title class="headline">Cams</v-list-item-title>
 							</v-list-item-content>
 						</v-list-item>
 						
@@ -185,7 +185,7 @@
 		<script>
 			"use strict"
 			
-			var socket = io('/wol'); //load socket.io-client and connect to the host that serves the page
+			var socket = io('/cams'); //load socket.io-client and connect to the host that serves the page
 			
 			// Vue
 			var app = new Vue({
@@ -203,6 +203,7 @@
 					items: [
 					{ icon: 'mdi-view-dashboard', text: 'Dashboard', href: '/' },
 					{ icon: 'mdi-lock', text: 'Portal', href: 'portal' },
+					{ icon: 'mdi-cctv', text: 'Cams', href: 'cams' },
 					{ icon: 'mdi-lan', text: 'WOL', href: 'wol' },
 					],
 				},

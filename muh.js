@@ -109,7 +109,7 @@ for (x in portals){
     }
     if (portals[x][y].hasOwnProperty('pin_button')){
       //eval('button' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_button + ';');
-      eval('button' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_button + ', \'in\', \'rising\', {debounceTimeout: 500});');
+      eval('button' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_button + ', \'in\', \'rising\', {debounceTimeout: 20});');
     }	
   }
 }
@@ -304,7 +304,7 @@ function startTimer(){
   var timer = setTimeout(function () {
     console.log(getTime() + 'portal: timer finished')
     //handlePortal(lockRelayGDL,'garagedoorlock','lock',10)
-  }, 10000)
+  }, 5000)
 }
 
 function playSound(sound){
@@ -504,6 +504,10 @@ app.get('/wol', (req, res) => {
   res.sendFile(__dirname + '/public/wol.html')
 });
 
+app.get('/cams', (req, res) => {
+  res.sendFile(__dirname + '/public/cams.html')
+});
+
 app.get('/wetter', (req, res) => {
   res.sendFile(__dirname + '/public/wetter.html')
 });
@@ -649,7 +653,7 @@ function sendMail(name,state){
 }*/
 
 function sendPushover(name_long,image){
-  fs.readFile('/home/ben/test.png', function(err, data) {
+/*fs.readFile('/home/ben/test.png', function(err, data) {*/
   var p = new Push({
     user: po_user,
     token: po_token
@@ -659,14 +663,15 @@ function sendPushover(name_long,image){
     title: name_long,
     sound: 'magic',
     device: 'p1',
-    priority: 1,
-    file: { name: 'test.png', data: data }
+    priority: 1/*,
+    file: { name: 'test.png', data: data }*/
   }
-  p.send( msg, function( err, result ) {
-    if (err) { throw err }
+  p.send(msg, function(err, result) {
+    if (err) {throw err}
     console.log(getTime() + 'pushover: sent')
   })
-})
+/*})*/
+
 }
 
 function checkAlarm(id){
