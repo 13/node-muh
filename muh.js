@@ -32,7 +32,7 @@ const mqttClient  = mqtt.connect('mqtt://localhost')
 
 // pigpio
 const Gpio = require('pigpio').Gpio;
-var LED = new Gpio(24, {mode: Gpio.OUTPUT});// LED Haustür
+var LED = new Gpio(24, {mode: Gpio.OUTPUT, alert: true});// LED Haustür
 var stopBlinking = false;
 
 // play-sound
@@ -118,53 +118,39 @@ for (x in portals){
     }	
   }
 }
-	   
+
+portalHD.glitchFilter(10000);
+portalHDL.glitchFilter(10000);
+portalGD.glitchFilter(10000);
+portalGDL.glitchFilter(10000);
+portalG.glitchFilter(10000);
 buttonB.glitchFilter(10000);
 	    
-portalHD.on('interrupt', (value) => {	
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'HD') ? x.id : null)[0].id;
-  processPortal(id,value,true);
-});
-portalHDL.on('interrupt', (value) => {
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'HDL') ? x.id : null)[0].id;
-  processPortal(id,value,true);
-});
-portalGD.on('interrupt', (value) => {
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'GD') ? x.id : null)[0].id;
-  processPortal(id,value,true);
-});
-portalGDL.on('interrupt', (value) => {
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].id;
-  processPortal(id,value,true);
-});
-portalG.on('interrupt', (value) => {
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].id;
-  processPortal(id,value,true);
-});
-/*
-portalHD.watch((err, value) => {
+portalHD.on('alert', (value, tick) => {	
   var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'HD') ? x.id : null)[0].id;
   processPortal(id,value);
 });
-portalHDL.watch((err, value) => {
+portalHDL.on('alert', (value, tick) => {
   var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'HDL') ? x.id : null)[0].id;
   processPortal(id,value);
 });
-portalGD.watch((err, value) => {
+portalGD.on('alert', (value, tick) => {
   var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'GD') ? x.id : null)[0].id;
   processPortal(id,value);
 });
-portalGDL.watch((err, value) => {
+portalGDL.on('alert', (value, tick) => {
   var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].id;
-  processPortal(id,value);
+  processPortal(id,value;
 });
-portalG.watch((err, value) => {
+portalG.on('alert', (value, tick) => {
+  /*if (level === 0) {
+    console.log(++count);
+  }*/	
   var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].id;
   processPortal(id,value);
 });
-*/
 // bell
-buttonB.on('interrupt', (value) => {
+buttonB.on('alert', (value) => {
   var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'B') ? x.id : null)[0].id;
   processPortal(id,value);
 });
@@ -174,8 +160,8 @@ const blinkLED = _ => {
   if (stopBlinking) {
     return 
   }
-  LED.read()
-    .then(value => LED.write(value^1))
+  LED.on('alert', (value, tick) => {
+    .then(value => LED.digitalWrite(value^1))
     .then(_ => setTimeout(blinkLED, 1350))
     .catch(err => console.log('LED: ' + err));
 };
@@ -553,8 +539,8 @@ const clearAsyncInterval = (intervalIndex) => {
 
 // onoff unload 
 function unexportOnClose() {
-  LED.write(0);
-  LED.unexport();
+  LED.digitalWrite(0);
+  /*LED.unexport();
   portalHD.unexport();
   portalHDL.unexport();
   portalGD.unexport();
@@ -565,7 +551,8 @@ function unexportOnClose() {
   lockRelayGDL.unexport();
   unlockRelayGDL.unexport();
   moveRelayG.unexport();
-  buttonB.unexport();
+  buttonB.unexport();*/
+  process.exit();
 };
 process.on('SIGINT', unexportOnClose); //function to run when user closes using ctrl+c 
 
