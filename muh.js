@@ -31,7 +31,8 @@ const mqtt = require('mqtt')
 const mqttClient  = mqtt.connect('mqtt://localhost')
 
 // pigpio
-const Gpio = require('pigpio').Gpio;
+const pigpio = require('pigpio');
+const Gpio = pigpio.Gpio;
 var LED = new Gpio(24, {mode: Gpio.OUTPUT, alert: true});// LED Haustür
 var stopBlinking = false;
 
@@ -540,6 +541,7 @@ const clearAsyncInterval = (intervalIndex) => {
 // onoff unload 
 function unexportOnClose() {
   LED.digitalWrite(0);
+  pigpio.terminate();
   /*LED.unexport();
   portalHD.unexport();
   portalHDL.unexport();
