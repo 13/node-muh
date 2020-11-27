@@ -141,7 +141,7 @@ portalGD.on('alert', (value, tick) => {
 });
 portalGDL.on('alert', (value, tick) => {
   var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].id;
-  processPortal(id,value;
+  processPortal(id,value);
 });
 portalG.on('alert', (value, tick) => {
   /*if (level === 0) {
@@ -156,8 +156,7 @@ buttonB.on('alert', (value) => {
   processPortal(id,value);
 });
 
-//LED.digitalWrite(value^1);
-const blinkLED = _ => {
+/*const blinkLED = _ => {
   if (stopBlinking) {
     return 
   }
@@ -165,7 +164,7 @@ const blinkLED = _ => {
     .then(value => LED.digitalWrite(led.digitalRead()^1))
     .then(_ => setTimeout(blinkLED, 1350))
     .catch(err => console.log('LED: ' + err));
-};
+};*/
 
 function processPortal(id,state,initial=false){
   var pin = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].pin;
