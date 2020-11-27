@@ -162,7 +162,7 @@ const blinkLED = _ => {
     return 
   }
   LED.on('alert', (value, tick) => {
-    .then(value => LED.digitalWrite(value^1))
+    .then(value => LED.digitalWrite(led.digitalRead()^1))
     .then(_ => setTimeout(blinkLED, 1350))
     .catch(err => console.log('LED: ' + err));
 };
