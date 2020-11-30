@@ -55,7 +55,7 @@ var menu = { 'menu' : [
                          { icon: 'mdi-lock', text: 'Portal', href: 'portal' },
                          { icon: 'mdi-cctv', text: 'Cams', href: 'cams' },
                          { icon: 'mdi-lan', text: 'WOL', href: 'wol' }	
-		]} 	
+          ]} 	
 	
 var portals = { 'portals' : [
 			{ id:4, pin:25, 
@@ -84,7 +84,8 @@ for (x in portals){
         // run interrupt
         eval(`in${portals[x][y].name_short.toUpperCase()}.on('alert', (value, tick) => { \
 	            processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == ${portals[x][y].name_short.toUpperCase()}) ? x.id : null)[0].id,value) \
-            })`)
+        })`)
+      }
     }
     if (portals[x][y].hasOwnProperty('pin_lock')){
       eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_lock + ', {mode: Gpio.OUTPUT});');
@@ -98,12 +99,13 @@ for (x in portals){
     if (portals[x][y].hasOwnProperty('pin_button')){
       eval('in' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_button + ', {mode: Gpio.INPUT, pullUpDown: Gpio.PUD_DOWN, edge: Gpio.RISING_EDGE, alert: true})');
       if (process.env.NODE_ENV !== 'dev'){
-	    // set stable time
+	      // set stable time
         eval('in' + portals[x][y].name_short.toUpperCase() + '.glitchFilter(' + stableTime  + ')')
         // run interrupt
         eval(`in${portals[x][y].name_short.toUpperCase()}.on('alert', (value, tick) => { \
-	            processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == ${portals[x][y].name_short.toUpperCase()}) ? x.id : null)[0].id,value) \
-            })`)
+	        processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == ${portals[x][y].name_short.toUpperCase()}) ? x.id : null)[0].id,value) \
+        })`)
+      }
     }
   }
 }
@@ -308,7 +310,7 @@ portal.on('connection', async (socket) => {
     connectCounter--;
     console.log(getTime() + 'socketio: users disconnected ' + connectCounter)
     clearAsyncInterval(interval_p);
-  });
+  })
 
   // receive portal command
   socket.on('pushportal', (name, action) => {
@@ -340,7 +342,7 @@ portal.on('connection', async (socket) => {
         handlePortal(moveRelayG,name,action,400)
       }
     }
-  }); 	
+  })
 	
   // Send JSON 
   console.log(getTime() + 'portal: Sending portal JSON ' + JSON.stringify(Object.assign({}, menu, portals)))
@@ -397,9 +399,9 @@ wol.on('connection', async (socket) => {
   
   // hosts ping and send 
   for (x in hosts){
-	for (y in hosts[x]){
-	  hosts[x][y].state = await isReachable(hosts[x][y].name + ':' + hosts[x][y].port);
-	}
+    for (y in hosts[x]){
+      hosts[x][y].state = await isReachable(hosts[x][y].name + ':' + hosts[x][y].port)
+    }
   }
   
   console.log(getTime() + 'portal: Sending wol JSON ' + JSON.stringify(Object.assign({}, menu, hosts)))
@@ -524,10 +526,10 @@ function insertInfluxdb(portal, state){
 function queryInfluxdb(id, name_short, state){
   const fluxQuery = `from(bucket:"homeautomation") 
                  |> range(start: 0) 
-		 |> filter(fn: (r) => r["_measurement"] == "portal")
+                 |> filter(fn: (r) => r["_measurement"] == "portal")
                  |> filter(fn: (r) => r["portal_name"] == "${name_short}")
                  |> filter(fn: (r) => r["_field"] == "state")
-		 |> sort(columns:["_time"], desc: true)
+                 |> sort(columns:["_time"], desc: true)
                  |> limit(n:1)`;
 
   const queryApi = new InfluxDB({url:url,token:token18}).getQueryApi(org)
