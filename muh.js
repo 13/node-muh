@@ -78,12 +78,13 @@ for (x in portals){
       eval('in' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', { mode: Gpio.INPUT, pullUpDown: Gpio.PUD_DOWN, edge: Gpio.EITHER_EDGE, alert: true });')
       // read first time
       processPortal(portals[x][y].id, eval('in' + portals[x][y].name_short.toUpperCase() + '.digitalRead()'),true)
-      // set stable time
-      //eval('in' + portals[x][y].name_short.toUpperCase() + '.glitchFilter(' + stableTime  + ')')
-      // run interrupt
-      /*eval(`in${portals[x][y].name_short.toUpperCase()}.on('alert', (value, tick) => { \
-	processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == ${portals[x][y].name_short.toUpperCase()}) ? x.id : null)[0].id,value) \
-      })`)*/
+      if (process.env.NODE_ENV !== 'dev'){
+	    // set stable time
+        eval('in' + portals[x][y].name_short.toUpperCase() + '.glitchFilter(' + stableTime  + ')')
+        // run interrupt
+        eval(`in${portals[x][y].name_short.toUpperCase()}.on('alert', (value, tick) => { \
+	            processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == ${portals[x][y].name_short.toUpperCase()}) ? x.id : null)[0].id,value) \
+            })`)
     }
     if (portals[x][y].hasOwnProperty('pin_lock')){
       eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_lock + ', {mode: Gpio.OUTPUT});');
@@ -96,12 +97,13 @@ for (x in portals){
     }
     if (portals[x][y].hasOwnProperty('pin_button')){
       eval('in' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_button + ', {mode: Gpio.INPUT, pullUpDown: Gpio.PUD_DOWN, edge: Gpio.RISING_EDGE, alert: true})');
-      // set stable time
-      //eval('in' + portals[x][y].name_short.toUpperCase() + '.glitchFilter(' + stableTime  + ')')
-      // run interrupt
-      /*eval(`in${portals[x][y].name_short.toUpperCase()}.on('alert', (value, tick) => { \
-	processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == ${portals[x][y].name_short.toUpperCase()}) ? x.id : null)[0].id,value) \
-      })`)*/
+      if (process.env.NODE_ENV !== 'dev'){
+	    // set stable time
+        eval('in' + portals[x][y].name_short.toUpperCase() + '.glitchFilter(' + stableTime  + ')')
+        // run interrupt
+        eval(`in${portals[x][y].name_short.toUpperCase()}.on('alert', (value, tick) => { \
+	            processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == ${portals[x][y].name_short.toUpperCase()}) ? x.id : null)[0].id,value) \
+            })`)
     }
   }
 }
@@ -347,34 +349,34 @@ portal.on('connection', async (socket) => {
   // hosts interval ping and send
   var interval_p = setAsyncInterval(async () => {
     const promise = new Promise((resolve) => {
-      setTimeout(resolve('all done'), 3000);
-    });
-    await promise;
+      setTimeout(resolve('all done'), 3000)
+    })
+    await promise
       //console.log(getTime() + 'portal: Sending portal JSON interval ' + JSON.stringify(Object.assign({}, menu, portals)))
       portal.emit('portal',(Object.assign({}, menu, portals)))	
-  }, 3000);   
+  }, 3000) 
   
-});
+})
 
 wol.on('connection', async (socket) => {
-  console.log('wol connected');
-  connectCounter++; 
-  console.log('users connected: ' + connectCounter);
+  console.log(getTime() + 'socketio: wol connected')
+  connectCounter++
+  console.log(getTime() + 'socketio: users connected ' + connectCounter)
     
   // disconnect user
   socket.on('disconnect', () => {
-    connectCounter--;
-    console.log('user disconnected: ' + connectCounter);
-    clearAsyncInterval(interval);
-  });
+    connectCounter--
+    console.log(getTime() + 'socketio: users disconnected ' + connectCounter)
+    clearAsyncInterval(interval)
+  })
 
   // receive mac and wol
   socket.on('wakemac', (mac) => {
-    console.log('Wake: ' + mac);
+    console.log('Wake: ' + mac)
     if (mac != null){ 
-      wakeonlan.wake(mac);
+      wakeonlan.wake(mac)
     }
-  });  
+  })  
   
   // hosts
   var hosts = { 'hosts' : [
@@ -407,13 +409,13 @@ wol.on('connection', async (socket) => {
   var interval = setAsyncInterval(async () => {
     for (x in hosts){
       for (y in hosts[x]){
-        hosts[x][y].state = await isReachable(hosts[x][y].name + ':' + hosts[x][y].port);
+        hosts[x][y].state = await isReachable(hosts[x][y].name + ':' + hosts[x][y].port)
       }
     }	
     const promise = new Promise((resolve) => {
-      setTimeout(resolve('all done'), 3000);
-    });
-    await promise;
+      setTimeout(resolve('all done'), 3000)
+    })
+    await promise
     //console.log(getTime() + 'portal: Sending wol JSON interval ' + JSON.stringify(Object.assign({}, menu, hosts)))
     wol.emit('wol',(Object.assign({}, menu, hosts)))
   }, 3000)
@@ -422,64 +424,64 @@ wol.on('connection', async (socket) => {
 
 // new connection
 io.on('connection', async (socket) => { 
-  var socketId = socket.id;
-  var clientIp = socket.request.connection.remoteAddress;
+  var socketId = socket.id
+  var clientIp = socket.request.connection.remoteAddress
   console.log(getTime() + 'socketio: new connection ' + clientIp)
-});
+})
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/portal.html')
-});
+})
 
 app.get('/portal', (req, res) => {
   res.sendFile(__dirname + '/public/portal.html')
-});
+})
 
 app.get('/ping', (req, res) => {
   res.send('pong');
-});
+})
 
 app.get('/wol', (req, res) => {
   res.sendFile(__dirname + '/public/wol.html')
-});
+})
 
 app.get('/cams', (req, res) => {
   res.sendFile(__dirname + '/public/cams.html')
-});
+})
 
 app.get('/wetter', (req, res) => {
   res.sendFile(__dirname + '/public/wetter.html')
-});
+})
 
 server.listen(server_port, function () {
   console.log(getTime() + 'socketio: listening on port ' + server_port)
-});
+})
 
 // async intervals
-const asyncIntervals = [];
+const asyncIntervals = []
 const runAsyncInterval = async (cb, interval, intervalIndex) => {
-  await cb();
+  await cb()
   if (asyncIntervals[intervalIndex]) {
-    setTimeout(() => runAsyncInterval(cb, interval, intervalIndex), interval);
+    setTimeout(() => runAsyncInterval(cb, interval, intervalIndex), interval)
   }
 };
 
 const setAsyncInterval = (cb, interval) => {
   if (cb && typeof cb === "function") {
-    const intervalIndex = asyncIntervals.length;
-    asyncIntervals.push(true);
-    runAsyncInterval(cb, interval, intervalIndex);
-    return intervalIndex;
+    const intervalIndex = asyncIntervals.length
+    asyncIntervals.push(true)
+    runAsyncInterval(cb, interval, intervalIndex)
+    return intervalIndex
   } else {
-    throw new Error('Callback must be a function');
+    throw new Error('Callback must be a function')
   }
-};
+}
 
 const clearAsyncInterval = (intervalIndex) => {
   if (asyncIntervals[intervalIndex]) {
-    asyncIntervals[intervalIndex] = false;
+    asyncIntervals[intervalIndex] = false
   }
-};
+}
 
 // pigpio unload 
 function unexportOnClose() {
@@ -561,29 +563,7 @@ function publishMQTT(name_short, json){
   //mqttClient.end()
 }
 
-/*var transporter = nodemailer.createTransport(smtpTransport({
-  service: 'gmail',
-  host: 'smtp.gmail.com',
-  auth: {
-      user: '@gmail.com',
-      pass: ''
-  }
-}));
-
-function sendMail(name,state){
-  var mailOptions = {
-    from: 'gmail.com',
-    to: '@gmail.com',
-    subject: name + ' ' + state + ' ' + dayjs().format('HH:mm:ss.SSS DD.MM.YYYY'),
-    text: 'from: p4'
-  };
-  transporter.sendMail(mailOptions, function(error, info){
-    if (error) {
-      console.log(getTime() + 'nodemailer: error ' + error)
-    } else {
-      console.log(getTime() + 'nodemailer: sent ' + info.response)
-    }
-  });  
+/*function sendMail(name,state){
 }*/
 
 function sendPushover(name_long,image){
