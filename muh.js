@@ -47,6 +47,13 @@ var timer = null
 
 console.log(getTime() + 'portal: starting ...')
 
+var menue = { 'menu' : [
+                         { icon: 'mdi-view-dashboard', text: 'Dashboard', href: '/' },
+                         { icon: 'mdi-lock', text: 'Portal', href: 'portal' },
+                         { icon: 'mdi-cctv', text: 'Cams', href: 'cams' },
+                         { icon: 'mdi-lan', text: 'WOL', href: 'wol' }	
+		]} 	
+	
 var portals = { 'portals' : [
 			{ id:4, pin:25, 
 			  name:"housedoor", name_short:"hd", name_long:"Haustür" },
@@ -349,9 +356,11 @@ portal.on('connection', async (socket) => {
     }
   }); 	
 	
+  // Send JSON 
   //console.log('[PORTAL] Sending JSON ...');
   //console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
-  portal.emit('portal',portals);
+  //portal.emit('portal',portals)
+  portal.emit('portal',portals.concat(menu));
   
   // hosts interval ping and send
   var interval_p = setAsyncInterval(async () => {
@@ -362,7 +371,8 @@ portal.on('connection', async (socket) => {
     });
     await promise;
     //console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
-    portal.emit('portal',portals); // send	
+    portal.emit('portal',portals); // send
+    portal.emit('portal',portals.concat(menu));	  
     //console.log('end');
   }, 3000);   
   
