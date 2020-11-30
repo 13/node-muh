@@ -26,7 +26,7 @@
 				app
 				>
 					<v-list dense>
-						<template v-for="item in items">
+						<template v-for="item in menu">
 							<v-row
 							v-if="item.heading"
 							:key="item.heading"
@@ -321,6 +321,7 @@
 				isHidden: false,
 				json: null,
 				portals: [],
+				menu: [],
 				sb_portal: false,
 				sb_text: null,
 				sb_timeout: 2500,
@@ -330,11 +331,11 @@
 				GaragedoorlockDialog: false,
 				GarageDialog: false,
 				drawer: null,
-				items: [
+				/*menu: [
 					{ icon: 'mdi-view-dashboard', text: 'Dashboard', href: '/' },
 					{ icon: 'mdi-lock', text: 'Portal', href: 'portal' },
 					{ icon: 'mdi-lan', text: 'WOL', href: 'wol' },
-				],
+				],*/
 		},
 		filters: {
 			space (value) {
@@ -406,6 +407,7 @@
 				socket.on('portal', json => { //get button status from client
 					this.json = json,
 					this.portals = json.portals;
+					this.menu = json.menu;
 					this.socketState = true;
 					console.log("socket connect: " + this.socketState);
 				}),
