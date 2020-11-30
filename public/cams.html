@@ -17,7 +17,7 @@
     <!-- include socket.io client side script -->
     <script src="/socket.io/socket.io.js"></script>
   </head>
-<body>
+  <body>
 		<div id="app">
 			<v-app>
 				<v-navigation-drawer
@@ -26,7 +26,7 @@
 				app
 				>
 					<v-list dense>
-						<template v-for="item in items">
+						<template v-for="item in menu">
 							<v-row
 							v-if="item.heading"
 							:key="item.heading"
@@ -112,8 +112,7 @@
 					<v-btn icon @click="">
 						<v-icon>mdi-refresh</v-icon>
 					</v-btn>
-				</v-app-bar>			
-				
+				</v-app-bar>
 				<v-main>
 					
 					<!-- card -->
@@ -142,35 +141,37 @@
 						v-model="sb_wol"
 						:timeout="sb_timeout"
 						color="green lighten-1"
-						bottom
+						top
 						>
 							{{ sb_text }}
 						</v-snackbar>	
-						
-						<v-list>
-							<v-list-item
-							v-for="(host, idx) in hosts"
-							:key="idx"
-							@click="notify(host.mac, host.name, $event)"
-							v-bind:disabled="checkMAC(host.mac)"
-							style="color: #000 !important"
-							>
-								<v-list-item-content>
-									<v-list-item-title>{{ host.name | short }}</v-list-item-title>
-								</v-list-item-content>
-								<v-btn
-								v-bind:color="stateToTag(host.state)"
-								small
-								dark
-								elevation="0"
-								>
-									{{ host.state | onoff }}	
-								</v-btn>
-								<!--<v-list-item-icon>
-									<v-icon v-bind:color="stateToTag(host.state)">mdi-checkbox-blank</v-icon>
-								</v-list-item-icon>-->
-							</v-list-item>		
-						</v-list>
+<!-- cams -->
+
+  <v-container class="grey lighten-5">
+    <v-row no-gutters>
+      <template v-for="(cam,idx) in cams">
+        <v-col :key="idx">
+          <v-card
+            class="pa-2"
+            outlined
+            tile
+          >
+            {{ cam.href }}
+<v-img
+	:src="cam.href"
+></v-img>            
+          </v-card>
+        </v-col>
+        <v-responsive
+          v-if="idx === 2"
+          :key="`width-${idx}`"
+          width="100%"
+        ></v-responsive>
+      </template>
+    </v-row>
+  </v-container>
+
+<!-- cams -->
 					</v-card>
 				</v-main>
 			</v-app>
@@ -185,7 +186,7 @@
 		<script>
 			"use strict"
 			
-			var socket = io('/cams'); //load socket.io-client and connect to the host that serves the page
+			var socket = io('/wol'); //load socket.io-client and connect to the host that serves the page
 			
 			// Vue
 			var app = new Vue({
@@ -196,15 +197,16 @@
 					isHidden: false,
 					json: null,
 					hosts: [],
+					menu: [],
 					sb_wol: false,
 					sb_text: null,
 					sb_timeout: 2000,
 					drawer: null,
-					items: [
-					{ icon: 'mdi-view-dashboard', text: 'Dashboard', href: '/' },
-					{ icon: 'mdi-lock', text: 'Portal', href: 'portal' },
-					{ icon: 'mdi-cctv', text: 'Cams', href: 'cams' },
-					{ icon: 'mdi-lan', text: 'WOL', href: 'wol' },
+					cams: [
+					  { text: 'G1', href: '192.168.22.101:8001' },
+					  { text: 'HD1', href: '192.168.22.101:8002' },
+					  { text: 'HD2', href: '192.168.22.101:8003' },
+					  { text: 'G2', href: '192.168.22.101:8004' },
 					],
 				},
 				/*mounted: function () {
@@ -223,9 +225,12 @@
 				methods: {
 					getRealtimeData() {
 						socket.on('wol', json => { //get button status from client
-							this.json = json,
-							this.hosts = json.hosts;
-							this.socketState = true;
+							this.json = json
+							this.hosts = json.hosts
+							this.menu = json.menu
+							this.socketState = true
+							//console.log(JSON.stringify(this.json))
+							//console.log(JSON.stringify(this.hosts))
 							console.log("socket connect: " + this.socketState)
 						}),
 						socket.on('disconnect', socketState => {
