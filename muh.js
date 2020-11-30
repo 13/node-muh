@@ -17,7 +17,10 @@ const mqtt = require('mqtt')
 const mqttClient  = mqtt.connect('mqtt://localhost')
 
 // pigpio
-const pigpio = require('pigpio')
+const pigpio = process.env.NODE_ENV !== 'production' ?
+  require('pigpio-mock') :
+  require('pigpio')
+//const pigpio = require('pigpio')
 const Gpio = pigpio.Gpio
 const LED = new Gpio(24, {mode: Gpio.OUTPUT, alert: true}) //LED Haustür
 var stopBlinking = false
@@ -47,7 +50,7 @@ var timer = null
 
 console.log(getTime() + 'portal: starting ...')
 
-var menue = { 'menu' : [
+var menu = { 'menu' : [
                          { icon: 'mdi-view-dashboard', text: 'Dashboard', href: '/' },
                          { icon: 'mdi-lock', text: 'Portal', href: 'portal' },
                          { icon: 'mdi-cctv', text: 'Cams', href: 'cams' },
@@ -360,7 +363,8 @@ portal.on('connection', async (socket) => {
   //console.log('[PORTAL] Sending JSON ...');
   //console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
   //portal.emit('portal',portals)
-  portal.emit('portal',portals.concat(menu));
+  console.log([].concat(portals,menu))
+  portal.emit('portal',[].concat(portals,menu))
   
   // hosts interval ping and send
   var interval_p = setAsyncInterval(async () => {
@@ -371,8 +375,8 @@ portal.on('connection', async (socket) => {
     });
     await promise;
     //console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
-    portal.emit('portal',portals); // send
-    portal.emit('portal',portals.concat(menu));	  
+    //portal.emit('portal',portals); // send
+    portal.emit('portal',[].concat(portals,menu))
     //console.log('end');
   }, 3000);   
   
