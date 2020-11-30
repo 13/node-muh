@@ -26,7 +26,7 @@
 				app
 				>
 					<v-list dense>
-						<template v-for="item in items">
+						<template v-for="item in menu">
 							<v-row
 							v-if="item.heading"
 							:key="item.heading"
@@ -196,15 +196,16 @@
 					isHidden: false,
 					json: null,
 					hosts: [],
+					menu: [],
 					sb_wol: false,
 					sb_text: null,
 					sb_timeout: 2000,
 					drawer: null,
-					items: [
+					/*items: [
 					{ icon: 'mdi-view-dashboard', text: 'Dashboard', href: '/' },
 					{ icon: 'mdi-lock', text: 'Portal', href: 'portal' },
 					{ icon: 'mdi-lan', text: 'WOL', href: 'wol' },
-					],
+					],*/
 				},
 				/*mounted: function () {
 					this.$nextTick(function () {
@@ -222,9 +223,12 @@
 				methods: {
 					getRealtimeData() {
 						socket.on('wol', json => { //get button status from client
-							this.json = json,
-							this.hosts = json.hosts;
-							this.socketState = true;
+							this.json = json
+							this.hosts = json.hosts
+							this.menu = json.menu
+							this.socketState = true
+							//console.log(JSON.stringify(this.json))
+							//console.log(JSON.stringify(this.hosts))
 							console.log("socket connect: " + this.socketState)
 						}),
 						socket.on('disconnect', socketState => {

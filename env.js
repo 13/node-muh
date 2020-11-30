@@ -9,7 +9,7 @@ const password = ''
 const token18 = `${username}:${password}`
 // Pushover
 const po_user = ''
-const po_token: ''
+const po_token = ''
 
 module.exports = {
   url,

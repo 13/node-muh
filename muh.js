@@ -79,11 +79,11 @@ for (x in portals){
       // read first time
       processPortal(portals[x][y].id, eval('in' + portals[x][y].name_short.toUpperCase() + '.digitalRead()'),true)
       // set stable time
-      eval('in' + portals[x][y].name_short.toUpperCase() + '.glitchFilter(' + stableTime  + ')')
+      //eval('in' + portals[x][y].name_short.toUpperCase() + '.glitchFilter(' + stableTime  + ')')
       // run interrupt
-      eval(`in${portals[x][y].name_short.toUpperCase()}.on('alert', (value, tick) => { \
+      /*eval(`in${portals[x][y].name_short.toUpperCase()}.on('alert', (value, tick) => { \
 	processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == ${portals[x][y].name_short.toUpperCase()}) ? x.id : null)[0].id,value) \
-      })`)
+      })`)*/
     }
     if (portals[x][y].hasOwnProperty('pin_lock')){
       eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_lock + ', {mode: Gpio.OUTPUT});');
@@ -97,33 +97,14 @@ for (x in portals){
     if (portals[x][y].hasOwnProperty('pin_button')){
       eval('in' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_button + ', {mode: Gpio.INPUT, pullUpDown: Gpio.PUD_DOWN, edge: Gpio.RISING_EDGE, alert: true})');
       // set stable time
-      eval('in' + portals[x][y].name_short.toUpperCase() + '.glitchFilter(' + stableTime  + ')')
+      //eval('in' + portals[x][y].name_short.toUpperCase() + '.glitchFilter(' + stableTime  + ')')
       // run interrupt
-      eval(`in${portals[x][y].name_short.toUpperCase()}.on('alert', (value, tick) => { \
+      /*eval(`in${portals[x][y].name_short.toUpperCase()}.on('alert', (value, tick) => { \
 	processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == ${portals[x][y].name_short.toUpperCase()}) ? x.id : null)[0].id,value) \
-      })`)
+      })`)*/
     }
   }
 }
-
-/*inHD.on('alert', (value, tick) => {	
-  processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == 'HD') ? x.id : null)[0].id,value)
-});
-inHDL.on('alert', (value, tick) => {
-  processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == 'HDL') ? x.id : null)[0].id,value)
-});
-inGD.on('alert', (value, tick) => {
-  processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == 'GD') ? x.id : null)[0].id,value)
-});
-inGDL.on('alert', (value, tick) => {
-  processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].id,value)
-});
-inG.on('alert', (value, tick) => {
-  processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].id,value)
-});*/
-/*inB.on('alert', (value, tick) => {
-  processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == 'B') ? x.id : null)[0].id,value)
-});*/
 
 const blinkLED = () => {
   if (stopBlinking) {
@@ -360,24 +341,17 @@ portal.on('connection', async (socket) => {
   }); 	
 	
   // Send JSON 
-  //console.log('[PORTAL] Sending JSON ...');
-  //console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
-  //portal.emit('portal',portals)
-  console.log([].concat(portals,menu))
-  portal.emit('portal',[].concat(portals,menu))
-  
+  console.log(getTime() + 'portal: Sending portal JSON ' + JSON.stringify(Object.assign({}, menu, portals)))
+  portal.emit('portal',(Object.assign({}, menu, portals)))
+
   // hosts interval ping and send
   var interval_p = setAsyncInterval(async () => {
-    //console.log('start');
-    //console.log('[PORTAL] Sending JSON Interval ...');
     const promise = new Promise((resolve) => {
       setTimeout(resolve('all done'), 3000);
     });
     await promise;
-    //console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
-    //portal.emit('portal',portals); // send
-    portal.emit('portal',[].concat(portals,menu))
-    //console.log('end');
+      //console.log(getTime() + 'portal: Sending portal JSON interval ' + JSON.stringify(Object.assign({}, menu, portals)))
+      portal.emit('portal',(Object.assign({}, menu, portals)))	
   }, 3000);   
   
 });
@@ -425,14 +399,12 @@ wol.on('connection', async (socket) => {
 	  hosts[x][y].state = await isReachable(hosts[x][y].name + ':' + hosts[x][y].port);
 	}
   }
-  console.log('[WOL] Sending JSON ...');
-  console.log('[WOL] JSON: ' + JSON.stringify(hosts));
-  wol.emit('wol',hosts);
+  
+  console.log(getTime() + 'portal: Sending wol JSON ' + JSON.stringify(Object.assign({}, menu, hosts)))
+  wol.emit('wol',(Object.assign({}, menu, hosts)))	
   
   // hosts interval ping and send
   var interval = setAsyncInterval(async () => {
-    console.log('start');
-    console.log('[WOL] Sending JSON Interval ...');
     for (x in hosts){
       for (y in hosts[x]){
         hosts[x][y].state = await isReachable(hosts[x][y].name + ':' + hosts[x][y].port);
@@ -442,10 +414,9 @@ wol.on('connection', async (socket) => {
       setTimeout(resolve('all done'), 3000);
     });
     await promise;
-    console.log('[WOL] JSON: ' + JSON.stringify(hosts));
-    wol.emit('wol',hosts); // send	
-    console.log('end');
-  }, 3000); 
+    //console.log(getTime() + 'portal: Sending wol JSON interval ' + JSON.stringify(Object.assign({}, menu, hosts)))
+    wol.emit('wol',(Object.assign({}, menu, hosts)))
+  }, 3000)
   
 });
 

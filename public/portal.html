@@ -409,6 +409,8 @@
 					this.portals = json.portals;
 					this.menu = json.menu;
 					this.socketState = true;
+                    console.log(JSON.stringify(this.json))
+                    //console.log(JSON.stringify(this.hosts))
 					console.log("socket connect: " + this.socketState);
 				}),
 				socket.on('disconnect', socketState => {
