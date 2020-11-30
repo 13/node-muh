@@ -17,7 +17,7 @@ const mqtt = require('mqtt')
 const mqttClient  = mqtt.connect('mqtt://localhost')
 
 // pigpio
-const pigpio = process.env.NODE_ENV !== 'production' ?
+const pigpio = process.env.NODE_ENV === 'dev' ?
   require('pigpio-mock') :
   require('pigpio')
 //const pigpio = require('pigpio')

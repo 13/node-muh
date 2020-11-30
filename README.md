@@ -12,6 +12,8 @@ node muh unified homeautomation
 
   sudo setcap 'cap_net_bind_service=+ep' $(which node) //allow port 80
   node muh.js
+
+  export NODE_ENV=dev && node muh.js
 ```
 
 ## TODO
