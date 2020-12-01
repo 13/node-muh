@@ -1,39 +1,36 @@
 #!/usr/bin/env node
 
-const express = require('express');
-const app = express();
+if (process.arch == 'arm'){
+  envConfig = './env_p1'
+} else {
+  envConfig = './env'
+}
 
-const server = require('http').createServer(app);
-const io = require('socket.io')(server);
-const portal = io.of('/portal');
-const wol = io.of('/wol');
+const express = require('express')
+const app = express()
 
-// influxdb 1.8
+const server = require('http').createServer(app)
+const io = require('socket.io')(server)
+const portal = io.of('/portal')
+const wol = io.of('/wol')
+
+// influxdb 1.8+
 const {InfluxDB, Point, HttpError, FluxTableMetaData} = require('@influxdata/influxdb-client')
-const {url, org, token18, bucket, po_user, po_token} = require('./env')
-//const writeApi = new InfluxDB({url:url,token:token18}).getWriteApi(org, bucket, 'ns')
-//const queryApi = new InfluxDB({url:url,token:token18}).getQueryApi(org)
-
-// influxdb 2+
-/*const {InfluxDB, Point, HttpError, FluxTableMetaData} = require('@influxdata/influxdb-client')
-const {url, token, org, bucket} = require('./env')
-const {hostname} = require('os')
-const writeApi = new InfluxDB({url, token}).getWriteApi(org, bucket, 'ns')
-//writeApi.useDefaultTags({location: hostname()})
-const queryApi = new InfluxDB({url, token}).getQueryApi(org)*/
-
-// nodemailer
-/*const nodemailer = require('nodemailer')
-const smtpTransport = require('nodemailer-smtp-transport')*/
+const {url, org, token18, bucket, po_user, po_token} = require(envConfig)
 
 // mqtt
 const mqtt = require('mqtt')
 const mqttClient  = mqtt.connect('mqtt://localhost')
 
-// onoff gpio
-const Gpio = require('onoff').Gpio;
-var LED = new Gpio(24, 'out'); // LED Haustür
-var stopBlinking = false;
+// pigpio
+const pigpio = process.env.NODE_ENV === 'dev' ?
+  require('pigpio-mock') :
+  require('pigpio')
+//const pigpio = require('pigpio')
+const Gpio = pigpio.Gpio
+const LED = new Gpio(24, {mode: Gpio.OUTPUT, alert: true}) //LED Haustür
+var stopBlinking = false
+var stableTime = 10000 
 
 // play-sound
 const player = require('play-sound')(opts = {})
@@ -45,33 +42,27 @@ const loudness = require('loudness')
 const Push = require( 'pushover-notifications' )
 var fs = require( 'fs' )
 
-const isReachable = require('is-reachable');
-const wakeonlan = require('wake_on_lan');
+// wol
+const isReachable = require('is-reachable')
+const wakeonlan = require('wake_on_lan')
 
-//const dayjs = require('dayjs/locale/de');
+// helpers
 const dayjs = require('dayjs');
 
-const server_port = 80;
-var connectCounter = 0;
-var timer = null;
+// socketio
+const server_port = 80
+var connectCounter = 0
+var timer = null
 
-/*var portals = { 'portals' : [
-			{ id:4, pin:25, 
-			  name:"housedoor", name_short:"hd", name_long:"Haustür", 
-			  state:0, tstamp:dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss') },
-			{ id:5, pin:8, pin_lock:16, pin_unlock:20, pin_hold: 500,
-			  name:"housedoorlock", name_short:"hdl", name_long:"Haustür Riegel",
-			  state:0, tstamp:dayjs('2020-11-16 09:30:00').format('YYYY-MM-DD HH:mm:ss') },
-			{ id:2, pin:13, 
-			  name:"garagedoor", name_short:"gd", name_long:"Garagentür", 
-			  state:0, tstamp:"2020-05-25 07:10:47" },
-			{ id:3, pin:6, pin_lock:19, pin_unlock:26, pin_hold: 500, led:false,
-			  name:"garagedoorlock", name_short:"gdl", name_long:"Garagentür Riegel", 
-			  state:0, tstamp:"2020-05-25 07:12:47" },	
-			{ id:1, pin:5, pin_move:12, pin_hold: 400, led:false,
-			  name:"garage", name_short:"g", name_long:"Garage", 
-			  state:0, tstamp:"2020-05-24 07:50:47" }
-		]}*/
+console.log(getTime() + 'portal: starting ...')
+
+var menu = { 'menu' : [
+                         { icon: 'mdi-view-dashboard', text: 'Dashboard', href: '/' },
+                         { icon: 'mdi-lock', text: 'Portal', href: 'portal' },
+                         { icon: 'mdi-cctv', text: 'Cams', href: 'cams' },
+                         { icon: 'mdi-lan', text: 'WOL', href: 'wol' }	
+          ]} 	
+	
 var portals = { 'portals' : [
 			{ id:4, pin:25, 
 			  name:"housedoor", name_short:"hd", name_long:"Haustür" },
@@ -89,86 +80,50 @@ var portals = { 'portals' : [
 
 for (x in portals){
   for (y in portals[x]){
-	if (portals[x][y].hasOwnProperty('pin')){
-    //insertInfluxdb(portals[x][y].name_short.toUpperCase(),Math.floor(Math.random()*2));
-    //portals[x][y].tstamp = queryInfluxdb(portals[x][y].name_short.toUpperCase());
-      //eval('portal' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin + ';');
-      eval('portal' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', \'in\', \'both\');');
-	}
+    if (portals[x][y].hasOwnProperty('pin')){
+      eval('in' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', { mode: Gpio.INPUT, pullUpDown: Gpio.PUD_UP, edge: Gpio.EITHER_EDGE, alert: true });')
+      // read first time
+      processPortal(portals[x][y].id, eval('in' + portals[x][y].name_short.toUpperCase() + '.digitalRead()'),true)
+      if (process.env.NODE_ENV !== 'dev'){
+	// set stable time
+        eval('in' + portals[x][y].name_short.toUpperCase() + '.glitchFilter(' + stableTime  + ')')
+        // run interrupt
+        eval(`in${portals[x][y].name_short.toUpperCase()}.on('alert', (value, tick) => { \
+          processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == '${portals[x][y].name_short.toUpperCase()}') ? x.id : null)[0].id,value) \
+        })`)
+      }
+    }
     if (portals[x][y].hasOwnProperty('pin_lock')){
-      //eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_lock + ';');
-      eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_lock + ', \'high\', {activeLow:true});');
+      eval('lockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_lock + ', {mode: Gpio.OUTPUT});');
     }
     if (portals[x][y].hasOwnProperty('pin_unlock')){
-      //eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_unlock + ';');
-      eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_unlock + ', \'high\', {activeLow:true});');
+      eval('unlockRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_unlock + ', {mode: Gpio.OUTPUT});');
     }
     if (portals[x][y].hasOwnProperty('pin_move')){
-      //eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_move + ';');
-      eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_move + ', \'high\', {activeLow:true});');
+      eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_move + ', {mode: Gpio.OUTPUT});');
     }
     if (portals[x][y].hasOwnProperty('pin_button')){
-      //eval('button' + portals[x][y].name_short.toUpperCase() + ' = ' + portals[x][y].pin_button + ';');
-      eval('button' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_button + ', \'in\', \'rising\', {debounceTimeout: 20});');
-    }	
+      eval('in' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_button + ', {mode: Gpio.INPUT, pullUpDown: Gpio.PUD_DOWN, edge: Gpio.RISING_EDGE, alert: true})');
+      if (process.env.NODE_ENV !== 'dev'){
+	// set stable time
+        eval('in' + portals[x][y].name_short.toUpperCase() + '.glitchFilter(' + stableTime  + ')')
+        // run interrupt
+        eval(`in${portals[x][y].name_short.toUpperCase()}.on('alert', (value, tick) => { \
+          processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == '${portals[x][y].name_short.toUpperCase()}') ? x.id : null)[0].id,value) \
+        })`)
+      }
+    }
   }
 }
 
-portalHD.read((err, value) => {
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'HD') ? x.id : null)[0].id;
-  processPortal(id,value,true);
-});
-portalHDL.read((err, value) => {
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'HDL') ? x.id : null)[0].id;
-  processPortal(id,value,true);
-});
-portalGD.read((err, value) => {
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'GD') ? x.id : null)[0].id;
-  processPortal(id,value,true);
-});
-portalGDL.read((err, value) => {
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].id;
-  processPortal(id,value,true);
-});
-portalG.read((err, value) => {
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].id;
-  processPortal(id,value,true);
-});
-
-portalHD.watch((err, value) => {
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'HD') ? x.id : null)[0].id;
-  processPortal(id,value);
-});
-portalHDL.watch((err, value) => {
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'HDL') ? x.id : null)[0].id;
-  processPortal(id,value);
-});
-portalGD.watch((err, value) => {
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'GD') ? x.id : null)[0].id;
-  processPortal(id,value);
-});
-portalGDL.watch((err, value) => {
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].id;
-  processPortal(id,value);
-});
-portalG.watch((err, value) => {
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].id;
-  processPortal(id,value);
-});
-// bell
-buttonB.watch((err, value) => {
-  var id = portals.portals.filter(x => (x.name_short.toUpperCase() == 'B') ? x.id : null)[0].id;
-  processPortal(id,value);
-});
-
-const blinkLED = _ => {
+const blinkLED = () => {
   if (stopBlinking) {
     return 
   }
-  LED.read()
-    .then(value => LED.write(value^1))
-    .then(_ => setTimeout(blinkLED, 1350))
-    .catch(err => console.log('LED: ' + err));
+  LED.on('alert', (value, tick) => {
+    LED.digitalWrite(LED.digitalRead()^1)
+    setTimeout(blinkLED, 1350)
+  })
 };
 
 function processPortal(id,state,initial=false){
@@ -224,22 +179,22 @@ function processPortal(id,state,initial=false){
       if (state){
         // set timer 10m
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
-        startTimer()
+        //startTimer()
       } else {
         // delete timer & disable autolock
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
-	clearTimeout(timer);
+	//clearTimeout(timer);
       }
     }
     if (name_short == 'GDL'){
       if (state){
         // delete timer & disable autolock
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
-        clearTimeout(timer);
+        //clearTimeout(timer);
       } else {
         // set timer 10m
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
-        startTimer()
+        //startTimer()
       }
     }
 	
@@ -280,18 +235,18 @@ function processPortal(id,state,initial=false){
       // LED on
       console.log(getTime() + 'portal: LED on')
       stopBlinking = true;
-      LED.write(1);
+      LED.digitalWrite(1);
     } else if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state == 1 ||
                portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state == 1){
       // LED blink
       console.log(getTime() + 'portal: LED blink')
-      stopBlinking = false;
-      blinkLED();
+      stopBlinking = false
+      //blinkLED()
     } else {
       // LED off
       console.log(getTime() + 'portal: LED off')
-      stopBlinking = true;
-      LED.write(0);
+      stopBlinking = true
+      LED.digitalWrite(0)
     }
   }
 }
@@ -336,9 +291,9 @@ function playSound(sound){
 
 function setRelay(gpio,state) {
   if (state){
-    gpio.write(1)
+    gpio.digitalWrite(!true)
   } else {
-    gpio.write(0)
+    gpio.digitalWrite(!false)
   }
 }
 
@@ -361,7 +316,7 @@ portal.on('connection', async (socket) => {
     connectCounter--;
     console.log(getTime() + 'socketio: users disconnected ' + connectCounter)
     clearAsyncInterval(interval_p);
-  });
+  })
 
   // receive portal command
   socket.on('pushportal', (name, action) => {
@@ -393,46 +348,43 @@ portal.on('connection', async (socket) => {
         handlePortal(moveRelayG,name,action,400)
       }
     }
-  }); 	
+  })
 	
-  //console.log('[PORTAL] Sending JSON ...');
-  //console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
-  portal.emit('portal',portals);
-  
+  // Send JSON 
+  console.log(getTime() + 'portal: Sending portal JSON ' + JSON.stringify(Object.assign({}, menu, portals)))
+  portal.emit('portal',(Object.assign({}, menu, portals)))
+
   // hosts interval ping and send
   var interval_p = setAsyncInterval(async () => {
-    //console.log('start');
-    //console.log('[PORTAL] Sending JSON Interval ...');
     const promise = new Promise((resolve) => {
-      setTimeout(resolve('all done'), 3000);
-    });
-    await promise;
-    //console.log('[PORTAL] JSON: ' + JSON.stringify(portals));
-    portal.emit('portal',portals); // send	
-    //console.log('end');
-  }, 3000);   
+      setTimeout(resolve('all done'), 3000)
+    })
+    await promise
+      //console.log(getTime() + 'portal: Sending portal JSON interval ' + JSON.stringify(Object.assign({}, menu, portals)))
+      portal.emit('portal',(Object.assign({}, menu, portals)))	
+  }, 3000) 
   
-});
+})
 
 wol.on('connection', async (socket) => {
-  console.log('wol connected');
-  connectCounter++; 
-  console.log('users connected: ' + connectCounter);
+  console.log(getTime() + 'socketio: wol connected')
+  connectCounter++
+  console.log(getTime() + 'socketio: users connected ' + connectCounter)
     
   // disconnect user
   socket.on('disconnect', () => {
-    connectCounter--;
-    console.log('user disconnected: ' + connectCounter);
-    clearAsyncInterval(interval);
-  });
+    connectCounter--
+    console.log(getTime() + 'socketio: users disconnected ' + connectCounter)
+    clearAsyncInterval(interval)
+  })
 
   // receive mac and wol
   socket.on('wakemac', (mac) => {
-    console.log('Wake: ' + mac);
+    console.log('Wake: ' + mac)
     if (mac != null){ 
-      wakeonlan.wake(mac);
+      wakeonlan.wake(mac)
     }
-  });  
+  })  
   
   // hosts
   var hosts = { 'hosts' : [
@@ -453,110 +405,102 @@ wol.on('connection', async (socket) => {
   
   // hosts ping and send 
   for (x in hosts){
-	for (y in hosts[x]){
-	  hosts[x][y].state = await isReachable(hosts[x][y].name + ':' + hosts[x][y].port);
-	}
+    for (y in hosts[x]){
+      hosts[x][y].state = await isReachable(hosts[x][y].name + ':' + hosts[x][y].port)
+    }
   }
-  console.log('[WOL] Sending JSON ...');
-  console.log('[WOL] JSON: ' + JSON.stringify(hosts));
-  wol.emit('wol',hosts);
+  
+  console.log(getTime() + 'portal: Sending wol JSON ' + JSON.stringify(Object.assign({}, menu, hosts)))
+  wol.emit('wol',(Object.assign({}, menu, hosts)))	
   
   // hosts interval ping and send
   var interval = setAsyncInterval(async () => {
-    console.log('start');
-    console.log('[WOL] Sending JSON Interval ...');
     for (x in hosts){
       for (y in hosts[x]){
-        hosts[x][y].state = await isReachable(hosts[x][y].name + ':' + hosts[x][y].port);
+        hosts[x][y].state = await isReachable(hosts[x][y].name + ':' + hosts[x][y].port)
       }
     }	
     const promise = new Promise((resolve) => {
-      setTimeout(resolve('all done'), 3000);
-    });
-    await promise;
-    console.log('[WOL] JSON: ' + JSON.stringify(hosts));
-    wol.emit('wol',hosts); // send	
-    console.log('end');
-  }, 3000); 
+      setTimeout(resolve('all done'), 3000)
+    })
+    await promise
+    //console.log(getTime() + 'portal: Sending wol JSON interval ' + JSON.stringify(Object.assign({}, menu, hosts)))
+    wol.emit('wol',(Object.assign({}, menu, hosts)))
+  }, 3000)
   
 });
 
 // new connection
 io.on('connection', async (socket) => { 
-  var socketId = socket.id;
-  var clientIp = socket.request.connection.remoteAddress;
+  var socketId = socket.id
+  var clientIp = socket.request.connection.remoteAddress
   console.log(getTime() + 'socketio: new connection ' + clientIp)
-});
+})
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/portal.html')
-});
+})
 
 app.get('/portal', (req, res) => {
   res.sendFile(__dirname + '/public/portal.html')
-});
+})
 
 app.get('/ping', (req, res) => {
   res.send('pong');
-});
+})
 
 app.get('/wol', (req, res) => {
   res.sendFile(__dirname + '/public/wol.html')
-});
+})
 
 app.get('/cams', (req, res) => {
   res.sendFile(__dirname + '/public/cams.html')
-});
+})
 
 app.get('/wetter', (req, res) => {
   res.sendFile(__dirname + '/public/wetter.html')
-});
+})
 
 server.listen(server_port, function () {
   console.log(getTime() + 'socketio: listening on port ' + server_port)
-});
+})
 
 // async intervals
-const asyncIntervals = [];
+const asyncIntervals = []
 const runAsyncInterval = async (cb, interval, intervalIndex) => {
-  await cb();
+  await cb()
   if (asyncIntervals[intervalIndex]) {
-    setTimeout(() => runAsyncInterval(cb, interval, intervalIndex), interval);
+    setTimeout(() => runAsyncInterval(cb, interval, intervalIndex), interval)
   }
 };
 
 const setAsyncInterval = (cb, interval) => {
   if (cb && typeof cb === "function") {
-    const intervalIndex = asyncIntervals.length;
-    asyncIntervals.push(true);
-    runAsyncInterval(cb, interval, intervalIndex);
-    return intervalIndex;
+    const intervalIndex = asyncIntervals.length
+    asyncIntervals.push(true)
+    runAsyncInterval(cb, interval, intervalIndex)
+    return intervalIndex
   } else {
-    throw new Error('Callback must be a function');
+    throw new Error('Callback must be a function')
   }
-};
+}
 
 const clearAsyncInterval = (intervalIndex) => {
   if (asyncIntervals[intervalIndex]) {
-    asyncIntervals[intervalIndex] = false;
+    asyncIntervals[intervalIndex] = false
   }
-};
+}
 
-// onoff unload 
+// pigpio unload 
 function unexportOnClose() {
-  LED.write(0);
-  LED.unexport();
-  portalHD.unexport();
-  portalHDL.unexport();
-  portalGD.unexport();
-  portalGDL.unexport();
-  portalG.unexport();  
-  lockRelayHDL.unexport();
-  unlockRelayHDL.unexport();
-  lockRelayGDL.unexport();
-  unlockRelayGDL.unexport();
-  moveRelayG.unexport();
-  buttonB.unexport();
+  LED.digitalWrite(0)
+  lockRelayHDL.digitalWrite(!false)
+  unlockRelayHDL.digitalWrite(!false)
+  lockRelayGDL.digitalWrite(!false)
+  unlockRelayGDL.digitalWrite(!false)
+  moveRelayG.digitalWrite(!false)
+  pigpio.terminate()
+  process.exit()
 };
 process.on('SIGINT', unexportOnClose); //function to run when user closes using ctrl+c 
 
@@ -588,10 +532,10 @@ function insertInfluxdb(portal, state){
 function queryInfluxdb(id, name_short, state){
   const fluxQuery = `from(bucket:"homeautomation") 
                  |> range(start: 0) 
-		 |> filter(fn: (r) => r["_measurement"] == "portal")
+                 |> filter(fn: (r) => r["_measurement"] == "portal")
                  |> filter(fn: (r) => r["portal_name"] == "${name_short}")
                  |> filter(fn: (r) => r["_field"] == "state")
-		 |> sort(columns:["_time"], desc: true)
+                 |> sort(columns:["_time"], desc: true)
                  |> limit(n:1)`;
 
   const queryApi = new InfluxDB({url:url,token:token18}).getQueryApi(org)
@@ -627,29 +571,7 @@ function publishMQTT(name_short, json){
   //mqttClient.end()
 }
 
-/*var transporter = nodemailer.createTransport(smtpTransport({
-  service: 'gmail',
-  host: 'smtp.gmail.com',
-  auth: {
-      user: '@gmail.com',
-      pass: ''
-  }
-}));
-
-function sendMail(name,state){
-  var mailOptions = {
-    from: 'gmail.com',
-    to: '@gmail.com',
-    subject: name + ' ' + state + ' ' + dayjs().format('HH:mm:ss.SSS DD.MM.YYYY'),
-    text: 'from: p4'
-  };
-  transporter.sendMail(mailOptions, function(error, info){
-    if (error) {
-      console.log(getTime() + 'nodemailer: error ' + error)
-    } else {
-      console.log(getTime() + 'nodemailer: sent ' + info.response)
-    }
-  });  
+/*function sendMail(name,state){
 }*/
 
 function sendPushover(name_long,image){

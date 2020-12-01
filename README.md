@@ -12,6 +12,11 @@ node muh unified homeautomation
 
   sudo setcap 'cap_net_bind_service=+ep' $(which node) //allow port 80
   node muh.js
+
+
+
+  export NODE_ENV=dev && node muh.js
+  $env:NODE_ENV='dev'
 ```
 
 ## TODO
@@ -21,7 +26,7 @@ node muh unified homeautomation
 - [x] add influxdb
 - [x] add mqtt
 - [ ] add mail (mstmp-queue)
-- [x] add pushmessage (pushover
+- [x] add pushmessage (pushover)
 - [x] add klingel
 - [ ] add rfid
 
