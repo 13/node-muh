@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 
+if (process.arch == 'arm'){
+  envConfig = './env_p1'
+} else {
+  envConfig = './env'
+}
+
 const express = require('express')
 const app = express()
 
@@ -10,7 +16,7 @@ const wol = io.of('/wol')
 
 // influxdb 1.8+
 const {InfluxDB, Point, HttpError, FluxTableMetaData} = require('@influxdata/influxdb-client')
-const {url, org, token18, bucket, po_user, po_token} = require('./env')
+const {url, org, token18, bucket, po_user, po_token} = require(envConfig)
 
 // mqtt
 const mqtt = require('mqtt')
