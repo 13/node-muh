@@ -11,7 +11,6 @@ node muh unified homeautomation
   npm rebuild
 
   sudo setcap 'cap_net_bind_service=+ep' $(which node) //allow port 80
-
   node muh.js
 ```
 
@@ -20,15 +19,15 @@ node muh unified homeautomation
 - [x] add reed sensors
 - [x] add relays
 - [x] add influxdb
-- [ ] add mqtt
-- [ ] add mail (gmail)
-- [ ] add pushmessage (gotify)
-- [ ] add klingel
+- [x] add mqtt
+- [ ] add mail (mstmp-queue)
+- [x] add pushmessage (pushover
+- [x] add klingel
 - [ ] add rfid
 
 ### Secondary features
 - [ ] add autolock timer
-- [ ] clear buffer socket
+- [ ] clear buffer socket (problems!!!)
 - [ ] add influxdb send timestamp || test what happens
 - [ ] wol popup window
 - [ ] sounds page with volume slider, mute button, ...

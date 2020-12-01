@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Portal</title>
-		<!-- vuetify -->
-		<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
-		<link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
-		<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
-		<!-- include socket.io client side script -->
-		<script src="https://cdn.jsdelivr.net/npm/socket.io@3.x/client-dist/socket.io.js"></script>	
-	</head>
-	<body>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Portal</title>
+    <link rel="icon" href="favicon.png" type="image/png" sizes="16x16"> 
+    <!-- vuetify -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <!--
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    -->
+    <link href="/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="/css/vuetify.min.css" rel="stylesheet">
+    <!-- include socket.io client side script -->
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+<body>
 		<div id="app">
 			<v-app>
 				<v-navigation-drawer
@@ -141,7 +146,7 @@
 					<v-list>
 						<div v-for="(portal, idx) in portals" :key="idx">
 							<v-list-item
-							v-if="!portal.name.includes('lock')"
+							v-if="!portal.name.includes('lock') && portal.name !== 'bell'"
 							@click=""
 							disabled
 							>
@@ -168,7 +173,7 @@
 								</v-chip>
 							</v-list-item>
 							<!-- portal footer -->
-							<v-container fluid v-if="!portal.name.includes('lock')" class="pa-0">
+							<v-container fluid v-if="!portal.name.includes('lock') && portal.name !== 'bell'" class="pa-0">
 								<v-row no-gutters
 								align="center"
 								justify="center">	
@@ -207,6 +212,7 @@
 							<!-- dialog -->
 							<v-dialog
 							v-model="$data[toUpperCaseFirstChar(portal.name) + 'Dialog']"
+							v-if="portal.name !== 'bell'"
 							max-width="480"
 							>
 								<v-card>
@@ -295,8 +301,12 @@
 		</v-app>
 	</div><!-- app -->
 	
+	<!--
 	<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+	-->
+	<script src="/js/vue.js"></script>
+	<script src="/js/vuetify.js"></script>
 	<script>
 		"use strict"
 		
