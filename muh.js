@@ -75,15 +75,15 @@ var portals = { 'portals' : [
 for (x in portals){
   for (y in portals[x]){
     if (portals[x][y].hasOwnProperty('pin')){
-      eval('in' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', { mode: Gpio.INPUT, pullUpDown: Gpio.PUD_DOWN, edge: Gpio.EITHER_EDGE, alert: true });')
+      eval('in' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', { mode: Gpio.INPUT, pullUpDown: Gpio.PUD_UP, edge: Gpio.EITHER_EDGE, alert: true });')
       // read first time
       processPortal(portals[x][y].id, eval('in' + portals[x][y].name_short.toUpperCase() + '.digitalRead()'),true)
       if (process.env.NODE_ENV !== 'dev'){
-	    // set stable time
+	// set stable time
         eval('in' + portals[x][y].name_short.toUpperCase() + '.glitchFilter(' + stableTime  + ')')
         // run interrupt
         eval(`in${portals[x][y].name_short.toUpperCase()}.on('alert', (value, tick) => { \
-	            processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == ${portals[x][y].name_short.toUpperCase()}) ? x.id : null)[0].id,value) \
+          processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == '${portals[x][y].name_short.toUpperCase()}') ? x.id : null)[0].id,value) \
         })`)
       }
     }
@@ -99,11 +99,11 @@ for (x in portals){
     if (portals[x][y].hasOwnProperty('pin_button')){
       eval('in' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_button + ', {mode: Gpio.INPUT, pullUpDown: Gpio.PUD_DOWN, edge: Gpio.RISING_EDGE, alert: true})');
       if (process.env.NODE_ENV !== 'dev'){
-	      // set stable time
+	// set stable time
         eval('in' + portals[x][y].name_short.toUpperCase() + '.glitchFilter(' + stableTime  + ')')
         // run interrupt
         eval(`in${portals[x][y].name_short.toUpperCase()}.on('alert', (value, tick) => { \
-	        processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == ${portals[x][y].name_short.toUpperCase()}) ? x.id : null)[0].id,value) \
+          processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == '${portals[x][y].name_short.toUpperCase()}') ? x.id : null)[0].id,value) \
         })`)
       }
     }
@@ -173,22 +173,22 @@ function processPortal(id,state,initial=false){
       if (state){
         // set timer 10m
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
-        startTimer()
+        //startTimer()
       } else {
         // delete timer & disable autolock
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
-	clearTimeout(timer);
+	//clearTimeout(timer);
       }
     }
     if (name_short == 'GDL'){
       if (state){
         // delete timer & disable autolock
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
-        clearTimeout(timer);
+        //clearTimeout(timer);
       } else {
         // set timer 10m
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
-        startTimer()
+        //startTimer()
       }
     }
 	
@@ -234,13 +234,13 @@ function processPortal(id,state,initial=false){
                portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state == 1){
       // LED blink
       console.log(getTime() + 'portal: LED blink')
-      stopBlinking = false;
-      blinkLED();
+      stopBlinking = false
+      //blinkLED()
     } else {
       // LED off
       console.log(getTime() + 'portal: LED off')
-      stopBlinking = true;
-      LED.digitalWrite(0);
+      stopBlinking = true
+      LED.digitalWrite(0)
     }
   }
 }
