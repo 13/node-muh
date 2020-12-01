@@ -1,8 +1,8 @@
 {
   "name": "node-muh",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "nodejs muh unified homeautomation",
-  "main": "express.js",
+  "main": "muh.js",
   "dependencies": {
     "@influxdata/influxdb-client": "^1.8.0",
     "@mdi/font": "^5.8.55",
