@@ -11,6 +11,36 @@ node muh unified homeautomation
  * [Troubleshooting](#troubleshooting)
  * [Todo](#todo)
 
+## Features
+
+ * Display garage & doors 
+ * Control garage & doors
+ * Doorbell
+ * Status LED 
+ * Notification via Email & Pushmessage
+ * Autolock doors after specific time
+ * Store all changes in database
+ 
+### Softare
+
+ * nodejs
+ * pigpio
+ * mqtt
+ * influxdb
+
+### Hardware
+
+ * Magnetic reed switch
+   * Display state open or closed of garage & doors
+ * Relay switch
+   * Close & open garage
+   * Lock, unlock & open doors
+ * Button switch
+   * Doorbell
+ * LED status indicator
+   * Display all doors in the basement are locked
+ * PIR sensor
+
 ## Installation
 
 ### Prerequisites
