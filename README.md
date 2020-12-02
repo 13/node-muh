@@ -21,7 +21,7 @@ node muh unified homeautomation
  * Autolock doors after specific time
  * Store all changes in database
  
-### Softare
+### Software
 
  * nodejs
  * pigpio
@@ -99,6 +99,7 @@ $env:NODE_ENV='dev'
 - [x] add klingel
 - [ ] add rfid
 
+- [ ] enable/disable services like pushover
 - [ ] add autolock timer
 - [ ] clear buffer socket (problems!!!)
 - [ ] add influxdb send timestamp || test what happens
