@@ -13,7 +13,7 @@ node muh unified homeautomation
 
 ## Installation
 
-### Prequesites
+### Prerequisites
 
 Install the pigpio C library.
 
@@ -24,13 +24,17 @@ yay -S pigpio-git
 
 ### Installation
 
-Clone git node-muh repository, install node-muh dependencies and run.
+Clone git node-muh repository, install node-muh dependencies.
  
 ```bash
 git clone https://github.com/13/node-muh.git
 
 npm install
+```
 
+Run with root privileges.
+
+```bash
 sudo node muh.js
 ```
 
