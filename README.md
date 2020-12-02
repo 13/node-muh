@@ -45,16 +45,27 @@ node muh unified homeautomation
 
 ### Prerequisites
 
-Install the pigpio C library.
+Install the pigpio C library
 
 ```bash
 pacman -S base-devel git npm
 yay -S pigpio-git
 ```
 
+Set default modes in `/boot/config.txt`
+
+```bash
+# Pull-down button & reed switch 
+gpio=5,6,8,13,25,7=pd
+# Output relays (driving high)
+gpio=12,16,20,19,26=op,dh
+# Output LED (driving low)
+gpio=24=op,dl
+```
+
 ### Installation
 
-Clone git node-muh repository, install node-muh dependencies.
+Clone git node-muh repository, install node-muh dependencies
  
 ```bash
 git clone https://github.com/13/node-muh.git
@@ -62,7 +73,7 @@ git clone https://github.com/13/node-muh.git
 npm install
 ```
 
-Run with root privileges.
+Run with root privileges
 
 ```bash
 sudo node muh.js
