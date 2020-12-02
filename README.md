@@ -13,25 +13,46 @@ node muh unified homeautomation
 
 ## Installation
 
-Install the pigpio C library, clone git node-muh repository and install node-muh dependencies.
+### Prequesites
+
+Install the pigpio C library.
 
 ```bash
-pacman -S git npm base-devel
+pacman -S base-devel git npm
 yay -S pigpio-git
+```
 
+### Installation
+
+Clone git node-muh repository, install node-muh dependencies and run.
+ 
+```bash
 git clone https://github.com/13/node-muh.git
 
 npm install
-npm rebuild
 
-sudo setcap 'cap_net_bind_service=+ep' $(which node) //allow port 80
-node muh.js
+sudo node muh.js
+```
 
-export NODE_ENV=dev && node muh.js
-$env:NODE_ENV='dev'
+Or run with development environment
+
+```bash
+export NODE_ENV=dev && sudo node muh.js
 ```
 
 ## Troubleshooting
+
+### Allow port 80 on linux
+
+```bash
+sudo setcap 'cap_net_bind_service=+ep' $(which node)
+```
+
+### Set env on powershell
+
+```bash
+$env:NODE_ENV='dev'
+```
 
 ## Todo
 
