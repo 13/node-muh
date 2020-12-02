@@ -81,7 +81,7 @@ var portals = { 'portals' : [
 for (x in portals){
   for (y in portals[x]){
     if (portals[x][y].hasOwnProperty('pin')){
-      eval('in' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', { mode: Gpio.INPUT, pullUpDown: Gpio.PUD_UP, edge: Gpio.EITHER_EDGE, alert: true });')
+      eval('in' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', { mode: Gpio.INPUT, pullUpDown: Gpio.PUD_DOWN, edge: Gpio.EITHER_EDGE, alert: true });')
       // read first time
       processPortal(portals[x][y].id, eval('in' + portals[x][y].name_short.toUpperCase() + '.digitalRead()'),true)
       if (process.env.NODE_ENV !== 'dev'){
