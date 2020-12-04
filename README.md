@@ -1,6 +1,6 @@
 # node-muh
 
-node muh unified homeautomation
+**m**uh **u**nified **h**omeautomation
 
 ## Contents
 
