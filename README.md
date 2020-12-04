@@ -23,7 +23,7 @@
  
 ### Software
 
- * nodejs
+ * nodejs socket.io
  * pigpio
  * mqtt
  * influxdb
