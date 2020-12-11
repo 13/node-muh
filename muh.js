@@ -604,7 +604,7 @@ function checkAlarm(id){
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'GD') ? x.id : null)[0].state &&
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state &&
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state){
-        console.log(getTime() + 'alarm red')
+        console.log(getTime() + 'red alert')
         //sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,'img')
   }
 }
