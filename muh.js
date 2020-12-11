@@ -205,7 +205,7 @@ function processPortal(id,state,initial=false){
         playSound('bell')
         loudness.setVolume(85)
         // pushover
-        sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,'img')
+        //sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,'img')
         // reset bell
         portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = 0 
       }
@@ -604,7 +604,8 @@ function checkAlarm(id){
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'GD') ? x.id : null)[0].state &&
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state &&
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state){
-        sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,'img')
+        console.log(getTime() + 'alarm red')
+        //sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,'img')
   }
 }
 
