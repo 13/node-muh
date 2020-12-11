@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 if (process.arch == 'arm'){
-  envConfig = './env_p1'
+  envConfig = './env-p1'
 } else {
   envConfig = './env'
 }
