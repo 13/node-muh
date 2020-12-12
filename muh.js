@@ -28,8 +28,12 @@ const pigpio = process.env.NODE_ENV === 'dev' ?
   require('pigpio')
 //const pigpio = require('pigpio')
 const Gpio = pigpio.Gpio
+
 const LED = new Gpio(24, {mode: Gpio.OUTPUT, alert: true}) //LED Haustür
-var stopBlinking = false
+var blinkIvLED = false
+//const LedRun = require('ledrun')
+//var LED = new LedRun(24)
+
 var stableTime = 10000 
 
 // play-sound
@@ -52,7 +56,9 @@ const dayjs = require('dayjs');
 // socketio
 const server_port = 80
 var connectCounter = 0
-var timer = null
+
+// timer
+var lockTimer = false
 
 console.log(getTime() + 'portal: starting ...')
 
@@ -116,16 +122,6 @@ for (x in portals){
   }
 }
 
-const blinkLED = () => {
-  if (stopBlinking) {
-    return 
-  }
-  LED.on('alert', (value, tick) => {
-    LED.digitalWrite(LED.digitalRead()^1)
-    setTimeout(blinkLED, 1350)
-  })
-};
-
 function processPortal(id,state,initial=false){
   var pin = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].pin;
   var name = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name;
@@ -179,22 +175,22 @@ function processPortal(id,state,initial=false){
       if (state){
         // set timer 10m
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
-        //startTimer()
+        handleTimer('on')
       } else {
         // delete timer & disable autolock
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
-	//clearTimeout(timer);
+	handleTimer('off')
       }
     }
     if (name_short == 'GDL'){
       if (state){
         // delete timer & disable autolock
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
-        //clearTimeout(timer);
+	handleTimer('off')
       } else {
         // set timer 10m
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
-        //startTimer()
+        handleTimer('on')
       }
     }
 	
@@ -234,32 +230,61 @@ function processPortal(id,state,initial=false){
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state == 1){
       // LED on
       console.log(getTime() + 'portal: LED on')
-      stopBlinking = true;
-      LED.digitalWrite(1);
+      handleLED('on')
     } else if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state == 1 ||
                portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state == 1){
       // LED blink
       console.log(getTime() + 'portal: LED blink')
-      stopBlinking = false
-      //blinkLED()
+      handleLED('blink')
     } else {
       // LED off
       console.log(getTime() + 'portal: LED off')
-      stopBlinking = true
-      LED.digitalWrite(0)
+      handleLED('off')
     }
   }
 }
 
 app.use(express.static(__dirname + '/public'));
 
-function startTimer(){
-  var timer = null;
-  console.log(getTime() + 'portal: timer started')
-  var timer = setTimeout(function () {
-    console.log(getTime() + 'portal: timer finished')
-    //handlePortal(lockRelayGDL,'garagedoorlock','lock',10)
-  }, 5000)
+function handleLED(state){
+  if (blinkIvLED != false){
+    clearInterval(blinkIvLED)
+    LED.digitalWrite(0)
+    blinkIvLED = false
+  }
+  if (state == 'on'){
+    LED.digitalWrite(1)
+  }
+  if (state == 'off'){
+    LED.digitalWrite(0)
+  }
+  if (state == 'blink'){
+    if (blinkIvLED == false){
+      blinkIvLED = setInterval(function() {
+        LED.digitalWrite(LED.digitalRead() ^ 1)
+      }, 1350)
+    }
+  }
+}
+
+function handleTimer(state){
+  if (state == 'on'){
+    if (lockTimer == false){
+      console.log(getTime() + 'portal: timer started')
+      lockTimer = setTimeout(function() {
+        console.log(getTime() + 'portal: timer finished')
+        lockTimer = false
+        handlePortal(lockRelayGDL,'garagedoorlock','lock',10)
+      }, 15*60*1000)
+    }
+  }
+  if (state == 'off'){
+    if (lockTimer != false){
+      console.log(getTime() + 'portal: timer cancelled')
+      clearTimeout(lockTimer)
+      lockTimer = false
+    }
+  }
 }
 
 function playSound(sound){
