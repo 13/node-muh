@@ -161,25 +161,24 @@ function processPortal(id,state,initial=false){
     // send mail
     //sendMail(name_short,state)
 	
-    // play sound
+    
     if (name_short == 'HD'){ 
-      if (state){
-         playSound('dong')
-      } else {
-         playSound('ding')
-      }
-    }	
-	
-    // automatic lock
+      playSound(name_short, state)
+    }		
+    
     if (name_short == 'GD'){
       if (state){
         // set timer 10m
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
         handleTimer('on')
+	// play sound
+	playSound(name_short, state)
       } else {
         // delete timer & disable autolock
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
 	handleTimer('off')
+	// play sound
+	playSound(name_short, state)
       }
     }
     if (name_short == 'GDL'){
@@ -194,6 +193,10 @@ function processPortal(id,state,initial=false){
       }
     }
 	
+    if (name_short == 'G'){ 
+      playSound(name_short, state)
+    }	  
+	  
     // bell
     if (name_short == 'B'){ 
       if (state){
@@ -287,20 +290,44 @@ function handleTimer(state){
   }
 }
 
-function playSound(sound){
+function playSound(sound, state=false){
   var folder = '/home/ben/sounds/'
-  if (sound == 'ding'){
-    mp3 = 'door/elevator1.mp3'
-    if (dayjs().month() == 12 && dayjs().date() >= 23 && dayjs().date() <= 26){
-      mp3 = 'door/otannenbaum.mp3'
+  
+  // HD
+  if (sound == 'HD'){
+    if (state){
+      if (dayjs().month() == 12 && dayjs().date() >= 23 && dayjs().date() <= 26){
+        mp3 = 'door/chime6.mp3'
+      } else {
+	mp3 = 'door/elevator2.mp3'      
+      }
+    } else {
+      if (dayjs().month() == 12 && dayjs().date() >= 23 && dayjs().date() <= 26){
+        mp3 = 'door/otannenbaum.mp3'
+      } else {
+	mp3 = 'door/elevator1.mp3'
+      }
     }
   }
-  if (sound == 'dong'){
-    mp3 = 'door/elevator2.mp3'
-    if (dayjs().month() == 12 && dayjs().date() >= 23 && dayjs().date() <= 26){
-      mp3 = 'door/chime6.mp3'
+	
+  // GD
+  if (sound == 'GD'){
+    if (state){
+      mp3 = 'door/gd-google-closed.mp3'    
+    } else {
+      mp3 = 'door/gd-google-opened.mp3'   
     }
   }
+	
+  // G
+  if (sound == 'G'){
+    if (state) {
+      mp3 = 'garage/g-google-closed.mp3'
+    } else {
+      mp3 = 'garage/g-google-opened.mp3'
+    }
+  }
+	
   // bell  
   if (sound == 'bell'){
     mp3 = 'bell/HausKlingel.mp3'
@@ -308,6 +335,8 @@ function playSound(sound){
       mp3 = 'bell/db-westminster1.mp3'
     }
   }  
+	
+  // play sound
   console.log(getTime() + 'portal: playing ' + folder.concat(mp3))
   player.play(folder.concat(mp3), function(err){
     if (err) throw err
