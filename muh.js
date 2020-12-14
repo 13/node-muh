@@ -144,9 +144,9 @@ function processPortal(id,state,initial=false){
       //insertInfluxdb(name_short,state);
       //queryInfluxdb(id,name_short)
     //}
-  } else {
-    console.log(getTime() + 'portal: ' + name_short + ' ' + state);
-  }
+  } /*else {
+    console.log(getTime() + 'portal: change detected ' + name_short + ' ' + state);
+  }*/
 
   if (typeof state_old !== 'undefined' && state != state_old){
     console.log(getTime() + 'portal: change ' + name_short + ' ' + state_old + ' -> ' + state);
@@ -323,10 +323,9 @@ function setRelay(gpio,state) {
 }
 
 function handlePortal(portal,name,action,hold){
-  console.log(getTime() + 'portal: ' + name + ' ' + action);
   setRelay(portal,true)
   setTimeout(function () {
-    console.log(getTime() + 'portal: ' + name + ' ' + action + ' OK')
+    console.log(getTime() + 'portal: ' + name + ' ' + action + ' done')
     setRelay(portal,false)
   }, hold)
 }
@@ -629,7 +628,7 @@ function checkAlarm(id){
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'GD') ? x.id : null)[0].state &&
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state &&
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state){
-        console.log(getTime() + 'red alert')
+        console.log(getTime() + 'portal: red alert')
         //sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,'img')
   }
 }
