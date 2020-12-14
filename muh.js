@@ -172,13 +172,13 @@ function processPortal(id,state,initial=false){
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
         handleTimer('on')
 	// play sound
-	playSound(name_short, state)
+	playSound(name_short, state, 'r')
       } else {
         // delete timer & disable autolock
         portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
 	handleTimer('off')
 	// play sound
-	playSound(name_short, state)
+	playSound(name_short, state, 'r')
       }
     }
     if (name_short == 'GDL'){
@@ -194,7 +194,7 @@ function processPortal(id,state,initial=false){
     }
 	
     if (name_short == 'G'){ 
-      playSound(name_short, state)
+      playSound(name_short, state, 'r')
     }	  
 	  
     // bell
@@ -290,7 +290,7 @@ function handleTimer(state){
   }
 }
 
-function playSound(sound, state=false){
+function playSound(sound, state=false, ch='both'){
   var folder = '/home/ben/sounds/'
   
   // HD
@@ -337,10 +337,22 @@ function playSound(sound, state=false){
   }  
 	
   // play sound
-  console.log(getTime() + 'portal: playing ' + folder.concat(mp3))
-  player.play(folder.concat(mp3), function(err){
-    if (err) throw err
-  })
+  if (ch == 'l'){
+    console.log(getTime() + 'portal: playing left channel ' + folder.concat(mp3))
+    player.play(folder.concat(mp3), { mpg123: ['-0'] }, function(err){
+      if (err) throw err
+    })  
+  } else if (ch == 'r'){
+    console.log(getTime() + 'portal: playing right channel ' + folder.concat(mp3))
+    player.play(folder.concat(mp3), { mpg123: ['-1'] }, function(err){
+      if (err) throw err
+    })  
+  } else {
+    console.log(getTime() + 'portal: playing both channels ' + folder.concat(mp3))
+    player.play(folder.concat(mp3), function(err){
+      if (err) throw err
+    })  
+  }
 }
 
 function setRelay(gpio,state) {
