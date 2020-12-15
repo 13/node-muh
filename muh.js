@@ -368,6 +368,17 @@ portal.on('connection', async (socket) => {
     clearAsyncInterval(interval_p);
   })
 
+  // receive volume command
+  socket.on('volume', (name, action) => {
+    console.log(getTime() + 'socketio: volume ' + name + ' ' + action)
+    if (name == 'mute'){
+      //if (loudness.getMuted()){
+      //loudness.setMuted(true)	    
+      loudness.setVolume(0)
+      //}
+    }
+  })
+	
   // receive portal command
   socket.on('pushportal', (name, action) => {
     console.log(getTime() + 'socketio: pushportal ' + name + ' ' + action)
