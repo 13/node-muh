@@ -25,3 +25,23 @@
 | G | G reed || VCC ||| GND ||| 
 | GD | GD reed | GDL reed | VCC ||| GND |||
 | HD | HD reed | HDL reed | VCC | B switch | LED | GND |||
+
+
+### RPi
+
+| P | H | D | RD | RN | RO | RO | RN | RD | D | H | P |
+|:-:|:-:|:-:|:--:|:--:|:--:|:--:|:--:|:--:|:-:|:-:|:-:|
+| | | X | 3.3V | 1 | X | X | 2 | 5V | X | | |
+| i2c | | | GPIO 2 | 3 | O | X | 4 | 5V | | | |
+| i2c | | | GPIO 3 | 5 | O | X | 6 | GND | X | | |
+| | 1-Wire | 1-Wire | GPIO 4 | 7 | X | O | 8 | GPIO 14 | | | UART |
+| | | | GND | 9 | O | O | 10 | GPIO 15 | | | UART |
+
+```
+P = Protocoll
+H = Hardware
+D = Description
+RD = Raspberry Pi Description
+RN = Raspberry Pi Num
+RO = Raspberry Pi Occupied
+```
