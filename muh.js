@@ -59,7 +59,7 @@ var connectCounter = 0
 var lockTimer = false
 
 console.log(getTime() + 'portal: starting ...')
-console.log(getTime() + 'portal: volumne 85%')
+console.log(getTime() + 'portal: volume 85%')
 loudness.setVolume(85)
 
 var menu = { 'menu' : [
