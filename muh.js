@@ -169,15 +169,13 @@ function processPortal(id,state,initial=false){
           // set timer 10m
           portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true
           handleTimer('on')
-	  // play sound
-	  playSound(name_short, state, 'r')
         } else {
           // delete timer & disable autolock
           portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false
 	  handleTimer('off')
-	  // play sound
-	  playSound(name_short, state, 'r')
         }
+	// play sound
+	playSound(name_short, state) 
       }
 
       if (name_short == 'GDL'){
@@ -193,7 +191,7 @@ function processPortal(id,state,initial=false){
       }
 	
       if (name_short == 'G'){ 
-        playSound(name_short, state, 'r')
+        playSound(name_short, state)
       }
 	  
       // bell
@@ -290,6 +288,7 @@ function handleTimer(state){
 }
 
 function playSound(sound, state=false, ch='both'){
+  // sounds folder
   var folder = '/home/ben/sounds/'
   
   // HD
