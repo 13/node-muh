@@ -59,6 +59,8 @@ var connectCounter = 0
 var lockTimer = false
 
 console.log(getTime() + 'portal: starting ...')
+console.log(getTime() + 'portal: volumne 85%')
+loudness.setVolume(85)
 
 var menu = { 'menu' : [
                          { icon: 'mdi-view-dashboard', text: 'Dashboard', href: '/' },
@@ -192,7 +194,7 @@ function processPortal(id,state,initial=false){
 	
       if (name_short == 'G'){ 
         playSound(name_short, state, 'r')
-      }	  
+      }
 	  
       // bell
       if (name_short == 'B'){ 
