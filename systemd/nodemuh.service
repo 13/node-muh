@@ -1,0 +1,16 @@
+[Unit]
+Description=node muh
+Requires=After=docker.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/node /home/ben/repo/node-muh/muh.js
+Restart=always
+RestartSec=30
+# Output to syslog
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=node-muh
+
+[Install]
+WantedBy=multi-user.target
