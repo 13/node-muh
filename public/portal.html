@@ -110,7 +110,7 @@
 				</v-toolbar-title>
 				<v-spacer></v-spacer>
 				<v-btn icon @click="">
-					<v-icon>mdi-refresh</v-icon>
+					<v-icon>mdi-volume-mute</v-icon>
 				</v-btn>
 			</v-app-bar>
 			<v-main>
@@ -462,6 +462,17 @@
 				this.sb_text = this.$options.filters.translateName(name) + " " + this.$options.filters.translateName(action) + " ..."
 				this.sb_portal = true
 			},
+			notifyVolume: function (name, action, event) {
+				// now we have access to the native event
+				if (event) {
+					event.preventDefault()
+				}
+				console.log(name + " " + action + " ...")
+				socket.emit("volume", name, action); //send push button status to back to server
+				//this.sb_text = this.$options.filters.translateName(name) + " " + action + " ..."
+				this.sb_text = this.$options.filters.translateName(name) + " " + this.$options.filters.translateName(action) + " ..."
+				this.sb_portal = true
+			},			
 			setDialogState(prop,val){
 				var modalName = prop.charAt(0).toUpperCase() + prop.slice(1) + "Dialog"
 				this[modalName] = val
