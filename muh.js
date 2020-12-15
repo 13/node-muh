@@ -26,15 +26,13 @@ const mqttClient  = mqtt.connect('mqtt://localhost')
 const pigpio = process.env.NODE_ENV === 'dev' ?
   require('pigpio-mock') :
   require('pigpio')
-//const pigpio = require('pigpio')
 const Gpio = pigpio.Gpio
+var stableTime = 100000 //10000 
 
 const LED = new Gpio(24, {mode: Gpio.OUTPUT, alert: true}) //LED Haustür
 var blinkIvLED = false
 //const LedRun = require('ledrun')
 //var LED = new LedRun(24)
-
-var stableTime = 10000 
 
 // play-sound
 const player = require('play-sound')(opts = {})
