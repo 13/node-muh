@@ -370,7 +370,7 @@ portal.on('connection', async (socket) => {
   // receive volume command
   socket.on('volume', (name, action) => {
     console.log(getTime() + 'socketio: volume ' + name + ' ' + action)
-    if (name == 'mute'){
+    if (action == 'mute'){
       //if (loudness.getMuted()){
       //loudness.setMuted(true)	    
       loudness.setVolume(0)
