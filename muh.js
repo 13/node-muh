@@ -88,11 +88,11 @@ for (x in portals){
   for (y in portals[x]){
     if (portals[x][y].hasOwnProperty('pin')){
       eval('in' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', { mode: Gpio.INPUT, pullUpDown: Gpio.PUD_DOWN, edge: Gpio.EITHER_EDGE, alert: true });')
-      // read first time
-      processPortal(portals[x][y].id, eval('in' + portals[x][y].name_short.toUpperCase() + '.digitalRead()'),true)
       if (process.env.NODE_ENV !== 'dev'){
-	// set stable time
+        // set stable time
         eval('in' + portals[x][y].name_short.toUpperCase() + '.glitchFilter(' + stableTime  + ')')
+        // read first time
+        processPortal(portals[x][y].id, eval('in' + portals[x][y].name_short.toUpperCase() + '.digitalRead()'),true)
         // run interrupt
         eval(`in${portals[x][y].name_short.toUpperCase()}.on('alert', (value, tick) => { \
           processPortal(portals.portals.filter(x => (x.name_short.toUpperCase() == '${portals[x][y].name_short.toUpperCase()}') ? x.id : null)[0].id,value) \
@@ -144,110 +144,109 @@ function processPortal(id,state,initial=false){
       //insertInfluxdb(name_short,state);
       //queryInfluxdb(id,name_short)
     //}
-  } /*else {
-    console.log(getTime() + 'portal: change detected ' + name_short + ' ' + state);
-  }*/
+  } else {
+    console.log(getTime() + 'portal: change detected ' + name_short + ' ' + state)
 
-  if (typeof state_old !== 'undefined' && state != state_old){
-    console.log(getTime() + 'portal: change ' + name_short + ' ' + state_old + ' -> ' + state);
-    checkAlarm(id)
-    portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
-    // save datetime
-    portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss');
-    // write influxdb
-    insertInfluxdb(name_short,state);
-    // publish mqtt
-    publishMQTT(name_short,JSON.stringify(portals.portals.filter(x => (x.id == id) ? x.id : null)[0]))
-    // send mail
-    //sendMail(name_short,state)
-	
+    if (typeof state_old !== 'undefined' && state != state_old){
+      console.log(getTime() + 'portal: change ' + name_short + ' ' + state_old + ' -> ' + state)
+      checkAlarm(id)
+      portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state
+      // save datetime
+      portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss')
+      // write influxdb
+      insertInfluxdb(name_short,state)
+      // publish mqtt
+      publishMQTT(name_short,JSON.stringify(portals.portals.filter(x => (x.id == id) ? x.id : null)[0]))
+      // send mail
+      //sendMail(name_short,state)
     
-    if (name_short == 'HD'){ 
-      playSound(name_short, state)
-    }		
+      if (name_short == 'HD'){ 
+        playSound(name_short, state)
+      }		
     
-    if (name_short == 'GD'){
-      if (state){
-        // set timer 10m
-        portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
-        handleTimer('on')
-	// play sound
-	playSound(name_short, state, 'r')
-      } else {
-        // delete timer & disable autolock
-        portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
-	handleTimer('off')
-	// play sound
-	playSound(name_short, state, 'r')
+      if (name_short == 'GD'){
+        if (state){
+          // set timer 10m
+          portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true
+          handleTimer('on')
+	  // play sound
+	  playSound(name_short, state, 'r')
+        } else {
+          // delete timer & disable autolock
+          portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false
+	  handleTimer('off')
+	  // play sound
+	  playSound(name_short, state, 'r')
+        }
       }
-    }
-    if (name_short == 'GDL'){
-      if (state){
-        // delete timer & disable autolock
-        portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false;
-	handleTimer('off')
-      } else {
-        // set timer 10m
-        portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true;
-        handleTimer('on')
+
+      if (name_short == 'GDL'){
+        if (state){
+          // delete timer & disable autolock
+          portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false
+  	  handleTimer('off')
+        } else {
+          // set timer 10m
+          portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true
+          handleTimer('on')
+        }
       }
-    }
 	
-    if (name_short == 'G'){ 
-      playSound(name_short, state, 'r')
-    }	  
+      if (name_short == 'G'){ 
+        playSound(name_short, state, 'r')
+      }	  
 	  
-    // bell
-    if (name_short == 'B'){ 
-      if (state){
-        loudness.setVolume(100)
-        playSound('bell')
-        loudness.setVolume(85)
-        // pushover
-        //sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,'img')
-        // reset bell
-        portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = 0 
+      // bell
+      if (name_short == 'B'){ 
+        if (state){
+          loudness.setVolume(100)
+          playSound('bell')
+          loudness.setVolume(85)
+          // pushover
+          //sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,'img')
+          // reset bell
+         portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = 0 
+        }
       }
     }
   }
+    // LED
+    if (name_short == 'G'){ 
+      if (state){
+        portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].led = true
+      } else {
+        portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].led = false
+      }
+    }
+    if (name_short == 'GDL'){ 
+      if (state){
+        portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].led = true
+      } else {
+        portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].led = false
+      }
+    }
 
-  // LED
-  if (name_short == 'G'){ 
-    if (state){
-      portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].led = true;
-    } else {
-      portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].led = false;
+    // LED blink
+    if (name_short == 'G' || name_short == 'GDL'){ 
+      if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state == 1 &&
+          portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state == 1){
+        // LED on
+        console.log(getTime() + 'portal: LED on')
+        handleLED('on')
+      } else if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state == 1 ||
+                 portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state == 1){
+        // LED blink
+        console.log(getTime() + 'portal: LED blink')
+        handleLED('blink')
+      } else {
+        // LED off
+        console.log(getTime() + 'portal: LED off')
+        handleLED('off')
+      }
     }
-  }
-  if (name_short == 'GDL'){ 
-    if (state){
-      portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].led = true;
-    } else {
-      portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].led = false;
-    }
-  }
-
-  // LED blink
-  if (name_short == 'G' || name_short == 'GDL'){ 
-    if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state == 1 &&
-        portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state == 1){
-      // LED on
-      console.log(getTime() + 'portal: LED on')
-      handleLED('on')
-    } else if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state == 1 ||
-               portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state == 1){
-      // LED blink
-      console.log(getTime() + 'portal: LED blink')
-      handleLED('blink')
-    } else {
-      // LED off
-      console.log(getTime() + 'portal: LED off')
-      handleLED('off')
-    }
-  }
 }
 
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/public'))
 
 function handleLED(state){
   if (blinkIvLED != false){
@@ -313,18 +312,18 @@ function playSound(sound, state=false, ch='both'){
   // GD
   if (sound == 'GD'){
     if (state){
-      mp3 = 'door/gd-google-closed.mp3'    
+      mp3 = 'door/gd-gtts-l-closed.mp3'    
     } else {
-      mp3 = 'door/gd-google-opened.mp3'   
+      mp3 = 'door/gd-gtts-l-opened.mp3'   
     }
   }
 	
   // G
   if (sound == 'G'){
     if (state) {
-      mp3 = 'garage/g-google-closed.mp3'
+      mp3 = 'garage/g-gtts-l-closed.mp3'
     } else {
-      mp3 = 'garage/g-google-opened.mp3'
+      mp3 = 'garage/g-gtts-l-opened.mp3'
     }
   }
 	
@@ -337,22 +336,8 @@ function playSound(sound, state=false, ch='both'){
   }  
 	
   // play sound
-  if (ch == 'l'){
-    console.log(getTime() + 'portal: playing left channel ' + folder.concat(mp3))
-    player.play(folder.concat(mp3), { mpg123: ['-0'] }, function(err){
-      if (err) throw err
-    })  
-  } else if (ch == 'r'){
-    console.log(getTime() + 'portal: playing right channel ' + folder.concat(mp3))
-    player.play(folder.concat(mp3), { mpg123: ['-1'] }, function(err){
-      if (err) throw err
-    })  
-  } else {
-    console.log(getTime() + 'portal: playing both channels ' + folder.concat(mp3))
-    player.play(folder.concat(mp3), function(err){
-      if (err) throw err
-    })  
-  }
+  console.log(getTime() + 'portal: playing ' + folder.concat(mp3))
+  player.play(folder.concat(mp3), function(err){ if (err) throw err })  
 }
 
 function setRelay(gpio,state) {
