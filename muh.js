@@ -62,6 +62,12 @@ console.log(getTime() + 'portal: starting ...')
 console.log(getTime() + 'portal: volume 85%')
 loudness.setVolume(85)
 
+var os = { 'volume': { 
+	                level: loudness.getVolume(),
+		        muted: loudness.getMuted()
+		     }	
+         } 
+
 var menu = { 'menu' : [
                          { icon: 'mdi-view-dashboard', text: 'Dashboard', href: '/' },
                          { icon: 'mdi-lock', text: 'Portal', href: 'portal' },
@@ -411,9 +417,11 @@ portal.on('connection', async (socket) => {
   })
 	
   // Send JSON 
-  console.log(getTime() + 'portal: Sending portal JSON ' + JSON.stringify(Object.assign({}, menu, portals)))
-  portal.emit('portal',(Object.assign({}, menu, portals)))
-
+  //console.log(getTime() + 'portal: Sending portal JSON ' + JSON.stringify(Object.assign({}, menu, portals)))
+  //portal.emit('portal',(Object.assign({}, menu, portals)))
+  console.log(getTime() + 'portal: Sending portal JSON ' + JSON.stringify(Object.assign({}, os, menu, portals)))
+  portal.emit('portal',(Object.assign({}, os, menu, portals)))
+	
   // hosts interval ping and send
   var interval_p = setAsyncInterval(async () => {
     const promise = new Promise((resolve) => {
@@ -421,7 +429,7 @@ portal.on('connection', async (socket) => {
     })
     await promise
       //console.log(getTime() + 'portal: Sending portal JSON interval ' + JSON.stringify(Object.assign({}, menu, portals)))
-      portal.emit('portal',(Object.assign({}, menu, portals)))	
+      portal.emit('portal',(Object.assign({}, os, menu, portals)))	
   }, 3000) 
   
 })
