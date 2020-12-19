@@ -339,6 +339,17 @@ function playSound(sound, state=false, ch='both'){
       mp3 = 'bell/db-westminster1.mp3'
     }
   }  
+
+  // RFID
+  if (sound == 'rfid'){
+    if (state == '1') {
+      mp3 = 'door/rfid-allow.mp3'
+    } else if (state == '0') {
+      mp3 = 'door/rfid-deny.mp3'
+    } else {
+      mp3 = 'door/rfid-tosintercom.mp3'
+    }
+  }
 	
   // play sound
   console.log(getTime() + 'portal: playing ' + folder.concat(mp3))
@@ -631,12 +642,54 @@ function queryInfluxdb(id, name_short, state){
   })
 }
 
+mqttClient.on('connect', function (){
+  mqttClient.subscribe('rfid/json', function (err) {
+    console.log(getTime() + 'mqtt: subscribing rfid')
+  })
+})
+
+mqttClient.on('message', function (topic, msg){
+  console.log(getTime() + 'mqtt: receiving ' + msg.toString())
+  let rfid = JSON.parse(msg)
+  console.log(rfid.tag)
+  if (typeof rfid.tag !== 'undefined'){
+    if (rfid.location == 'HD'){
+      if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'HD') ? x.id : null)[0].state){
+        playSound('rfid', '1') 
+        if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'HDL') ? x.id : null)[0].state){
+          console.log(getTime() + 'mqtt: opening ' + rfid.location)
+          //handlePortal(unlockRelayHDL,name,action,500)
+        } else {
+          console.log(getTime() + 'mqtt: locking ' + rfid.location)
+          //handlePortal(unlockRelayHDL,name,action,10)
+        }
+      } else {
+        playSound('rfid', '2') 
+      }
+    }
+    if (rfid.location == 'GD'){
+      if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'GD') ? x.id : null)[0].state){
+        playSound('rfid', '1') 
+        if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state){
+          console.log(getTime() + 'mqtt: opening ' + rfid.location)
+          //handlePortal(unlockRelayGDL,name,action,500)
+        } else {
+          console.log(getTime() + 'mqtt: locking ' + rfid.location)
+          //handlePortal(unlockRelayGDL,name,action,10)
+        }
+      } else {
+        playSound('rfid', '2') 
+      }
+    }
+  } else {
+    console.log(getTime() + 'mqtt: deny ' + rfid.key)
+    playSound('rfid', '0') 
+  }
+})
+
 function publishMQTT(name_short, json){
-  //mqttClient.on('connected',function(){
   console.log(getTime() + 'mqtt: publish ' + name_short)
   mqttClient.publish('portal/' + name_short + '/json', json)
-  //})
-  //mqttClient.end()
 }
 
 /*function sendMail(name,state){
