@@ -155,7 +155,9 @@ function processPortal(id,state,initial=false){
 
     if (typeof state_old !== 'undefined' && state != state_old){
       console.log(getTime() + 'portal: change ' + name_short + ' ' + state_old + ' -> ' + state)
+      // check alarm
       checkAlarm(id)
+      // save state
       portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state
       // save datetime
       portals.portals.filter(x => (x.id == id) ? x.id : null)[0].tstamp = dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss')
@@ -651,7 +653,6 @@ mqttClient.on('connect', function (){
 mqttClient.on('message', function (topic, msg){
   console.log(getTime() + 'mqtt: receiving ' + msg.toString())
   let rfid = JSON.parse(msg)
-  console.log(rfid.tag)
   if (typeof rfid.tag !== 'undefined'){
     if (rfid.location == 'HD'){
       if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'HD') ? x.id : null)[0].state){
@@ -718,9 +719,9 @@ function sendPushover(name_long,image){
 }
 
 function checkAlarm(id){
-  // alarm
-  // all doors closed and change
-  if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'HD') ? x.id : null)[0].state &&
+  // alarm, all doors closed and change
+  if (!(portals.portals.filter(x => (x.name_short.toUpperCase() == 'B') ? x.id : null)[0].state) &&
+      portals.portals.filter(x => (x.name_short.toUpperCase() == 'HD') ? x.id : null)[0].state &&
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'HDL') ? x.id : null)[0].state &&
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'GD') ? x.id : null)[0].state &&
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state &&
