@@ -109,8 +109,8 @@
 					<span class="hidden-sm-and-down"></span>
 				</v-toolbar-title>
 				<v-spacer></v-spacer>
-				<v-btn icon @click="notifyVolume('volume', 'mute', $event)">
-					<v-icon>mdi-volume-mute</v-icon>
+				<v-btn icon @click="notifyVolume('toggle', 'mute', $event)">
+					<v-icon v-bind:color="stateToTag(socketState)">mdi-volume-mute</v-icon>
 				</v-btn>
 			</v-app-bar>
 			<v-main>
@@ -322,6 +322,7 @@
 				json: null,
 				portals: [],
 				menu: [],
+				volume: [],
 				sb_portal: false,
 				sb_text: null,
 				sb_timeout: 2500,
@@ -408,9 +409,10 @@
 					this.json = json,
 					this.portals = json.portals;
 					this.menu = json.menu;
+					this.volume = json.volume;
 					this.socketState = true;
-                    console.log(JSON.stringify(this.json))
-                    //console.log(JSON.stringify(this.hosts))
+                                        console.log(JSON.stringify(this.json))
+                                        //console.log(JSON.stringify(this.hosts))
 					console.log("socket connect: " + this.socketState);
 				}),
 				socket.on('disconnect', socketState => {
@@ -470,7 +472,7 @@
 				console.log(name + " " + action + " ...")
 				socket.emit("volume", name, action) //send push button status to back to server
 				//this.sb_text = this.$options.filters.translateName(name) + " " + action + " ..."
-				this.sb_text = "Volume " + action + " ..."
+				this.sb_text = "Volume: " + name + " " + action + " ..."
 				this.sb_portal = true
 			},			
 			setDialogState(prop,val){
