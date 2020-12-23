@@ -72,7 +72,8 @@ var menu = { 'menu' : [
                          { icon: 'mdi-view-dashboard', text: 'Dashboard', href: '/' },
                          { icon: 'mdi-lock', text: 'Portal', href: 'portal' },
                          { icon: 'mdi-cctv', text: 'Cams', href: 'cams' },
-                         { icon: 'mdi-lan', text: 'WOL', href: 'wol' }	
+                         { icon: 'mdi-lan', text: 'WOL', href: 'wol' },
+	                 { icon: 'mdi-music-note', text: 'Sounds', href: 'sounds' }
           ]} 	
 	
 var portals = { 'portals' : [
@@ -731,7 +732,7 @@ function checkAlarm(id){
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state &&
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state){
         console.log(getTime() + 'portal: red alert')
-        sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' ALERT','img')
+        sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' opened ALERT','img')
   }
 }
 
