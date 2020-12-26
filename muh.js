@@ -59,14 +59,22 @@ var connectCounter = 0
 var lockTimer = false
 
 console.log(getTime() + 'portal: starting ...')
-console.log(getTime() + 'portal: volume 85%')
-loudness.setVolume(85)
 
 var os = { 'volume': { 
-	                level: loudness.getVolume(),
-		        muted: loudness.getMuted()
+	                level: 11,
+		        muted: true,
 		     }	
          } 
+
+setVolume(70)
+
+getVolume().then( vol => {
+    os.volume.level = vol
+})
+getMuted().then( muted => {
+    os.volume.muted = muted
+})
+
 
 var menu = { 'menu' : [
                          { icon: 'mdi-view-dashboard', text: 'Dashboard', href: '/' },
@@ -206,9 +214,9 @@ function processPortal(id,state,initial=false){
       // bell
       if (name_short == 'B'){ 
         if (state){
-          loudness.setVolume(100)
+          setVolume(100)
           playSound('bell')
-          loudness.setVolume(85)
+          setVolume(75)
           // pushover
           sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,'img')
           // reset bell
@@ -303,13 +311,13 @@ function playSound(sound, state=false, ch='both'){
   // HD
   if (sound == 'HD'){
     if (state){
-      if (dayjs().month() == 12 && dayjs().date() >= 23 && dayjs().date() <= 26){
+      if (dayjs().month() == 11 && dayjs().date() >= 24 && dayjs().date() <= 25){
         mp3 = 'door/chime6.mp3'
       } else {
 	mp3 = 'door/elevator2.mp3'      
       }
     } else {
-      if (dayjs().month() == 12 && dayjs().date() >= 23 && dayjs().date() <= 26){
+      if (dayjs().month() == 11 && dayjs().date() >= 24 && dayjs().date() <= 25){
         mp3 = 'door/otannenbaum.mp3'
       } else {
 	mp3 = 'door/elevator1.mp3'
@@ -338,7 +346,7 @@ function playSound(sound, state=false, ch='both'){
   // bell  
   if (sound == 'bell'){
     mp3 = 'bell/HausKlingel.mp3'
-    if (dayjs().month() == 12 && dayjs().date() >= 23 && dayjs().date() <= 26){
+    if (dayjs().month() == 11 && dayjs().date() >= 24 && dayjs().date() <= 25){
       mp3 = 'bell/db-westminster1.mp3'
     }
   }  
@@ -390,15 +398,26 @@ portal.on('connection', async (socket) => {
   // receive volume command
   socket.on('volume', (name, action) => {
     console.log(getTime() + 'socketio: volume ' + name + ' ' + action)
-    if (name == 'toggle'){
+    /*if (name == 'toggle'){
       if (action == 'mute'){
         if (loudness.getMuted()){
-          loudness.setMuted(false)	    
+	  console.log("hi")
+          setMuted(false)
           //loudness.setVolume(0)
         } else {
-	  loudness.setMuted(true)
+	  console.log("ho")
+	  setMuted(true)
         }
       }
+    }*/
+    if (name == 'toggle'){
+      getMuted().then( muted => {
+        if (muted){
+          setMuted(false)
+        } else {
+          setMuted(true)
+        }
+      })
     }
   })
 	
@@ -734,5 +753,35 @@ function checkAlarm(id){
         console.log(getTime() + 'portal: red alert')
         sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' opened ALERT','img')
   }
+}
+
+async function getMuted(){
+  const mute = await loudness.getMuted()
+  console.log(getTime() + 'volume: ' + (mute ? 'muted' : 'unmuted'))
+  os.volume.muted = mute
+  return mute
+}
+
+async function setMuted(mute){
+  console.log(getTime() + 'volume: ' + (mute ? 'mute' : 'unmute'))
+  os.volume.muted = mute
+  if (mute){ 
+    await loudness.setMuted(true)
+  } else {
+    await loudness.setMuted(false)
+  }
+}
+
+async function getVolume(){
+  const vol = await loudness.getVolume()
+  console.log(getTime() + 'volume: ' + vol + '%')
+  os.volume.level = vol
+  return vol
+}
+
+async function setVolume(vol){
+  console.log(getTime() + 'volume: set ' + vol + '%')
+  os.volume.level = vol
+  await loudness.setVolume(vol)
 }
 

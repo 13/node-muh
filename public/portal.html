@@ -110,7 +110,7 @@
 				</v-toolbar-title>
 				<v-spacer></v-spacer>
 				<v-btn icon @click="notifyVolume('toggle', 'mute', $event)">
-					<v-icon v-bind:color="stateToTag(socketState)">mdi-volume-mute</v-icon>
+					<v-icon v-bind:color="stateToTagVV(volume.muted)">{{ volume.muted | icon }}</v-icon>
 				</v-btn>
 			</v-app-bar>
 			<v-main>
@@ -401,6 +401,9 @@
 					txt = value;
 				}
 				return txt;
+			},
+			icon (value) {
+				return (value ? 'mdi-volume-off' : 'mdi-volume-high');
 			}
 		},
 		methods: {
@@ -474,7 +477,7 @@
 				//this.sb_text = this.$options.filters.translateName(name) + " " + action + " ..."
 				this.sb_text = "Volume: " + name + " " + action + " ..."
 				this.sb_portal = true
-			},			
+			},
 			setDialogState(prop,val){
 				var modalName = prop.charAt(0).toUpperCase() + prop.slice(1) + "Dialog"
 				this[modalName] = val
