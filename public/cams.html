@@ -156,9 +156,11 @@
             outlined
             tile
           >
-            {{ cam.href }}
 <v-img
-	:src="cam.href"
+  lazy-src="https://picsum.photos/id/11/10/6"
+  :src="cam.href"
+  max-height="450"
+  max-width="550"
 ></v-img>            
           </v-card>
         </v-col>
@@ -203,10 +205,10 @@
 					sb_timeout: 2000,
 					drawer: null,
 					cams: [
-					  { text: 'G1', href: '192.168.22.101:8001' },
-					  { text: 'HD1', href: '192.168.22.101:8002' },
-					  { text: 'HD2', href: '192.168.22.101:8003' },
-					  { text: 'G2', href: '192.168.22.101:8004' },
+					  { text: 'G1', href: 'http://192.168.22.101:8081' },
+					  { text: 'HD1', href: 'http://192.168.22.101:8082' },
+					  { text: 'HD2', href: 'http://192.168.22.101:8083' },
+					  { text: 'G2', href: 'http://192.168.22.101:8084' },
 					],
 				},
 				/*mounted: function () {

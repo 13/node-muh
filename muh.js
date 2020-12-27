@@ -60,20 +60,11 @@ var lockTimer = false
 
 console.log(getTime() + 'portal: starting ...')
 
-var os = { 'volume': { 
-	                level: 11,
-		        muted: true,
-		     }	
-         } 
+var os = { 'volume': { level:0, muted:false } } 
 
 setVolume(70)
-
-getVolume().then( vol => {
-    os.volume.level = vol
-})
-getMuted().then( muted => {
-    os.volume.muted = muted
-})
+getVolume().then( vol => { os.volume.level = vol })
+getMuted().then( muted => { os.volume.muted = muted })
 
 
 var menu = { 'menu' : [
@@ -291,7 +282,7 @@ function handleTimer(state){
       lockTimer = setTimeout(function() {
         console.log(getTime() + 'portal: timer finished')
         lockTimer = false
-        handlePortal(lockRelayGDL,'garagedoorlock','lock',10)
+        handlePortal(lockRelayGDL,'GDL','lock',10)
       }, 15*60*1000)
     }
   }
@@ -398,18 +389,6 @@ portal.on('connection', async (socket) => {
   // receive volume command
   socket.on('volume', (name, action) => {
     console.log(getTime() + 'socketio: volume ' + name + ' ' + action)
-    /*if (name == 'toggle'){
-      if (action == 'mute'){
-        if (loudness.getMuted()){
-	  console.log("hi")
-          setMuted(false)
-          //loudness.setVolume(0)
-        } else {
-	  console.log("ho")
-	  setMuted(true)
-        }
-      }
-    }*/
     if (name == 'toggle'){
       getMuted().then( muted => {
         if (muted){
@@ -424,7 +403,7 @@ portal.on('connection', async (socket) => {
   // receive portal command
   socket.on('pushportal', (name, action) => {
     console.log(getTime() + 'socketio: pushportal ' + name + ' ' + action)
-    if (name == 'housedoor'){
+    if (name == 'HD'){
       if (action == 'lock'){ 
         handlePortal(lockRelayHDL,name,action,10)
       }
@@ -435,7 +414,7 @@ portal.on('connection', async (socket) => {
         handlePortal(unlockRelayHDL,name,action,500)
       }
     }
-    if (name == 'garagedoor'){
+    if (name == 'GD'){
       if (action == 'lock'){ 
         handlePortal(lockRelayGDL,name,action,10)
       }
@@ -446,7 +425,7 @@ portal.on('connection', async (socket) => {
         handlePortal(unlockRelayGDL,name,action,500)
       }
     }
-    if (name == 'garage'){
+    if (name == 'G'){
       if (action == 'move'){ 
         handlePortal(moveRelayG,name,action,400)
       }
@@ -678,33 +657,29 @@ mqttClient.on('message', function (topic, msg){
   console.log(getTime() + 'mqtt: receiving ' + msg.toString())
   let rfid = JSON.parse(msg)
   if (typeof rfid.tag !== 'undefined'){
-    if (rfid.location == 'HD'){
+    if (rfid.location == 'HDL'){
       if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'HD') ? x.id : null)[0].state){
         playSound('rfid', '1') 
         if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'HDL') ? x.id : null)[0].state){
           console.log(getTime() + 'mqtt: opening ' + rfid.location)
-          //handlePortal(unlockRelayHDL,name,action,500)
+          handlePortal(unlockRelayHDL,rfid.location,'open',500)
         } else {
           console.log(getTime() + 'mqtt: locking ' + rfid.location)
-          //handlePortal(unlockRelayHDL,name,action,10)
+          handlePortal(unlockRelayHDL,rfid.location,'lock',10)
         }
       } else {
         playSound('rfid', '2') 
       }
-    }
-    if (rfid.location == 'GD'){
+    } else if (rfid.location == 'GDL'){
       if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'GD') ? x.id : null)[0].state){
         playSound('rfid', '1') 
-        if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state){
-          console.log(getTime() + 'mqtt: opening ' + rfid.location)
-          //handlePortal(unlockRelayGDL,name,action,500)
-        } else {
-          console.log(getTime() + 'mqtt: locking ' + rfid.location)
-          //handlePortal(unlockRelayGDL,name,action,10)
-        }
+        console.log(getTime() + 'mqtt: opening ' + rfid.location)
+        handlePortal(unlockRelayGDL,rfid.location,'open',500)
       } else {
         playSound('rfid', '2') 
       }
+    } else {
+        console.log(getTime() + 'mqtt: key missing location')
     }
   } else {
     console.log(getTime() + 'mqtt: deny ' + rfid.key)

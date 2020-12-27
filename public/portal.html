@@ -241,7 +241,7 @@
 											</v-row>
 											<v-row>
 												<v-col>
-													<v-btn block @click="notifyPortal(portals[idx].name, 'open', $event)">
+													<v-btn block @click="notifyPortal(portals[idx].name, portals[idx].name_short, 'open', $event)">
 														<v-icon left dark>mdi-door-open</v-icon>
 														Öffnen
 													</v-btn>
@@ -249,13 +249,13 @@
 											</v-row>
 											<v-row>
 												<v-col>
-													<v-btn block @click="notifyPortal(portals[idx].name, 'unlock', $event)">
+													<v-btn block @click="notifyPortal(portals[idx].name, portals[idx].name_short, 'unlock', $event)">
 														<v-icon left dark>mdi-lock-open-variant</v-icon>
 														Entriegeln
 													</v-btn>
 												</v-col>
 												<v-col>
-													<v-btn block @click="notifyPortal(portals[idx].name, 'lock', $event)">
+													<v-btn block @click="notifyPortal(portals[idx].name, portals[idx].name_short, 'lock', $event)">
 														<v-icon left dark>mdi-lock</v-icon>
 														Verriegeln
 													</v-btn>
@@ -279,7 +279,7 @@
 											</v-row>
 											<v-row>
 												<v-col>
-													<v-btn block @click="notifyPortal(portals[idx].name, 'move', $event)">
+													<v-btn block @click="notifyPortal(portals[idx].name, portals[idx].name_short, 'move', $event)">
 														<v-icon left dark>mdi-arrow-up-down-bold</v-icon>
 														Bewegen
 													</v-btn>
@@ -456,13 +456,13 @@
 			isLastRounded (index) {      
 				return (this.isLast(index) ? 'rounded-bottom' : 'rounded-bottom-0')
 			},
-			notifyPortal: function (name, action, event) {
+			notifyPortal: function (name, name_short, action, event) {
 				// now we have access to the native event
 				if (event) {
 					event.preventDefault()
 				}
 				console.log(name + " " + action + " ...")
-				socket.emit("pushportal", name, action); //send push button status to back to server
+				socket.emit("pushportal", name_short.toUpperCase(), action); //send push button status to back to server
 				//this.sb_text = this.$options.filters.translateName(name) + " " + action + " ..."
 				this.sb_text = this.$options.filters.translateName(name) + " " + this.$options.filters.translateName(action) + " ..."
 				this.sb_portal = true
