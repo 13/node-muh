@@ -10,9 +10,10 @@ ExecStart=/usr/bin/node /home/ben/repo/node-muh/muh.js
 Restart=always
 RestartSec=30
 # Output to syslog
-StandardOutput=syslog
-StandardError=syslog
+#StandardOutput=syslog
+#StandardError=syslog
 SyslogIdentifier=node-muh
+ExecStartPre=/bin/bash -c '(while ! nc -z -v -w1 localhost 8086 > /dev/null; do echo "Waiting for influxdb port 8086 to open..."; sleep 30; done); sleep 30'
 
 [Install]
 WantedBy=multi-user.target

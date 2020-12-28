@@ -6,6 +6,23 @@ if (process.arch == 'arm'){
   envConfig = './env'
 }
 
+// yargs
+const argv = require('yargs')(process.argv.slice(2))
+  // help text
+  .alias('h', 'help')
+  .help('help')
+  .usage('Usage: $0 -t')
+  .option('t', {
+      alias : 'timestamp',
+      describe: 'show timestamp',
+      nargs: 0,
+      //default: false,
+      requiresArg: false
+  }) .argv
+
+// configuration
+const showTimestamp = (argv.timestamp ? true : false)
+
 const express = require('express')
 const app = express()
 
@@ -589,7 +606,7 @@ function unexportOnClose() {
 process.on('SIGINT', unexportOnClose); //function to run when user closes using ctrl+c 
 
 function getTime() {
-  return dayjs().format('HH:mm:ss.SSS ')
+  return (showTimestamp ? dayjs().format('HH:mm:ss.SSS ') : '')
 }
 
 // influxdb writeapi
@@ -632,7 +649,7 @@ function queryInfluxdb(id, name_short, state){
     },
     error(e) {
       console.error(e)
-      console.log('ERR: ' + e)
+      console.log('ERRX: ' + e)
     },
     complete() {
       if (typeof time === 'undefined'){
