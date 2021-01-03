@@ -79,7 +79,7 @@ console.log(getTime() + 'portal: starting ...')
 
 var os = { 'volume': { level:0, muted:false } } 
 
-setVolume(70)
+setVolume(100)
 getVolume().then( vol => { os.volume.level = vol })
 getMuted().then( muted => { os.volume.muted = muted })
 
@@ -224,7 +224,7 @@ function processPortal(id,state,initial=false){
         if (state){
           setVolume(100)
           playSound('bell')
-          setVolume(75)
+          setVolume(100)
           // pushover
           sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,'img')
           // reset bell
