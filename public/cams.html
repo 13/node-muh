@@ -145,35 +145,33 @@
 						>
 							{{ sb_text }}
 						</v-snackbar>	
-<!-- cams -->
-
-  <v-container class="grey lighten-5">
-    <v-row no-gutters>
-      <template v-for="(cam,idx) in cams">
-        <v-col :key="idx">
-          <v-card
-            class="pa-2"
-            outlined
-            tile
-          >
-<v-img
-  lazy-src="https://picsum.photos/id/11/10/6"
-  :src="cam.href"
-  max-height="450"
-  max-width="550"
-></v-img>            
-          </v-card>
-        </v-col>
-        <v-responsive
-          v-if="idx === 2"
-          :key="`width-${idx}`"
-          width="100%"
-        ></v-responsive>
-      </template>
-    </v-row>
-  </v-container>
-
-<!-- cams -->
+                                                <!-- cams -->
+                                                  <v-container class="grey lighten-5">
+                                                    <v-row no-gutters>
+                                                      <template v-for="(cam,idx) in cams">
+                                                       <v-col :key="idx">
+                                                          <v-card
+                                                            class="pa-2"
+                                                            outlined
+                                                            tile
+                                                          >
+                                                            <v-img
+                                                              lazy-src="https://picsum.photos/id/11/10/6"
+                                                              :src="cam.href"
+                                                              max-height="450"
+                                                              max-width="550"
+                                                            ></v-img>            
+                                                          </v-card>
+                                                        </v-col>
+                                                        <v-responsive
+                                                          v-if="idx%2 === 0"
+                                                          :key="`width-${idx}`"
+                                                          width="100%"
+                                                        ></v-responsive>
+                                                      </template>
+                                                    </v-row>
+                                                  </v-container>
+                                                <!-- /cams -->
 					</v-card>
 				</v-main>
 			</v-app>
