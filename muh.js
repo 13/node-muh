@@ -682,7 +682,7 @@ mqttClient.on('message', function (topic, msg){
           handlePortal(unlockRelayHDL,rfid.location,'open',500)
         } else {
           console.log(getTime() + 'mqtt: locking ' + rfid.location)
-          handlePortal(unlockRelayHDL,rfid.location,'lock',10)
+          handlePortal(lockRelayHDL,rfid.location,'lock',10)
         }
       } else {
         playSound('rfid', '2') 
