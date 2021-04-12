@@ -89,7 +89,8 @@ var menu = { 'menu' : [
                          { icon: 'mdi-lock', text: 'Portal', href: 'portal' },
                          { icon: 'mdi-cctv', text: 'Cams', href: 'cams' },
                          { icon: 'mdi-lan', text: 'WOL', href: 'wol' },
-	                 { icon: 'mdi-music-note', text: 'Sounds', href: 'sounds' }
+	                 { icon: 'mdi-music-note', text: 'Sounds', href: 'sounds' },
+	                 { icon: 'mdi-cloud', text: 'Nextcloud', href: 'https://nextcloud.p0.muh' }
           ]} 	
 	
 var portals = { 'portals' : [
