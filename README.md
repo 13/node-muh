@@ -73,6 +73,12 @@ git clone https://github.com/13/node-muh.git
 npm install
 ```
 
+After a NodeJS update, rebuild pigpio
+
+```bash
+rm -Ir node_modules && npm install
+```
+
 Run with root privileges
 
 ```bash
