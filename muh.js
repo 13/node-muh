@@ -493,7 +493,7 @@ wol.on('connection', async (socket) => {
 			{ name:'google.com', port:'80'},
 			{ name:'c3p1.muh', port:'22', mac:'40:8D:5C:1D:54:9B'},
 			{ name:'jabba.muh', port:'22', mac:'90:1B:0E:3E:F3:77'},
-			{ name:'samsungtv.muh', port:'22', mac:'90:1B:0E:3E:F3:77', ip:'192.168.22.19'},
+			{ name:'samstv.muh', port:'22', mac:'90:1B:0E:3E:F3:77', ip:'192.168.22.20'},
 			{ name:'p0.muh', port:'22'},
 			{ name:'p4.muh', port:'22'},
 			{ name:'p30.muh', port:'22'}
