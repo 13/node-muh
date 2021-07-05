@@ -57,6 +57,13 @@ const player = require('play-sound')(opts = {})
 // loudness
 const loudness = require('loudness')
 
+// node-email
+/*var emailLib = require('path/to/email')
+  , Email = emailLib.Email;
+emailLib.to = 'x@y.com'
+emailLib.from = 'x@y.com'*/
+
+
 // node-pushover
 const Push = require( 'pushover-notifications' )
 var fs = require( 'fs' )
@@ -153,6 +160,7 @@ function processPortal(id,state,initial=false){
   var pin = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].pin;
   var name = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name;
   var name_short = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_short.toUpperCase();
+  var name_long = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long;
   var state_old = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state;
 
   if (initial == true){
@@ -187,7 +195,7 @@ function processPortal(id,state,initial=false){
       // publish mqtt
       publishMQTT(name_short,JSON.stringify(portals.portals.filter(x => (x.id == id) ? x.id : null)[0]))
       // send mail
-      //sendMail(name_short,state)
+      //sendMail(name_long,state)  
     
       if (name_short == 'HD'){ 
         playSound(name_short, state)
@@ -700,7 +708,12 @@ function publishMQTT(name_short, json){
   mqttClient.publish('portal/' + name_short + '/json', json)
 }
 
-/*function sendMail(name,state){
+/*function sendMail(name_long,state){
+  var mail = new Email(
+    { subject: "[MUH] " + name + " " + state + " " + dayjs(new Date()).format('HH:mm:ss.SSS DD.MM.YY')
+    , body: "msg"
+  })
+  mail.send()
 }*/
 
 function sendPushover(name_long,image){
@@ -735,6 +748,8 @@ function checkAlarm(id){
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state){
         console.log(getTime() + 'portal: red alert')
         sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' opened ALERT','img')
+	//sendMail(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' ', 
+	//	   portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state + ' ALERT')  
   }
 }
 
