@@ -11,6 +11,12 @@ const token18 = `${username}:${password}`
 const po_user = ''
 const po_token = ''
 
+// WOL hosts
+var hosts = { 'hosts' : [
+	{ name:'google.com', port:'80'},
+	{ name:'samstv.muh', port:'22', mac:'90:1B:0E:3E:F3:77', ip:'192.168.22.20'}
+]}
+
 module.exports = {
   url,
   token,
@@ -18,5 +24,6 @@ module.exports = {
   bucket,
   token18,
   po_user,
-  po_token
+  po_token,
+  hosts
 }
