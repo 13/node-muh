@@ -74,6 +74,7 @@ var connectCounter = 0
 
 // timer
 var lockTimer = false
+var lockTimerMinutes = 15
 
 console.log(getTime() + 'portal: starting ...')
 
@@ -194,7 +195,7 @@ function processPortal(id,state,initial=false){
     
       if (name_short == 'GD'){
         if (state){
-          // set timer 10m
+          // set timer
           portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true
           handleTimer('on')
         } else {
@@ -212,7 +213,7 @@ function processPortal(id,state,initial=false){
           portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = false
   	  handleTimer('off')
         } else {
-          // set timer 10m
+          // set timer
           portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].lock_timer = true
           handleTimer('on')
         }
@@ -303,7 +304,7 @@ function handleTimer(state){
         console.log(getTime() + 'portal: timer finished')
         lockTimer = false
         handlePortal(lockRelayGDL,'GDL','lock',10)
-      }, 15*60*1000)
+      }, lockTimerMinutes*60*1000)
     }
   }
   if (state == 'off'){
