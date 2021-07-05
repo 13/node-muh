@@ -58,11 +58,11 @@ const player = require('play-sound')(opts = {})
 const loudness = require('loudness')
 
 // node-email
-/*var emailLib = require('path/to/email')
+/*var emailLib = require('email')
   , Email = emailLib.Email;
-emailLib.to = 'x@y.com'
-emailLib.from = 'x@y.com'*/
-
+const {emailTo, emailFrom} = require(envConfig)
+emailLib.to = emailTo
+emailLib.from = emailFrom*/
 
 // node-pushover
 const Push = require( 'pushover-notifications' )
