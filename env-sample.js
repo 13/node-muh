@@ -10,7 +10,9 @@ const token18 = `${username}:${password}`
 // Pushover
 const po_user = ''
 const po_token = ''
-
+// Email
+const emailFrom = ''
+const emailTo = ''
 // WOL hosts
 var hosts = { 'hosts' : [
 	{ name:'google.com', port:'80'},
@@ -25,5 +27,7 @@ module.exports = {
   token18,
   po_user,
   po_token,
+  emailFrom,
+  emailTo
   hosts
 }
