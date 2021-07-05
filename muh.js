@@ -58,11 +58,10 @@ const player = require('play-sound')(opts = {})
 const loudness = require('loudness')
 
 // node-email
-/*var emailLib = require('email')
+var emailLib = require('email')
   , Email = emailLib.Email;
 const {emailTo, emailFrom} = require(envConfig)
-emailLib.to = emailTo
-emailLib.from = emailFrom*/
+emailLib.from = emailFrom
 
 // node-pushover
 const Push = require( 'pushover-notifications' )
@@ -92,7 +91,7 @@ getVolume().then( vol => { os.volume.level = vol })
 getMuted().then( muted => { os.volume.muted = muted })
 
 // WOL hosts
-var hosts = require(envConfig)
+const {hosts} = require(envConfig)
   
 var menu = { 'menu' : [
                          { icon: 'mdi-view-dashboard', text: 'Dashboard', href: '/' },
@@ -708,13 +707,14 @@ function publishMQTT(name_short, json){
   mqttClient.publish('portal/' + name_short + '/json', json)
 }
 
-/*function sendMail(name_long,state){
+function sendMail(name_long,state){
   var mail = new Email(
-    { subject: "[MUH] " + name + " " + state + " " + dayjs(new Date()).format('HH:mm:ss.SSS DD.MM.YY')
+    { to: emailTo
+    , subject: "[MUH] " + name_long + " " + state + " " + dayjs(new Date()).format('HH:mm:ss.SSS DD.MM.YY')
     , body: "msg"
   })
   mail.send()
-}*/
+}
 
 function sendPushover(name_long,image){
 /*fs.readFile('/home/ben/test.png', function(err, data) {*/
@@ -749,7 +749,7 @@ function checkAlarm(id){
         console.log(getTime() + 'portal: red alert')
         sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' opened ALERT','img')
 	//sendMail(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' ', 
-	//	   portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state + ' ALERT')  
+	//	 portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state + ' ALERT')  
   }
 }
 
