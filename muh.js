@@ -83,7 +83,9 @@ setVolume(100)
 getVolume().then( vol => { os.volume.level = vol })
 getMuted().then( muted => { os.volume.muted = muted })
 
-
+// WOL hosts
+var hosts = require(envConfig)
+  
 var menu = { 'menu' : [
                          { icon: 'mdi-view-dashboard', text: 'Dashboard', href: '/' },
                          { icon: 'mdi-lock', text: 'Portal', href: 'portal' },
@@ -487,23 +489,6 @@ wol.on('connection', async (socket) => {
       wakeonlan.wake(mac)
     }
   })  
-  
-  // hosts
-  var hosts = { 'hosts' : [
-			{ name:'google.com', port:'80'},
-			{ name:'c3p1.muh', port:'22', mac:'40:8D:5C:1D:54:9B'},
-			{ name:'jabba.muh', port:'22', mac:'90:1B:0E:3E:F3:77'},
-			{ name:'samstv.muh', port:'22', mac:'90:1B:0E:3E:F3:77', ip:'192.168.22.20'},
-			{ name:'p0.muh', port:'22'},
-			{ name:'p4.muh', port:'22'},
-			{ name:'p30.muh', port:'22'}
-			//{ name:'fibert.muh', port:'80'},
-			//{ name:'obiwan.muh', port:'80'},
-			//{ name:'obiwan.muh', port:'80'},
-			//{ name:'wr710.muh', port:'80'},
-			//{ name:'esp32cam1.muh', port:'80'},
-			//{ name:'esp32cam2.muh', port:'80'},
-		]}
   
   // hosts ping and send 
   for (x in hosts){
