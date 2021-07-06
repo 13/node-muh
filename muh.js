@@ -713,7 +713,7 @@ function publishMQTT(name_short, json){
 function sendMail(name_long,state){
   /*var mail = new Email(
     { to: emailTo
-    , subject: "[MUH] " + name_long + " " + state + " " + dayjs(new Date()).format('HH:mm:ss.SSS DD.MM.YY')
+    , subject: name_long + " " + state + " " + dayjs(new Date()).format('HH:mm:ss.SSS DD.MM.YY')
     , body: "msg"
   })
   mail.send()*/
@@ -729,13 +729,11 @@ function sendMail(name_long,state){
   transporter.sendMail({
     from: emailFrom,
     to: emailTo,
-    subject: '[MUH] ' + name_long + ' ' + state,
+    subject: name_long + ' ' + state,
     text: 'I hope this message gets delivered!'
   }, (err, info) => {
-    console.log(getTime() + 'portal: email ')
-    console.log(info.envelope)
-    console.log(info.messageId)
-  });
+    console.log(getTime() + 'email: sent')
+  })
 }
 
 function sendPushover(name_long,image){
