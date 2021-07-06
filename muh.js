@@ -57,14 +57,14 @@ const player = require('play-sound')(opts = {})
 // loudness
 const loudness = require('loudness')
 
-// node-email
-var emailLib = require('email')
-  , Email = emailLib.Email;
+// node-nodemailer
+const nodemailer = require('nodemailer')
+let transporter = nodemailer.createTransport({
+    sendmail: true,
+    newline: 'unix',
+    path: '/usr/sbin/sendmail'
+})
 const {emailTo, emailFrom} = require(envConfig)
-emailLib.from = emailFrom
-
-// child process msmtp
-const { spawn } = require('child_process');
 
 // node-pushover
 const Push = require( 'pushover-notifications' )
@@ -197,7 +197,7 @@ function processPortal(id,state,initial=false){
       // publish mqtt
       publishMQTT(name_short,JSON.stringify(portals.portals.filter(x => (x.id == id) ? x.id : null)[0]))
       // send mail
-      //sendMail(name_long,state)  
+      sendMail(name_long,state)  
     
       if (name_short == 'HD'){ 
         playSound(name_short, state)
@@ -718,14 +718,23 @@ function sendMail(name_long,state){
   })
   mail.send()*/
 
-  var mailcmd = spawn('echo \"[MUH] ' + name_long + ' ' + state + '\" | msmtp -a default ' + emailTo,
+  /*var mailcmd = spawn('echo \"[MUH] ' + name_long + ' ' + state + '\" | msmtp -a default ' + emailTo,
     (error, stdout, stderr) => {
     console.log(stdout)
     console.log(stderr)
      if (error !== null) {
        console.log(`exec error: ${error}`)
      }
-  })	
+  })*/
+  transporter.sendMail({
+    from: mailFrom,
+    to: mailTo,
+    subject: '[MUH] ' + name_long + ' ' + state,
+    text: 'I hope this message gets delivered!'
+  }, (err, info) => {
+    console.log(info.envelope);
+    console.log(info.messageId);
+  });
 }
 
 function sendPushover(name_long,image){
