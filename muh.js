@@ -63,6 +63,9 @@ var emailLib = require('email')
 const {emailTo, emailFrom} = require(envConfig)
 emailLib.from = emailFrom
 
+// child process msmtp
+const { spawn } = require('child_process');
+
 // node-pushover
 const Push = require( 'pushover-notifications' )
 var fs = require( 'fs' )
@@ -708,12 +711,21 @@ function publishMQTT(name_short, json){
 }
 
 function sendMail(name_long,state){
-  var mail = new Email(
+  /*var mail = new Email(
     { to: emailTo
     , subject: "[MUH] " + name_long + " " + state + " " + dayjs(new Date()).format('HH:mm:ss.SSS DD.MM.YY')
     , body: "msg"
   })
-  mail.send()
+  mail.send()*/
+
+  var mailcmd = spawn('echo \"[MUH] ' + name_long + ' ' + state + '\" | msmtp -a default ' + emailTo,
+    (error, stdout, stderr) => {
+    console.log(stdout)
+    console.log(stderr)
+     if (error !== null) {
+       console.log(`exec error: ${error}`)
+     }
+  })	
 }
 
 function sendPushover(name_long,image){
