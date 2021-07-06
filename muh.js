@@ -62,7 +62,7 @@ const nodemailer = require('nodemailer')
 let transporter = nodemailer.createTransport({
     sendmail: true,
     newline: 'unix',
-    path: '/usr/sbin/sendmail'
+    path: '/home/ben/bin/msmtp-enqueue.sh'
 })
 const {emailTo, emailFrom} = require(envConfig)
 
@@ -168,7 +168,7 @@ function processPortal(id,state,initial=false){
   if (initial == true){
     console.log(getTime() + 'portal: intializing ' + name_short + ' STATE: ' + state);
     portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
-
+    sendMail(name_long,state)  
     // read influxdb & write if empty
     queryInfluxdb(id,name_short,state)
     // publish mqtt
@@ -733,8 +733,8 @@ function sendMail(name_long,state){
     text: 'I hope this message gets delivered!'
   }, (err, info) => {
     console.log(getTime() + 'portal: email ')
-    //console.log(info.envelope)
-    //console.log(info.messageId)
+    console.log(info.envelope)
+    console.log(info.messageId)
   });
 }
 
