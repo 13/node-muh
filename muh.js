@@ -732,8 +732,9 @@ function sendMail(name_long,state){
     subject: '[MUH] ' + name_long + ' ' + state,
     text: 'I hope this message gets delivered!'
   }, (err, info) => {
-    console.log(info.envelope);
-    console.log(info.messageId);
+    console.log(getTime() + 'portal: email ')
+    //console.log(info.envelope)
+    //console.log(info.messageId)
   });
 }
 
