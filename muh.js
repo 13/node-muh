@@ -727,8 +727,8 @@ function sendMail(name_long,state){
      }
   })*/
   transporter.sendMail({
-    from: mailFrom,
-    to: mailTo,
+    from: emailFrom,
+    to: emailTo,
     subject: '[MUH] ' + name_long + ' ' + state,
     text: 'I hope this message gets delivered!'
   }, (err, info) => {
