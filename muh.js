@@ -728,7 +728,7 @@ function sendMail(name,state,msg=null){
     from: emailFrom,
     to: emailTo,
     subject: name + ' ' + state + ' ' + dayjs(new Date()).format('HH:mm:ss DD.MM.YYYY'),
-    text: msg
+    text: msg + '\n\nby node-muh.js'
   }, (err, info) => {
     console.log(getTime() + 'email: sent ' + name + ' ' + state)
   })
