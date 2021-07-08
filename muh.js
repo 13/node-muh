@@ -107,17 +107,23 @@ var menu = { 'menu' : [
 	
 var portals = { 'portals' : [
 			{ id:4, pin:25, 
-			  name:"housedoor", name_short:"hd", name_long:"Haustür" },
+			  name:"housedoor", name_short:"hd", name_long:"Haustür",
+			  state_name: [ "CLOSED", "OPENED" ] },
 			{ id:5, pin:8, pin_lock:16, pin_unlock:20, pin_hold: 500, lock_timer: false,
-			  name:"housedoorlock", name_short:"hdl", name_long:"Haustür Riegel" },
+			  name:"housedoorlock", name_short:"hdl", name_long:"Haustür Riegel",
+			  state_name: [ "LOCKED", "UNLOCKED" ] },
 			{ id:2, pin:13, 
-			  name:"garagedoor", name_short:"gd", name_long:"Garagentür" },
+			  name:"garagedoor", name_short:"gd", name_long:"Garagentür",
+			  state_name: [ "CLOSED", "OPENED" ] },
 			{ id:3, pin:6, pin_lock:19, pin_unlock:26, pin_hold: 500, led:false,
-			  name:"garagedoorlock", name_short:"gdl", name_long:"Garagentür Riegel" },
+			  name:"garagedoorlock", name_short:"gdl", name_long:"Garagentür Riegel",
+			  state_name: [ "LOCKED", "UNLOCKED" ] },
 			{ id:1, pin:5, pin_move:12, pin_hold: 400, led:false,
-			  name:"garage", name_short:"g", name_long:"Garage" },
+			  name:"garage", name_short:"g", name_long:"Garage",
+			  state_name: [ "CLOSED", "OPENED" ] },
 			{ id:100, pin_button:7, state:0,
-			  name:"bell", name_short:"b", name_long:"Klingel" }  
+			  name:"bell", name_short:"b", name_long:"Klingel",
+			  state_name: [ "ON", "OFF" ] }
 		]} 
 
 for (x in portals){
@@ -159,16 +165,18 @@ for (x in portals){
 }
 
 function processPortal(id,state,initial=false){
-  var pin = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].pin;
-  var name = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name;
-  var name_short = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_short.toUpperCase();
-  var name_long = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long;
-  var state_old = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state;
+  var pin = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].pin
+  var name = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name
+  var name_short = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_short.toUpperCase()
+  var name_long = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long
+  var state_old = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state
+  var state_name = portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state_name
 
   if (initial == true){
     console.log(getTime() + 'portal: intializing ' + name_short + ' STATE: ' + state);
     portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
-    sendMail(name_long,state)  
+    //sendMail(name_long,(state ? state_name[0] : state_name[1]))
+
     // read influxdb & write if empty
     queryInfluxdb(id,name_short,state)
     // publish mqtt
@@ -197,7 +205,7 @@ function processPortal(id,state,initial=false){
       // publish mqtt
       publishMQTT(name_short,JSON.stringify(portals.portals.filter(x => (x.id == id) ? x.id : null)[0]))
       // send mail
-      sendMail(name_long,state)  
+      sendMail(name_long,(state ? state_name[0] : state_name[1]))
     
       if (name_short == 'HD'){ 
         playSound(name_short, state)
@@ -241,8 +249,10 @@ function processPortal(id,state,initial=false){
           setVolume(100)
           // pushover
           sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,'img')
+          // send mail
+          sendMail(name_long,(state ? state_name[0] : state_name[1]))
           // reset bell
-         portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = 0 
+          portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = 0 
         }
       }
     }
@@ -681,9 +691,11 @@ mqttClient.on('message', function (topic, msg){
         if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'HDL') ? x.id : null)[0].state){
           console.log(getTime() + 'mqtt: opening ' + rfid.location)
           handlePortal(unlockRelayHDL,rfid.location,'open',500)
+          sendMail('RFID ' + rfid.location + ' opening',rfid.tag)
         } else {
           console.log(getTime() + 'mqtt: locking ' + rfid.location)
           handlePortal(lockRelayHDL,rfid.location,'lock',10)
+          sendMail('RFID ' + rfid.location + ' locking',rfid.tag)
         }
       } else {
         playSound('rfid', '2') 
@@ -693,6 +705,7 @@ mqttClient.on('message', function (topic, msg){
         playSound('rfid', '1') 
         console.log(getTime() + 'mqtt: opening ' + rfid.location)
         handlePortal(unlockRelayGDL,rfid.location,'open',500)
+        sendMail('RFID ' + rfid.location + ' opening',rfid.tag)
       } else {
         playSound('rfid', '2') 
       }
@@ -702,6 +715,7 @@ mqttClient.on('message', function (topic, msg){
   } else {
     console.log(getTime() + 'mqtt: deny ' + rfid.key)
     playSound('rfid', '0') 
+    sendMail('RFID ' + rfid.location + ' DENIED',rfid.key)
   }
 })
 
@@ -710,29 +724,14 @@ function publishMQTT(name_short, json){
   mqttClient.publish('portal/' + name_short + '/json', json)
 }
 
-function sendMail(name_long,state){
-  /*var mail = new Email(
-    { to: emailTo
-    , subject: name_long + " " + state + " " + dayjs(new Date()).format('HH:mm:ss.SSS DD.MM.YY')
-    , body: "msg"
-  })
-  mail.send()*/
-
-  /*var mailcmd = spawn('echo \"[MUH] ' + name_long + ' ' + state + '\" | msmtp -a default ' + emailTo,
-    (error, stdout, stderr) => {
-    console.log(stdout)
-    console.log(stderr)
-     if (error !== null) {
-       console.log(`exec error: ${error}`)
-     }
-  })*/
+function sendMail(name,state,msg=null){
   transporter.sendMail({
     from: emailFrom,
     to: emailTo,
-    subject: name_long + ' ' + state,
-    text: 'I hope this message gets delivered!'
+    subject: name + ' ' + state + ' ' + dayjs(new Date()).format('HH:mm:ss DD.MM.YYYY'),
+    text: msg
   }, (err, info) => {
-    console.log(getTime() + 'email: sent')
+    console.log(getTime() + 'email: sent ' + name + ' ' + state)
   })
 }
 
@@ -768,8 +767,8 @@ function checkAlarm(id){
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state){
         console.log(getTime() + 'portal: red alert')
         sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' opened ALERT','img')
-	//sendMail(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' ', 
-	//	 portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state + ' ALERT')  
+	sendMail(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' ', 
+		 portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state + ' ALERT')  
   }
 }
 
