@@ -175,7 +175,6 @@ function processPortal(id,state,initial=false){
   if (initial == true){
     console.log(getTime() + 'portal: intializing ' + name_short + ' STATE: ' + state);
     portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
-    //sendMail(name_long,(state ? state_name[0] : state_name[1]))
 
     // read influxdb & write if empty
     queryInfluxdb(id,name_short,state)
@@ -767,8 +766,8 @@ function checkAlarm(id){
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state){
         console.log(getTime() + 'portal: red alert')
         sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' opened ALERT','img')
-	sendMail(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' ', 
-		 portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state + ' ALERT')  
+	//sendMail(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' ', 
+	//         portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state + ' ALERT')  
   }
 }
 
