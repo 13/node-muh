@@ -421,6 +421,11 @@
 				}),
 				socket.on('disconnect', socketState => {
 					this.socketState = false
+					this.portals = []
+					/*this.portals = [
+							{ id:4,state:2,
+							  name:"housedoor", name_short:"hd", name_long:"Haustür" }
+							]*/
 					console.log('socket disconnect: ' + socketState);
 				});
 			},
