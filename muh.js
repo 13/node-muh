@@ -175,6 +175,8 @@ function processPortal(id,state,initial=false){
   if (initial == true){
     console.log(getTime() + 'portal: intializing ' + name_short + ' STATE: ' + state);
     portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
+    // DEBUG
+    //sendMail(name_long,(state ? state_name[0] : state_name[1]))
 
     // read influxdb & write if empty
     queryInfluxdb(id,name_short,state)
@@ -319,10 +321,12 @@ function handleTimer(state){
   if (state == 'on'){
     if (lockTimer == false){
       console.log(getTime() + 'portal: timer started')
+      sendMail('AutoLock','STARTED ' + lockTimerMinutes + "m")
       lockTimer = setTimeout(function() {
         console.log(getTime() + 'portal: timer finished')
         lockTimer = false
         handlePortal(lockRelayGDL,'GDL','lock',10)
+        sendMail('AutoLock','OK')
       }, lockTimerMinutes*60*1000)
     }
   }
@@ -331,6 +335,7 @@ function handleTimer(state){
       console.log(getTime() + 'portal: timer cancelled')
       clearTimeout(lockTimer)
       lockTimer = false
+      sendMail('AutoLock','CANCELLED')
     }
   }
 }
@@ -728,7 +733,7 @@ function sendMail(name,state,msg=null){
     from: emailFrom,
     to: emailTo,
     subject: name + ' ' + state + ' ' + dayjs(new Date()).format('HH:mm:ss DD.MM.YYYY'),
-    text: msg + '\n\nby node-muh.js'
+    text: ((msg == null) ? "" : msg) + '\n\nby node-muh.js'
   }, (err, info) => {
     console.log(getTime() + 'email: sent ' + name + ' ' + state)
   })
