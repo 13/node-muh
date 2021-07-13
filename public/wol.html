@@ -233,6 +233,7 @@
 						}),
 						socket.on('disconnect', socketState => {
 							this.socketState = false
+					                this.hosts: []
 							console.log('socket disconnect: ' + socketState)
 						});
 					},
