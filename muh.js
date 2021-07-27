@@ -44,7 +44,9 @@ const pigpio = process.env.NODE_ENV === 'dev' ?
   require('pigpio-mock') :
   require('pigpio')
 const Gpio = pigpio.Gpio
-var stableTime = 100000 //10000 
+// Level must be stable for xx ms
+// 100 ok 150
+var stableTime = 10 * 1000
 
 const LED = new Gpio(24, {mode: Gpio.OUTPUT, alert: true}) //LED Haustür
 var blinkIvLED = false
@@ -86,6 +88,8 @@ var lockTimer = false
 var lockTimerMinutes = 15
 
 console.log(getTime() + 'portal: starting ...')
+
+var options = { 'options': { alarm:true, sendmail:true, pushover:true } } 
 
 var os = { 'volume': { level:0, muted:false } } 
 
@@ -175,6 +179,7 @@ function processPortal(id,state,initial=false){
   if (initial == true){
     console.log(getTime() + 'portal: intializing ' + name_short + ' STATE: ' + state);
     portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = state;
+
     // DEBUG
     //sendMail(name_long,(state ? state_name[0] : state_name[1]))
 
@@ -414,7 +419,7 @@ function setRelay(gpio,state) {
 function handlePortal(portal,name,action,hold){
   setRelay(portal,true)
   setTimeout(function () {
-    console.log(getTime() + 'portal: ' + name + ' ' + action + ' done')
+    console.log(getTime() + 'portal: ' + name + ' ' + action + ' ')
     setRelay(portal,false)
   }, hold)
 }
@@ -729,14 +734,19 @@ function publishMQTT(name_short, json){
 }
 
 function sendMail(name,state,msg=null){
-  transporter.sendMail({
-    from: emailFrom,
-    to: emailTo,
-    subject: name + ' ' + state + ' ' + dayjs(new Date()).format('HH:mm:ss DD.MM.YYYY'),
-    text: ((msg == null) ? "" : msg) + '\n\nby node-muh.js'
-  }, (err, info) => {
-    console.log(getTime() + 'email: sent ' + name + ' ' + state)
-  })
+  var sendmail_on = false
+  if (sendmail_on){
+    transporter.sendMail({
+      from: emailFrom,
+      to: emailTo,
+      subject: name + ' ' + state + ' ' + dayjs(new Date()).format('HH:mm:ss DD.MM.YYYY'),
+      text: ((msg == null) ? "" : msg) + '\n\nby node-muh.js'
+    }, (err, info) => {
+      console.log(getTime() + 'email: sent ' + name + ' ' + state)
+    })
+  } else {
+      console.log(getTime() + 'email: disabled')
+  }
 }
 
 function sendPushover(name_long,image){
