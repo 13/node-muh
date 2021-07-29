@@ -89,9 +89,14 @@ var lockTimerMinutes = 15
 
 console.log(getTime() + 'portal: starting ...')
 
-var options = { 'options': { alarm:true, sendmail:true, pushover:true } } 
+var os = { 'volume': { level:0, muted:false }, 
+           'options': { alarm:true, sendmail:true, pushover:true }
+         } 
 
-var os = { 'volume': { level:0, muted:false } } 
+// Show config
+Object.entries(os).forEach(
+  ([key, value]) => console.log(getTime() + 'config: ' + key, value)
+)
 
 setVolume(100)
 getVolume().then( vol => { os.volume.level = vol })
@@ -106,7 +111,8 @@ var menu = { 'menu' : [
                          { icon: 'mdi-cctv', text: 'Cams', href: 'cams' },
                          { icon: 'mdi-lan', text: 'WOL', href: 'wol' },
 	                 { icon: 'mdi-music-note', text: 'Sounds', href: 'sounds' },
-	                 { icon: 'mdi-cloud', text: 'Nextcloud', href: 'https://nextcloud.p0.muh' }
+	                 { icon: 'mdi-cloud', text: 'Nextcloud', href: 'https://p1.muh' },
+	                 { icon: 'mdi-cloud', text: 'jabba', href: 'http://jabba.muh' }
           ]} 	
 	
 var portals = { 'portals' : [
@@ -515,6 +521,7 @@ wol.on('connection', async (socket) => {
   // receive mac and wol
   socket.on('wakemac', (mac) => {
     console.log('Wake: ' + mac)
+    console.log(getTime() + 'wakeonlan: waking ' + mac)
     if (mac != null){ 
       wakeonlan.wake(mac)
     }
@@ -734,8 +741,7 @@ function publishMQTT(name_short, json){
 }
 
 function sendMail(name,state,msg=null){
-  var sendmail_on = false
-  if (sendmail_on){
+  if (os.options.sendmail){
     transporter.sendMail({
       from: emailFrom,
       to: emailTo,
@@ -750,24 +756,28 @@ function sendMail(name,state,msg=null){
 }
 
 function sendPushover(name_long,image){
-/*fs.readFile('/home/ben/test.png', function(err, data) {*/
-  var p = new Push({
-    user: po_user,
-    token: po_token
-  })
-  var msg = {
-    message: dayjs(new Date()).format('HH:mm:ss DD.MM.YYYY'),
-    title: name_long,
-    sound: 'magic',
-    device: 'p1',
-    priority: 1/*,
-    file: { name: 'test.png', data: data }*/
+  if (os.options.pushover){
+  /*fs.readFile('/home/ben/test.png', function(err, data) {*/
+    var p = new Push({
+      user: po_user,
+      token: po_token
+    })
+    var msg = {
+      message: dayjs(new Date()).format('HH:mm:ss DD.MM.YYYY'),
+      title: name_long,
+      sound: 'magic',
+      device: 'p1',
+      priority: 1/*,
+      file: { name: 'test.png', data: data }*/
+    }
+    p.send(msg, function(err, result) {
+      if (err) {throw err}
+      console.log(getTime() + 'pushover: sent')
+    })
+  /*})*/
+  } else {
+      console.log(getTime() + 'pushover: disabled')
   }
-  p.send(msg, function(err, result) {
-    if (err) {throw err}
-    console.log(getTime() + 'pushover: sent')
-  })
-/*})*/
 
 }
 
@@ -779,10 +789,12 @@ function checkAlarm(id){
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'GD') ? x.id : null)[0].state &&
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state &&
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state){
-        console.log(getTime() + 'portal: red alert')
-        sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' opened ALERT','img')
-	//sendMail(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' ', 
-	//         portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state + ' ALERT')  
+        if (os.options.alarm){
+          console.log(getTime() + 'portal: red alert')
+          sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' opened ALERT','img')
+	  //sendMail(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' ', 
+	  //         portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state + ' ALERT')  
+        }
   }
 }
 
