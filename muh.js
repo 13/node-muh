@@ -70,7 +70,13 @@ const {emailTo, emailFrom} = require(envConfig)
 
 // node-pushover
 const Push = require( 'pushover-notifications' )
-var fs = require( 'fs' )
+const fs = require( 'fs' )
+// image-download
+const download = require('image-downloader')
+options = {
+  url: 'http://192.168.22.101:8765/picture/3/current',
+  dest: '/tmp/urlBell.jpg'
+}
 
 // wol
 const isReachable = require('is-reachable')
@@ -188,6 +194,7 @@ function processPortal(id,state,initial=false){
 
     // DEBUG
     //sendMail(name_long,(state ? state_name[0] : state_name[1]))
+    //sendPushover(name_long,true)
 
     // read influxdb & write if empty
     queryInfluxdb(id,name_short,state)
@@ -260,7 +267,7 @@ function processPortal(id,state,initial=false){
           playSound('bell')
           setVolume(100)
           // pushover
-          sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,'img')
+          sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,true)
           // send mail
           sendMail(name_long,(state ? state_name[0] : state_name[1]))
           // reset bell
@@ -755,9 +762,9 @@ function sendMail(name,state,msg=null){
   }
 }
 
-function sendPushover(name_long,image){
+function sendPushover(name_long,img=false){
   if (os.options.pushover){
-  /*fs.readFile('/home/ben/test.png', function(err, data) {*/
+
     var p = new Push({
       user: po_user,
       token: po_token
@@ -768,15 +775,35 @@ function sendPushover(name_long,image){
       sound: 'magic',
       device: 'p1',
       priority: 1/*,
-      file: { name: 'test.png', data: data }*/
+      debug: true*/
     }
-    p.send(msg, function(err, result) {
-      if (err) {throw err}
-      console.log(getTime() + 'pushover: sent')
-    })
-  /*})*/
+
+    if (img){
+      download.image(options)
+        .then(({ filename }) => {
+          console.log(getTime() + '' + name_long + ': image downloaded ' + filename)
+	//non-blocking
+        //fs.readFile(path, function(err, data) {
+	  msg['file'] = filename
+	  //console.log(msg)
+          p.send(msg, function(err, result) {
+	    //DEBUG
+	    //console.log('error', err)
+	    //console.log('result', result)
+            if (err) {throw err}
+            console.log(getTime() + 'pushover: sent with image')
+          })
+	})
+	.catch((err) => console.error(err))
+      //})
+    } else {
+      p.send(msg, function(err, result) {
+        if (err) {throw err}
+        console.log(getTime() + 'pushover: sent')
+      })
+    }
   } else {
-      console.log(getTime() + 'pushover: disabled')
+    console.log(getTime() + 'pushover: disabled')
   }
 
 }
@@ -791,7 +818,7 @@ function checkAlarm(id){
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state){
         if (os.options.alarm){
           console.log(getTime() + 'portal: red alert')
-          sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' opened ALERT','img')
+          sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' opened ALERT')
 	  //sendMail(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' ', 
 	  //         portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state + ' ALERT')  
         }

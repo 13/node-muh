@@ -8,6 +8,7 @@
     "@mdi/font": "^5.8.55",
     "dayjs": "^1.9.6",
     "express": "^4.17.1",
+    "image-downloader": "^4.0.3",
     "is-reachable": "^4.0.0",
     "loudness": "^0.4.1",
     "mqtt": "^4.2.5",
