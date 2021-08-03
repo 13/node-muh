@@ -111,14 +111,14 @@ $env:NODE_ENV='dev'
 - [x] add relays
 - [x] add influxdb
 - [x] add mqtt
-- [ ] add mail (mstmp-queue)
+- [x] add mail (mstmp-queue)
 - [x] add pushmessage (pushover)
 - [x] add klingel
-- [ ] add rfid
+- [x] add rfid
 
-- [ ] enable/disable services like pushover
-- [ ] add autolock timer
-- [ ] clear buffer socket (problems!!!)
+- [x] enable/disable services like pushover
+- [x] add autolock timer
+- [x] clear buffer socket (problems!!!)
 - [ ] add influxdb send timestamp || test what happens
 - [ ] wol popup window
 - [ ] sounds page with volume slider, mute button, ...
