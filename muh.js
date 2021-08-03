@@ -194,7 +194,7 @@ function processPortal(id,state,initial=false){
 
     // DEBUG
     //sendMail(name_long,(state ? state_name[0] : state_name[1]))
-    //sendPushover(name_long,true)
+    //sendPushover(name_long,name_short)
 
     // read influxdb & write if empty
     queryInfluxdb(id,name_short,state)
@@ -267,7 +267,7 @@ function processPortal(id,state,initial=false){
           playSound('bell')
           setVolume(100)
           // pushover
-          sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,true)
+          sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,name_short)
           // send mail
           sendMail(name_long,(state ? state_name[0] : state_name[1]))
           // reset bell
@@ -714,10 +714,12 @@ mqttClient.on('message', function (topic, msg){
         if (portals.portals.filter(x => (x.name_short.toUpperCase() == 'HDL') ? x.id : null)[0].state){
           console.log(getTime() + 'mqtt: opening ' + rfid.location)
           handlePortal(unlockRelayHDL,rfid.location,'open',500)
+          sendPushover('RFID ' + rfid.location + ' opening ' + rfid.tag,rfid.location)
           sendMail('RFID ' + rfid.location + ' opening',rfid.tag)
         } else {
           console.log(getTime() + 'mqtt: locking ' + rfid.location)
           handlePortal(lockRelayHDL,rfid.location,'lock',10)
+          sendPushover('RFID ' + rfid.location + ' locking ' + rfid.tag,rfid.location)
           sendMail('RFID ' + rfid.location + ' locking',rfid.tag)
         }
       } else {
@@ -728,6 +730,7 @@ mqttClient.on('message', function (topic, msg){
         playSound('rfid', '1') 
         console.log(getTime() + 'mqtt: opening ' + rfid.location)
         handlePortal(unlockRelayGDL,rfid.location,'open',500)
+        sendPushover('RFID ' + rfid.location + ' opening ' + rfid.tag,rfid.location)
         sendMail('RFID ' + rfid.location + ' opening',rfid.tag)
       } else {
         playSound('rfid', '2') 
@@ -738,6 +741,7 @@ mqttClient.on('message', function (topic, msg){
   } else {
     console.log(getTime() + 'mqtt: deny ' + rfid.key)
     playSound('rfid', '0') 
+    sendPushover('RFID ' + rfid.location + ' DENIED',rfid.location)
     sendMail('RFID ' + rfid.location + ' DENIED',rfid.key)
   }
 })
@@ -762,7 +766,7 @@ function sendMail(name,state,msg=null){
   }
 }
 
-function sendPushover(name_long,img=false){
+function sendPushover(name_long,img=null){
   if (os.options.pushover){
 
     var p = new Push({
@@ -778,7 +782,20 @@ function sendPushover(name_long,img=false){
       debug: true*/
     }
 
-    if (img){
+    if (img != null){
+      if (img == 'B' || img == 'HD' || img == 'HDL'){
+        options = {
+          url: 'http://192.168.22.101:8765/picture/3/current',
+          dest: '/tmp/url' + img + '.jpg'
+        }
+      }
+      if (img == 'G' || img == 'GD' || img == 'GDL'){
+        options = {
+          url: 'http://192.168.22.101:8765/picture/4/current',
+          dest: '/tmp/url' + img + '.jpg'
+        }
+      }
+      // image download
       download.image(options)
         .then(({ filename }) => {
           console.log(getTime() + '' + name_long + ': image downloaded ' + filename)
@@ -818,7 +835,8 @@ function checkAlarm(id){
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state){
         if (os.options.alarm){
           console.log(getTime() + 'portal: red alert')
-          sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' opened ALERT')
+          sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' opened ALERT',
+	               portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_short)
 	  //sendMail(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' ', 
 	  //         portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state + ' ALERT')  
         }
