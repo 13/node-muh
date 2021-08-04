@@ -72,8 +72,8 @@ const {emailTo, emailFrom} = require(envConfig)
 const Push = require( 'pushover-notifications' )
 const fs = require( 'fs' )
 // image-download
-const download = require('image-downloader')
-options = {
+const img_download = require('image-downloader')
+var img_options = {
   url: 'http://192.168.22.101:8765/picture/3/current',
   dest: '/tmp/urlBell.jpg'
 }
@@ -108,39 +108,10 @@ setVolume(100)
 getVolume().then( vol => { os.volume.level = vol })
 getMuted().then( muted => { os.volume.muted = muted })
 
-// WOL hosts
+//hosts,menu,portals 
 const {hosts} = require(envConfig)
-  
-var menu = { 'menu' : [
-                         { icon: 'mdi-view-dashboard', text: 'Dashboard', href: '/' },
-                         { icon: 'mdi-lock', text: 'Portal', href: 'portal' },
-                         { icon: 'mdi-cctv', text: 'Cams', href: 'cams' },
-                         { icon: 'mdi-lan', text: 'WOL', href: 'wol' },
-	                 { icon: 'mdi-music-note', text: 'Sounds', href: 'sounds' },
-	                 { icon: 'mdi-cloud', text: 'Nextcloud', href: 'https://p1.muh' },
-	                 { icon: 'mdi-cloud', text: 'jabba', href: 'http://jabba.muh' }
-          ]} 	
-	
-var portals = { 'portals' : [
-			{ id:4, pin:25, 
-			  name:"housedoor", name_short:"hd", name_long:"Haustür",
-			  state_name: [ "CLOSED", "OPENED" ] },
-			{ id:5, pin:8, pin_lock:16, pin_unlock:20, pin_hold: 500, lock_timer: false,
-			  name:"housedoorlock", name_short:"hdl", name_long:"Haustür Riegel",
-			  state_name: [ "LOCKED", "UNLOCKED" ] },
-			{ id:2, pin:13, 
-			  name:"garagedoor", name_short:"gd", name_long:"Garagentür",
-			  state_name: [ "CLOSED", "OPENED" ] },
-			{ id:3, pin:6, pin_lock:19, pin_unlock:26, pin_hold: 500, led:false,
-			  name:"garagedoorlock", name_short:"gdl", name_long:"Garagentür Riegel",
-			  state_name: [ "LOCKED", "UNLOCKED" ] },
-			{ id:1, pin:5, pin_move:12, pin_hold: 400, led:false,
-			  name:"garage", name_short:"g", name_long:"Garage",
-			  state_name: [ "CLOSED", "OPENED" ] },
-			{ id:100, pin_button:7, state:0,
-			  name:"bell", name_short:"b", name_long:"Klingel",
-			  state_name: [ "ON", "OFF" ] }
-		]} 
+const {menu} = require(envConfig)
+const {portals} = require(envConfig)
 
 for (x in portals){
   for (y in portals[x]){
@@ -784,19 +755,19 @@ function sendPushover(name_long,img=null){
 
     if (img != null){
       if (img == 'B' || img == 'HD' || img == 'HDL'){
-        options = {
+        img_options = {
           url: 'http://192.168.22.101:8765/picture/3/current',
           dest: '/tmp/url' + img + '.jpg'
         }
       }
       if (img == 'G' || img == 'GD' || img == 'GDL'){
-        options = {
+        img_options = {
           url: 'http://192.168.22.101:8765/picture/4/current',
           dest: '/tmp/url' + img + '.jpg'
         }
       }
       // image download
-      download.image(options)
+      img_download.image(img_options)
         .then(({ filename }) => {
           console.log(getTime() + '' + name_long + ': image downloaded ' + filename)
 	//non-blocking
