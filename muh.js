@@ -93,6 +93,10 @@ var connectCounter = 0
 var lockTimer = false
 var lockTimerMinutes = 15
 
+// bell block timer
+var bellLockTimer = false
+var bellLockTimerSecs = 5
+
 console.log(getTime() + 'portal: starting ...')
 
 var os = { 'volume': { level:0, muted:false }, 
@@ -234,15 +238,25 @@ function processPortal(id,state,initial=false){
       // bell
       if (name_short == 'B'){ 
         if (state){
-          setVolume(100)
-          playSound('bell')
-          setVolume(100)
-          // pushover
-          sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,name_short)
-          // send mail
-          sendMail(name_long,(state ? state_name[0] : state_name[1]))
-          // reset bell
-          portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = 0 
+          if (bellLockTimer == false){
+            // increase volume & bell  
+            setVolume(100)
+            playSound('bell')
+            setVolume(100)
+            // pushover
+            sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long,name_short)
+            // send mail
+            sendMail(name_long,(state ? state_name[0] : state_name[1]))
+            // reset bell
+            portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state = 0 
+            // timer
+            console.log(getTime() + 'portal: bell timer started')
+            bellLockTimer = true
+            bellLockTimer = setTimeout(function() {
+              console.log(getTime() + 'portal: bell timer finished')
+              bellLockTimer = false
+            }, bellLockTimerSecs*1000)
+          }
         }
       }
     }
@@ -807,7 +821,7 @@ function checkAlarm(id){
         if (os.options.alarm){
           console.log(getTime() + 'portal: red alert')
           sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' opened ALERT',
-	               portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_short)
+	               portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_short.toUpperCase())
 	  //sendMail(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' ', 
 	  //         portals.portals.filter(x => (x.id == id) ? x.id : null)[0].state + ' ALERT')  
         }
