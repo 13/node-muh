@@ -818,7 +818,7 @@ function checkAlarm(id){
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'GD') ? x.id : null)[0].state &&
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'GDL') ? x.id : null)[0].state &&
       portals.portals.filter(x => (x.name_short.toUpperCase() == 'G') ? x.id : null)[0].state){
-        if (os.options.alarm){
+        if (os.options.alarm && portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_short.toUpperCase() != 'B'){
           console.log(getTime() + 'portal: red alert')
           sendPushover(portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_long + ' opened ALERT',
 	               portals.portals.filter(x => (x.id == id) ? x.id : null)[0].name_short.toUpperCase())
