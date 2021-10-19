@@ -119,6 +119,7 @@ const {portals} = require(envConfig)
 
 for (x in portals){
   for (y in portals[x]){
+    // Reed
     if (portals[x][y].hasOwnProperty('pin')){
       eval('in' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin + ', { mode: Gpio.INPUT, pullUpDown: Gpio.PUD_DOWN, edge: Gpio.EITHER_EDGE, alert: true });')
       if (process.env.NODE_ENV !== 'dev'){
@@ -141,6 +142,7 @@ for (x in portals){
     if (portals[x][y].hasOwnProperty('pin_move')){
       eval('moveRelay' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_move + ', {mode: Gpio.OUTPUT});');
     }
+    // Button
     if (portals[x][y].hasOwnProperty('pin_button')){
       eval('in' + portals[x][y].name_short.toUpperCase() + ' = new Gpio(' + portals[x][y].pin_button + ', {mode: Gpio.INPUT, pullUpDown: Gpio.PUD_DOWN, edge: Gpio.RISING_EDGE, alert: true})');
       if (process.env.NODE_ENV !== 'dev'){
