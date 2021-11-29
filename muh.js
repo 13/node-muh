@@ -30,6 +30,7 @@ const server = require('http').createServer(app)
 const io = require('socket.io')(server)
 const portal = io.of('/portal')
 const wol = io.of('/wol')
+const cam = io.of('/cams')
 
 // influxdb 1.8+
 const {InfluxDB, Point, HttpError, FluxTableMetaData} = require('@influxdata/influxdb-client')
@@ -116,6 +117,7 @@ getMuted().then( muted => { os.volume.muted = muted })
 const {hosts} = require(envConfig)
 const {menu} = require(envConfig)
 const {portals} = require(envConfig)
+const {cams} = require(envConfig)
 
 for (x in portals){
   for (y in portals[x]){
@@ -552,6 +554,29 @@ wol.on('connection', async (socket) => {
   
 });
 
+cam.on('connection', async (socket) => {
+  console.log(getTime() + 'socketio: cam connected')
+  connectCounter++
+  console.log(getTime() + 'socketio: users connected ' + connectCounter)
+    
+  // disconnect user
+  socket.on('disconnect', () => {
+    connectCounter--
+    console.log(getTime() + 'socketio: users disconnected ' + connectCounter)
+    clearAsyncInterval(interval)
+  })
+
+  console.log(getTime() + 'portal: Sending cam JSON ' + JSON.stringify(Object.assign({}, menu, cams)))
+  cam.emit('cams',(Object.assign({}, menu, cams)))	
+  
+  // hosts interval ping and send
+  var interval = setAsyncInterval(async () => {
+    //console.log(getTime() + 'portal: Sending cams JSON interval ' + JSON.stringify(Object.assign({}, menu, hosts)))
+    cam.emit('cams',(Object.assign({}, menu, cams)))
+  }, 3000)
+
+});
+
 // new connection
 io.on('connection', async (socket) => { 
   var socketId = socket.id
@@ -782,6 +807,8 @@ function sendPushover(name_long,img=null){
           dest: '/tmp/url' + img + '.jpg'
         }
       }
+      // wait
+      //await new Promise(resolve => setTimeout(resolve, 5000))
       // image download
       img_download.image(img_options)
         .then(({ filename }) => {

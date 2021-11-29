@@ -146,32 +146,34 @@
 							{{ sb_text }}
 						</v-snackbar>	
                                                 <!-- cams -->
-                                                  <v-container class="grey lighten-5">
-                                                    <v-row no-gutters>
-                                                      <template v-for="(cam,idx) in cams">
-                                                       <v-col :key="idx">
-                                                          <v-card
-                                                            class="pa-2"
-                                                            outlined
-                                                            tile
-                                                          >
-                                                            <v-img
-                                                              lazy-src="https://picsum.photos/id/11/10/6"
-                                                              :src="cam.href"
-                                                              max-height="500px"
-                                                              max-width="500px"
-                                                            ></v-img>            
-                                                          </v-card>
-                                                        </v-col>
-                                                        <v-responsive
-                                                          v-if="idx%2 === 1"
-                                                          :key="`width-${idx}`"
-                                                          width="100%"
-                                                        ></v-responsive>
-                                                      </template>
-                                                    </v-row>
-                                                  </v-container>
-                                                <!-- /cams -->
+                                                <v-container fluid>
+						  <v-row dense>
+						    <v-col
+                                                      v-for="(cam,idx) in cams"
+						      :key="idx"
+						      :cols="cam.flex"
+						    >
+					            <v-card>
+		                  			<v-img
+					                  :src="cam.url"
+							  class="white--text align-end"
+							  gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
+							>
+							  <v-card-title v-text="cam.name"></v-card-title>
+						        </v-img>
+							<v-card-actions class="justify-center">
+					                  <v-btn
+							    icon
+							    color="red darken-2"
+							  >
+					                    <v-icon>mdi-lightbulb-off</v-icon>
+				                        </v-btn>
+						      </v-card-actions>
+						    </v-card>
+						  </v-col>
+						</v-row>
+					       </v-container>
+                                               <!-- /cams -->
 					</v-card>
 				</v-main>
 			</v-app>
@@ -186,7 +188,7 @@
 		<script>
 			"use strict"
 			
-			var socket = io('/wol'); //load socket.io-client and connect to the host that serves the page
+			var socket = io('/cams'); //load socket.io-client and connect to the host that serves the page
 			
 			// Vue
 			var app = new Vue({
@@ -197,17 +199,18 @@
 					isHidden: false,
 					json: null,
 					hosts: [],
+					cams: [],
 					menu: [],
 					sb_wol: false,
 					sb_text: null,
 					sb_timeout: 2000,
-					drawer: null,
+					drawer: null/*,
 					cams: [
 					  { text: 'G1', href: 'http://192.168.22.101:8081' },
 					  { text: 'HD1', href: 'http://192.168.22.101:8082' },
 					  { text: 'HD2', href: 'http://192.168.22.101:8083' },
 					  { text: 'G2', href: 'http://192.168.22.101:8084' },
-					],
+					],*/
 				},
 				/*mounted: function () {
 					this.$nextTick(function () {
@@ -224,9 +227,10 @@
 				},
 				methods: {
 					getRealtimeData() {
-						socket.on('wol', json => { //get button status from client
+						socket.on('cams', json => { //get button status from client
 							this.json = json
 							this.hosts = json.hosts
+							this.cams = json.cams
 							this.menu = json.menu
 							this.socketState = true
 							//console.log(JSON.stringify(this.json))
