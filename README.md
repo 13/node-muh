@@ -2,7 +2,7 @@
 
 **m**uh **u**nified **h**omeautomation
 
-A Homeautomation Frontend & Backend built with Vue.js
+A Homeautomation Frontend & Backend built with Vue.js for Raspberry Pi
 
 <p align="center">
 <img src="assets/screen1.png" width="300">
